@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="botSh" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#fff;stop-opacity:0.12"/>
+      <stop offset="40%" style="stop-color:#fff;stop-opacity:0"/>
+      <stop offset="100%" style="stop-color:#1e3a5f;stop-opacity:0.08"/>
+    </linearGradient>
+  </defs>
+  <!-- B5=L ?>4 1CBK;:>9 -->
+  <ellipse cx="560" cy="718" rx="195" ry="26" fill="#1e293b" opacity="0.07"/>
+  <!-- :>@?CA 1CBK;:8 -->
+  <path d="M 485 175 L 508 88 L 612 88 L 635 175 L 618 628 L 502 628 Z" fill="#94a3b8" opacity="0.2" stroke="#64748b" stroke-width="2" stroke-opacity="0.35"/>
+  <path d="M 508 175 L 612 175" stroke="#64748b" stroke-width="1.5" stroke-opacity="0.25"/>
+  <!-- 1;8: =0 AB5:;5 -->
+  <path d="M 518 220 Q 522 420 525 600" stroke="url(#botSh)" stroke-width="14" fill="none"/>
+  <!-- 3>@;KH:> -->
+  <rect x="538" y="52" width="44" height="48" rx="7" fill="#cbd5e1" opacity="0.28" stroke="#94a3b8" stroke-width="1.2" stroke-opacity="0.4"/>
+  <rect x="548" y="38" width="24" height="18" rx="3" fill="#e2e8f0" opacity="0.35"/>
+  <!-- MB8:5B:0 C65 =0 1CBK;:5 -->
+  <rect x="455" y="305" width="268" height="168" rx="10" fill="#f8fafc" opacity="0.62" stroke="#1e6fdf" stroke-width="1.8" stroke-opacity="0.28" transform="rotate(-2.2 589 389)"/>
+  <rect x="475" y="328" width="140" height="7" rx="2" fill="#64748b" opacity="0.22" transform="rotate(-2.2 589 331)"/>
+  <rect x="475" y="342" width="100" height="5" rx="2" fill="#64748b" opacity="0.16" transform="rotate(-2.2 589 344)"/>
+  <!-- HB@8E:>4 =0 MB8:5B:5 -->
+  <g transform="translate(475, 365) rotate(-2.2)" opacity="0.45">
+    <rect x="0" y="0" width="2.5" height="52" fill="#0f172a"/>
+    <rect x="5" y="0" width="1.5" height="52" fill="#0f172a"/>
+    <rect x="9" y="0" width="4" height="52" fill="#0f172a"/>
+    <rect x="16" y="0" width="2" height="52" fill="#0f172a"/>
+    <rect x="21" y="0" width="3.5" height="52" fill="#0f172a"/>
+    <rect x="27" y="0" width="1.5" height="52" fill="#0f172a"/>
+    <rect x="31" y="0" width="5" height="52" fill="#0f172a"/>
+    <rect x="39" y="0" width="2" height="52" fill="#0f172a"/>
+    <rect x="44" y="0" width="3" height="52" fill="#0f172a"/>
+    <rect x="50" y="0" width="1.5" height="52" fill="#0f172a"/>
+    <rect x="54" y="0" width="4" height="52" fill="#0f172a"/>
+    <rect x="61" y="0" width="2.5" height="52" fill="#0f172a"/>
+    <rect x="66" y="0" width="3" height="52" fill="#0f172a"/>
+  </g>
+  <!-- Data Matrix CA;>2=> -->
+  <g transform="translate(640, 360) rotate(-2.2)" opacity="0.32" fill="#0f172a">
+    <rect x="0" y="0" width="7" height="7"/><rect x="9" y="0" width="7" height="7"/><rect x="18" y="0" width="7" height="7"/>
+    <rect x="0" y="9" width="7" height="7"/><rect x="18" y="9" width="7" height="7"/>
+    <rect x="0" y="18" width="7" height="7"/><rect x="9" y="18" width="7" height="7"/><rect x="18" y="18" width="7" height="7"/>
+    <rect x="27" y="0" width="7" height="7"/><rect x="36" y="0" width="7" height="7"/>
+    <rect x="27" y="9" width="7" height="7"/><rect x="36" y="9" width="7" height="7"/>
+  </g>
+  <!-- 2B>@0O MB8:5B:0 «=0:;58205BAO»  ?>4 C3;><, :0: ;8AB >B @C;>=0 -->
+  <rect x="705" y="248" width="218" height="148" rx="8" fill="#ffffff" opacity="0.48" stroke="#1e6fdf" stroke-width="1.5" stroke-opacity="0.32" transform="rotate(16 814 322)"/>
+  <path d="M 705 310 Q 655 275 595 255 Q 555 242 520 235" stroke="#1e6fdf" stroke-width="2.5" stroke-opacity="0.22" fill="none" stroke-linecap="round"/>
+  <!-- :@09 @C;>=0 (A25@EC A?@020) -->
+  <ellipse cx="1085" cy="110" rx="72" ry="72" fill="none" stroke="#64748b" stroke-width="2.5" stroke-opacity="0.22"/>
+  <path d="M 1045 108 Q 1085 95 1125 108" fill="none" stroke="#94a3b8" stroke-width="10" stroke-opacity="0.18" stroke-linecap="round"/>
+  <rect x="1020" y="175" width="120" height="14" rx="4" fill="#cbd5e1" opacity="0.22" transform="rotate(-12 1080 182)"/>
+  <!-- <5;:85 «@538AB@0F8>==K5» :@5ABK ?>;83@0D88 -->
+  <g stroke="#1e6fdf" stroke-opacity="0.12" stroke-width="1.2" fill="none">
+    <path d="M 80 120 L 100 120 M 90 110 L 90 130"/>
+    <path d="M 1120 640 L 1140 640 M 1130 630 L 1130 650"/>
+    <path d="M 150 680 L 170 680 M 160 670 L 160 690"/>
+  </g>
+  <!-- :>=BC@ @CG=>3> 0??;8:0B>@0 / =0?@02;ONI59 (01AB@0:B=>) -->
+  <path d="M 680 265 L 750 200 L 820 215" stroke="#475569" stroke-width="2" stroke-opacity="0.15" fill="none" stroke-linecap="round"/>
+</svg>

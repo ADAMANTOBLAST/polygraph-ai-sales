@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход | Админ-панель</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body class="admin-body">
+  <div class="login-page">
+    <div class="login-card">
+      <h1>Админ-панель</h1>
+      <p class="hint">Вход только для сотрудников. Дальше сюда подключим авторизацию через Bitrix или ваш API.</p>
+      <form id="loginForm" novalidate>
+        <label for="email">E-mail</label>
+        <input type="email" id="email" name="email" autocomplete="username" placeholder="admin@company.com" required>
+
+        <label for="password">Пароль</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" placeholder="••••••••" required>
+
+        <button type="submit" class="btn btn-primary">Войти</button>
+        <p id="loginError" class="login-error" aria-live="polite"></p>
+      </form>
+      <p class="hint" style="margin-top: 20px; margin-bottom: 0;">
+        <a href="../flexn.html" style="color: var(--fnr-primary);">← На главную</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="../assets/js/auth-session.js"></script>
+  <script>
+    // Если уже вошли — сразу в кабинет
+    if (window.FnrAuth && FnrAuth.isLoggedIn()) {
+      window.location.replace('index.html');
+    }
+
+    /**
+     * Заглушка входа: любой непустой email + пароль создаёт сессию.
+     * Замените на fetch к вашему бэкенду / Bitrix (проверка логина на сервере).
+     */
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const err = document.getElementById('loginError');
+      err.textContent = '';
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        err.textContent = 'Заполните e-mail и пароль.';
+        return;
+      }
+
+      FnrAuth.setSessionStub({ user: email });
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

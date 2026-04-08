@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Флекс-н-Ролл ПРО — производство инновационных этикеток, интеграция цифровых печатных модулей и самоклеящихся материалов. Более 17 лет на рынке.">
+  <title>Flex-n-roll | Инновационные этикетки и цифровые решения</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --accent: #1e6fdf;
+      --accent-dark: #0f5bc0;
+      --text: #0f172a;
+      --text-muted: rgba(15, 23, 42, 0.72);
+      /* Один набор слоёв для страницы и для стекла (искажаем именно эти пиксели) */
+      --site-bg-svg: url("assets/bg-labeling-scene.svg");
+      --site-bg-scene-mid:
+        radial-gradient(ellipse 55% 45% at 58% 42%, rgba(255, 255, 255, 0.22) 0%, transparent 65%),
+        radial-gradient(circle min(140px, 22vmin) at 86% 12%, rgba(30, 111, 223, 0.14) 0%, transparent 72%);
+      --site-bg-base:
+        radial-gradient(ellipse 90% 75% at 12% 8%, rgba(100, 150, 220, 0.14) 0%, transparent 50%),
+        radial-gradient(ellipse 75% 60% at 88% 25%, rgba(70, 120, 200, 0.11) 0%, transparent 46%),
+        radial-gradient(ellipse 65% 55% at 50% 95%, rgba(50, 90, 160, 0.09) 0%, transparent 48%),
+        linear-gradient(168deg, #e8ecf2 0%, #cfd8e6 32%, #a8b8d0 58%, #7a92b0 82%, #5a7394 100%);
+      --site-bg-svg-size: min(1240px, 165vw) auto;
+      --site-bg-svg-pos: 48% 44%;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      line-height: 1.55;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Фон: базовый градиент + сцена «наклейка этикетки» (SVG) и мелкая полиграфическая фактура */
+    .page-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 86% 12%, rgba(30, 111, 223, 0.34) 0%, transparent 38%),
+        radial-gradient(circle at 10% 84%, rgba(30, 111, 223, 0.26) 0%, transparent 44%),
+        linear-gradient(160deg, #d4deef 0%, #bfd0e8 48%, #a8bfde 100%);
+    }
+
+    /* Паттерн под ваш референс: «этикетки/рулоны» в сине-серой палитре */
+    .page-bg::before,
+    .page-bg::after {
+      content: none;
+    }
+
+    .page-bg-scene {
+      display: none;
+    }
+
+    /* «Печать»: микро-линии, сетка, диагонали — под стеклом дают искажения */
+    .page-bg-scene::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(90deg, transparent, transparent 13px, rgba(30, 55, 90, 0.055) 13px, rgba(30, 55, 90, 0.055) 14px),
+        repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(30, 55, 90, 0.04) 17px, rgba(30, 55, 90, 0.04) 18px),
+        repeating-linear-gradient(-18deg, transparent, transparent 48px, rgba(30, 111, 223, 0.045) 48px, rgba(30, 111, 223, 0.045) 49px),
+        radial-gradient(circle at 1px 1px, rgba(30, 55, 90, 0.11) 1px, transparent 0),
+        radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.22) 1px, transparent 0);
+      background-size:
+        100% 72px,
+        88px 100%,
+        100% 100%,
+        16px 16px,
+        22px 22px;
+      background-position:
+        8% 88%,
+        6% 12%,
+        center,
+        0 0,
+        11px 7px;
+      opacity: 0.92;
+    }
+
+    .page-bg-scene::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+      mix-blend-mode: soft-light;
+      opacity: 0.85;
+      pointer-events: none;
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 22px;
+    }
+
+    main {
+      padding-bottom: 8px;
+    }
+
+    /* Liquid glass: максимум просвета + сильный backdrop */
+    .liquidGlass-wrapper {
+      position: relative;
+      display: flex;
+      overflow: hidden;
+      color: inherit;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      box-shadow:
+        0 6px 10px rgba(0, 0, 0, 0.1),
+        0 0 32px rgba(30, 80, 140, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(30px) saturate(1.48);
+      -webkit-backdrop-filter: blur(30px) saturate(1.48);
+      transition: box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2), transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+    }
+
+    .liquidGlass-wrapper:hover {
+      box-shadow:
+        0 9px 18px rgba(0, 0, 0, 0.12),
+        0 0 38px rgba(30, 90, 160, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.62),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    /*
+      Фон внутри стекла — не «дырка» в странице: те же слои, что у .page-bg, с background-attachment: fixed,
+      плюс blur и SVG-искажение. Сверху идёт полупрозрачный .liquidGlass-tint: если он сильный, фон «теряется».
+    */
+    .liquidGlass-effect {
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      overflow: hidden;
+      background-image: var(--site-bg-svg), var(--site-bg-scene-mid), var(--site-bg-base);
+      background-size:
+        var(--site-bg-svg-size),
+        cover,
+        cover,
+        cover,
+        cover,
+        cover,
+        cover;
+      background-position:
+        var(--site-bg-svg-pos),
+        center,
+        center,
+        center,
+        center,
+        center,
+        center;
+      background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+      background-attachment: fixed, fixed, fixed, fixed, fixed, fixed, fixed;
+      filter: blur(7px) url(#glass-distortion);
+      -webkit-filter: blur(7px) url(#glass-distortion);
+    }
+
+    /* Почти без белой плёнки — только лёгкий холодный оттенок */
+    .liquidGlass-tint {
+      z-index: 1;
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        145deg,
+        rgba(255, 255, 255, 0.028) 0%,
+        rgba(255, 255, 255, 0.006) 48%,
+        rgba(255, 255, 255, 0.022) 100%
+      );
+      pointer-events: none;
+      border-radius: inherit;
+    }
+
+    .liquidGlass-shine {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      overflow: hidden;
+      pointer-events: none;
+      border-radius: inherit;
+      background: linear-gradient(
+        118deg,
+        rgba(255, 255, 255, 0.22) 0%,
+        rgba(255, 255, 255, 0.05) 24%,
+        transparent 42%,
+        transparent 58%,
+        rgba(255, 255, 255, 0.035) 76%,
+        rgba(255, 255, 255, 0.09) 100%
+      );
+      box-shadow:
+        inset 2px 2px 2px 0 rgba(255, 255, 255, 0.38),
+        inset -2px -2px 2px 0 rgba(255, 255, 255, 0.18),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.14);
+    }
+
+    .liquidGlass-content {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+    }
+
+    /* Шапка */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 8px 0;
+    }
+
+    .header-inner {
+      border-radius: 22px;
+      padding: 7px 14px;
+    }
+
+    .header-grid {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      min-width: 0;
+    }
+
+    .header-brand:hover .header-site-name {
+      color: var(--accent-dark);
+    }
+
+    /* Слот под логотип: файл logo2.png в корне проекта (рядом с flexn.html) */
+    .header-logo-slot {
+      flex-shrink: 0;
+      width: 86px;
+      height: 86px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      box-shadow: none;
+      overflow: visible;
+    }
+
+    .header-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 0;
+      display: block;
+    }
+
+    .header-site-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.38);
+      color: var(--text);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55) inset;
+      transition: background 0.2s, transform 0.2s, color 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.52);
+      color: var(--accent-dark);
+      transform: translateY(-1px);
+    }
+
+    /* Hero: текст слева + квадрат под фото справа (сторона квадрата = высоте ряда) */
+    .hero {
+      padding: 20px 0 8px;
+    }
+
+    .hero-grid {
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+
+    .hero-card {
+      flex: 1 1 280px;
+      min-width: 0;
+      border-radius: 32px;
+      padding: 36px 32px;
+    }
+
+    .hero-photo-wrap {
+      flex: 0 0 auto;
+      align-self: stretch;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .hero-photo-card {
+      height: 100%;
+      width: auto;
+      aspect-ratio: 1;
+      max-width: min(40vw, 400px);
+      min-height: 200px;
+      border-radius: 32px;
+      overflow: hidden;
+    }
+
+    .hero-photo-card .liquidGlass-content {
+      padding: 0;
+      height: 100%;
+    }
+
+    .hero-photo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hero-card h1 {
+      font-size: clamp(1.5rem, 3vw, 2.1rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    .hero-list {
+      list-style: none;
+      margin: 0 0 24px;
+    }
+
+    .hero-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+      font-size: 0.98rem;
+      color: var(--text-muted);
+    }
+
+    .hero-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    .check-ico {
+      flex-shrink: 0;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-top: 0.35em;
+      box-shadow: 0 0 0 4px rgba(30, 111, 223, 0.14);
+    }
+
+    /* Полоса преимуществ */
+    .features-bar {
+      padding: 20px 0 36px;
+    }
+
+    .features-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .feature-cell {
+      border-radius: 20px;
+      padding: 18px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .feature-ico {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.32) inset;
+    }
+
+    .feature-cell p {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.35;
+    }
+
+    /* Партнёрский блок сверху, форма снизу — одна колонка, не перегружает ширину */
+    .main-split {
+      padding: 16px 0 64px;
+    }
+
+    .split-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      align-items: stretch;
+      width: 100%;
+    }
+
+    .split-grid > .liquidGlass-wrapper {
+      width: 100%;
+    }
+
+    .split-info {
+      border-radius: 32px;
+      padding: 34px 30px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .split-info h2 {
+      font-size: clamp(1.35rem, 2.6vw, 1.85rem);
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .split-info h2 span.accent-line {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+      margin-top: 14px;
+    }
+
+    .split-lead {
+      font-size: 1.02rem;
+      line-height: 1.55;
+      color: var(--text-muted);
+      margin: 0 0 24px;
+      max-width: none;
+    }
+
+    .split-tagline {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent-dark);
+      margin-bottom: 10px;
+    }
+
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 0;
+    }
+
+    .service-card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 18px 18px 16px;
+      border-radius: 20px;
+      text-align: left;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      cursor: default;
+      font-family: inherit;
+      backdrop-filter: blur(20px) saturate(1.22);
+      -webkit-backdrop-filter: blur(20px) saturate(1.22);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.14) inset,
+        inset 0 1px 0 rgba(255, 255, 255, 0.32);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .service-card:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 0 0 1px rgba(30, 111, 223, 0.2) inset,
+        0 8px 20px rgba(15, 40, 80, 0.08);
+    }
+
+    .service-card-ico {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(30, 111, 223, 0.05);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: var(--accent);
+      font-size: 1.05rem;
+    }
+
+    .service-card-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.25;
+    }
+
+    .service-card-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Форма */
+    .form-glass {
+      border-radius: 32px;
+      padding: 30px 26px 34px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-glass .liquidGlass-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-glass form {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-glass h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .form-glass .form-sub {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+      line-height: 1.45;
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .form-group {
+      flex: 1 1 calc(50% - 8px);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full-width {
+      flex: 1 1 100%;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: rgba(15, 23, 42, 0.85);
+    }
+
+    .required-star {
+      color: #e03a3a;
+    }
+
+    .input-glass,
+    textarea.input-glass {
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.42);
+      font-family: inherit;
+      font-size: 0.92rem;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(18px) saturate(1.18);
+      -webkit-backdrop-filter: blur(18px) saturate(1.18);
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-glass::placeholder {
+      color: rgba(15, 23, 42, 0.45);
+    }
+
+    .input-glass:focus {
+      outline: none;
+      border-color: rgba(30, 111, 223, 0.65);
+      box-shadow: 0 0 0 3px rgba(30, 111, 223, 0.2);
+    }
+
+    textarea.input-glass {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      backdrop-filter: blur(16px) saturate(1.12);
+      -webkit-backdrop-filter: blur(16px) saturate(1.12);
+    }
+
+    .radio-group label {
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      margin: 0;
+    }
+
+    .radio-group input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .privacy-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 8px 0 18px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .privacy-row input {
+      margin-top: 3px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .privacy-row a {
+      color: var(--accent);
+    }
+
+    .submit-btn {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px 20px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 1.02rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(30, 111, 223, 0.35);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(30, 111, 223, 0.4);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.75;
+      cursor: not-allowed;
+    }
+
+    .error-msg {
+      color: #c02626;
+      font-size: 0.75rem;
+      min-height: 1em;
+    }
+
+    .form-message {
+      margin-top: 16px;
+      text-align: center;
+      font-weight: 500;
+      font-size: 0.92rem;
+    }
+
+    /* Футер */
+    .footer {
+      padding: 40px 0 28px;
+    }
+
+    .footer-card {
+      border-radius: 24px;
+      padding: 28px 24px;
+    }
+
+    .footer-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 32px;
+    }
+
+    .footer-col {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .footer-col h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: var(--text);
+    }
+
+    .footer-col p,
+    .footer-col a {
+      color: var(--text-muted);
+      text-decoration: none;
+      line-height: 1.6;
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.92rem;
+    }
+
+    .footer-col a:hover {
+      color: var(--accent);
+    }
+
+    .footer-bottom {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.35);
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .header-wrap-rel {
+      position: relative;
+    }
+
+    @media (max-width: 960px) {
+      .hero-grid {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .hero-photo-wrap {
+        order: 1;
+        justify-content: center;
+      }
+
+      .hero-photo-card {
+        width: min(100%, 360px);
+        height: auto;
+        max-width: 100%;
+        aspect-ratio: 1;
+        min-height: 0;
+        margin: 0 auto;
+      }
+
+      .features-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header-site-name {
+        font-size: 1rem;
+      }
+
+      .header-logo-slot {
+        width: 68px;
+        height: 68px;
+      }
+
+      .service-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body id="top">
+  <!-- SVG-фильтр искажения для .liquidGlass-effect (как в примере liquid glass) -->
+  <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true" focusable="false">
+    <defs>
+      <!-- Умеренное искажение: заметно «жидкое», но без артефактов на тексте -->
+      <filter id="glass-distortion" x="-15%" y="-15%" width="130%" height="130%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.018 0.004" numOctaves="2" result="noise" seed="42" />
+        <feGaussianBlur in="noise" stdDeviation="1.1" result="smoothNoise" />
+        <feDisplacementMap in="SourceGraphic" in2="smoothNoise" scale="36" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="page-bg" aria-hidden="true">
+    <div class="page-bg-scene"></div>
+  </div>
+
+  <header class="header">
+    <div class="container header-wrap-rel">
+      <div class="liquidGlass-wrapper header-inner">
+        <div class="liquidGlass-effect" aria-hidden="true"></div>
+        <div class="liquidGlass-tint" aria-hidden="true"></div>
+        <div class="liquidGlass-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content">
+          <div class="header-grid">
+            <a href="#top" class="header-brand">
+              <span class="header-logo-slot">
+                <img class="header-logo-img" src="logo2.png" width="86" height="86" alt="Логотип компании" decoding="async">
+              </span>
+              <span class="header-site-name">Flex-n-roll</span>
+            </a>
+            <div class="header-actions">
+              <button type="button" class="icon-btn" aria-label="Уведомления"><i class="fas fa-bell"></i></button>
+              <button type="button" class="icon-btn" aria-label="Помощь"><i class="fas fa-question-circle"></i></button>
+              <button type="button" class="icon-btn" aria-label="Профиль"><i class="fas fa-user"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-grid">
+          <div class="liquidGlass-wrapper hero-card">
+            <div class="liquidGlass-effect" aria-hidden="true"></div>
+            <div class="liquidGlass-tint" aria-hidden="true"></div>
+            <div class="liquidGlass-shine" aria-hidden="true"></div>
+            <div class="liquidGlass-content">
+              <h1>Современное производство этикетки и упаковки</h1>
+              <ul class="hero-list">
+                <li>
+                  <span class="check-ico" aria-hidden="true"></span>
+                  Широкие возможности флексо + цифровой печати
+                </li>
+                <li>
+                  <span class="check-ico" aria-hidden="true"></span>
+                  Разработка дизайна упаковки
+                </li>
+                <li>
+                  <span class="check-ico" aria-hidden="true"></span>
+                  Производство термоусадочных плёнок
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="hero-photo-wrap">
+            <div class="liquidGlass-wrapper hero-photo-card">
+              <div class="liquidGlass-effect" aria-hidden="true"></div>
+              <div class="liquidGlass-tint" aria-hidden="true"></div>
+              <div class="liquidGlass-shine" aria-hidden="true"></div>
+              <div class="liquidGlass-content">
+                <img class="hero-photo-img" src="hero-photo.jpg" alt="Производство этикеток и упаковки" width="400" height="400" loading="lazy" decoding="async">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features-bar">
+      <div class="container">
+        <div class="features-row">
+          <div class="liquidGlass-wrapper feature-cell">
+            <div class="liquidGlass-effect" aria-hidden="true"></div>
+            <div class="liquidGlass-tint" aria-hidden="true"></div>
+            <div class="liquidGlass-shine" aria-hidden="true"></div>
+            <div class="liquidGlass-content" style="display:flex;align-items:center;gap:14px;width:100%">
+              <div class="feature-ico"><i class="fas fa-droplet"></i></div>
+              <p>До 9 цветов печати</p>
+            </div>
+          </div>
+          <div class="liquidGlass-wrapper feature-cell">
+            <div class="liquidGlass-effect" aria-hidden="true"></div>
+            <div class="liquidGlass-tint" aria-hidden="true"></div>
+            <div class="liquidGlass-shine" aria-hidden="true"></div>
+            <div class="liquidGlass-content" style="display:flex;align-items:center;gap:14px;width:100%">
+              <div class="feature-ico"><i class="fas fa-search"></i></div>
+              <p>Изучаем материал и формат</p>
+            </div>
+          </div>
+          <div class="liquidGlass-wrapper feature-cell">
+            <div class="liquidGlass-effect" aria-hidden="true"></div>
+            <div class="liquidGlass-tint" aria-hidden="true"></div>
+            <div class="liquidGlass-shine" aria-hidden="true"></div>
+            <div class="liquidGlass-content" style="display:flex;align-items:center;gap:14px;width:100%">
+              <div class="feature-ico"><i class="fas fa-seedling"></i></div>
+              <p>Производим этикетки</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="main-split">
+      <div class="container">
+        <div class="split-grid">
+          <div class="liquidGlass-wrapper split-info">
+            <div class="liquidGlass-effect" aria-hidden="true"></div>
+            <div class="liquidGlass-tint" aria-hidden="true"></div>
+            <div class="liquidGlass-shine" aria-hidden="true"></div>
+            <div class="liquidGlass-content">
+              <p class="split-tagline">Не просто поставщик — партнёр в упаковке</p>
+              <h2>Вместе доводим продукт до полки<span class="accent-line" aria-hidden="true"></span></h2>
+              <p class="split-lead">Дизайн, материалы, печать и маркировка — одна команда на связи. Вам не нужно собирать пять подрядчиков: мы берём на себя цикл и отвечаем за результат.</p>
+              <div class="service-grid">
+                <div class="service-card">
+                  <span class="service-card-ico"><i class="fas fa-print"></i></span>
+                  <span class="service-card-title">Флексография</span>
+                  <span class="service-card-desc">Стабильные тиражи, до 9 цветов, рулон и лист</span>
+                </div>
+                <div class="service-card">
+                  <span class="service-card-ico"><i class="fas fa-microchip"></i></span>
+                  <span class="service-card-title">Цифровая печать</span>
+                  <span class="service-card-desc">Быстрый старт, мелкие партии, персонализация</span>
+                </div>
+                <div class="service-card">
+                  <span class="service-card-ico"><i class="fas fa-layer-group"></i></span>
+                  <span class="service-card-title">Linerless</span>
+                  <span class="service-card-desc">Без лайнера — меньше отходов, больше метража на рулоне</span>
+                </div>
+                <div class="service-card">
+                  <span class="service-card-ico"><i class="fas fa-qrcode"></i></span>
+                  <span class="service-card-title">AR и цифровой слой</span>
+                  <span class="service-card-desc">Оживите упаковку: опыт для клиента у полки</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="liquidGlass-wrapper form-glass">
+            <div class="liquidGlass-effect" aria-hidden="true"></div>
+            <div class="liquidGlass-tint" aria-hidden="true"></div>
+            <div class="liquidGlass-shine" aria-hidden="true"></div>
+            <div class="liquidGlass-content">
+              <h2>Оставьте заявку на расчёт</h2>
+              <p class="form-sub">Мы сразу же свяжемся с вами для уточнения заказа.</p>
+              <form id="callbackForm" novalidate>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>ФИО <span class="required-star">*</span></label>
+                    <input type="text" class="input-glass" id="name" name="name" placeholder="Иванов Иван" required>
+                    <div class="error-msg"></div>
+                  </div>
+                  <div class="form-group">
+                    <label>Номер телефона <span class="required-star">*</span></label>
+                    <input type="tel" class="input-glass" id="phone" name="phone" placeholder="+375 (29) 123-45-67" required>
+                    <div class="error-msg"></div>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>E-mail <span class="required-star">*</span></label>
+                    <input type="email" class="input-glass" id="email" name="email" placeholder="sales@company.com" required>
+                    <div class="error-msg"></div>
+                  </div>
+                  <div class="form-group">
+                    <label>Название компании</label>
+                    <input type="text" class="input-glass" id="company" name="company" placeholder="ООО «Пример»">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Telegram</label>
+                    <input type="text" class="input-glass" id="telegram" name="telegram" placeholder="@username">
+                  </div>
+                  <div class="form-group">
+                    <label>Способ взаимодействия <span class="required-star">*</span></label>
+                    <div class="radio-group" id="contactMethodGroup">
+                      <label><input type="radio" name="contactMethod" value="phone"> Телефон</label>
+                      <label><input type="radio" name="contactMethod" value="telegram"> Telegram</label>
+                    </div>
+                    <div class="error-msg" id="methodError"></div>
+                  </div>
+                </div>
+                <div class="form-group full-width">
+                  <label>Комментарий к заказу</label>
+                  <textarea class="input-glass" id="message" name="message" placeholder="Кратко опишите задачу…"></textarea>
+                </div>
+                <div class="privacy-row">
+                  <input type="checkbox" id="privacyAgree" name="privacyAgree">
+                  <label for="privacyAgree" style="font-weight:500;cursor:pointer">Согласен с <a href="#" onclick="return false">политикой конфиденциальности</a></label>
+                </div>
+                <div class="error-msg" id="privacyError"></div>
+                <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> Отправить заявку</button>
+                <div id="formStatus" class="form-message"></div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="liquidGlass-wrapper footer-card">
+        <div class="liquidGlass-effect" aria-hidden="true"></div>
+        <div class="liquidGlass-tint" aria-hidden="true"></div>
+        <div class="liquidGlass-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content">
+          <div class="footer-grid">
+            <div class="footer-col">
+              <h4>Флекс-н-Ролл ПРО</h4>
+              <p>ООО «Флекс-н-Ролл ПРО»</p>
+              <p>Инновационные этикетки, цифровые модули и материалы</p>
+            </div>
+            <div class="footer-col">
+              <h4>Контакты</h4>
+              <p><i class="fas fa-map-marker-alt" style="margin-right:8px"></i> Минская обл., Смолевичский р-н,<br> ул. Сапфировая, д.20</p>
+              <p><i class="fas fa-phone-alt"></i> +375 17 591-03-16</p>
+              <p><i class="fas fa-envelope"></i> sales@flex-n-roll.com</p>
+            </div>
+            <div class="footer-col">
+              <h4>Навигация</h4>
+              <a href="#contact">Заявка</a>
+              <a href="admin/login.html">Вход для сотрудников</a>
+            </div>
+          </div>
+          <div class="footer-bottom">
+            <span>© 2026, ООО «Флекс-н-Ролл ПРО»</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+<script>
+  const SUBMIT_BTN_HTML = '<i class="fas fa-paper-plane"></i> Отправить заявку';
+
+  // маска для телефона (универсальная +375 | +7)
+  function applyPhoneMask(input) {
+    let val = input.value.replace(/\D/g, '');
+    if (val.length === 0) {
+      input.value = '';
+      return;
+    }
+    // если начинается с 375 (Беларусь) или 7 (Россия) сделаем красивый формат
+    let formatted = '';
+    if (val.startsWith('375') && val.length >= 3) {
+      let m = val.slice(3);
+      let code = '';
+      if (m.length > 0) code = m.slice(0, 2);
+      let part1 = m.length > 2 ? m.slice(2, 5) : '';
+      let part2 = m.length > 5 ? m.slice(5, 7) : '';
+      let part3 = m.length > 7 ? m.slice(7, 9) : '';
+      formatted = `+375 (${code})` + (part1 ? ` ${part1}` : '') + (part2 ? `-${part2}` : '') + (part3 ? `-${part3}` : '');
+    } else if (val.startsWith('7') && val.length >= 1) {
+      let rest = val.slice(1);
+      let part1 = rest.length > 0 ? rest.slice(0, 3) : '';
+      let part2 = rest.length > 3 ? rest.slice(3, 6) : '';
+      let part3 = rest.length > 6 ? rest.slice(6, 8) : '';
+      let part4 = rest.length > 8 ? rest.slice(8, 10) : '';
+      formatted = `+7 (${part1})` + (part2 ? ` ${part2}` : '') + (part3 ? `-${part3}` : '') + (part4 ? `-${part4}` : '');
+    } else {
+      // если пользователь вводит в другом формате - оставляем как есть, но добавим плюс для корректности
+      if (val.length > 0 && !val.startsWith('7') && !val.startsWith('375')) {
+        formatted = '+' + val;
+      } else {
+        formatted = val;
+      }
+    }
+    input.value = formatted;
+  }
+
+  const phoneInput = document.getElementById('phone');
+  phoneInput.addEventListener('input', (e) => applyMaskOnFly(e));
+  function applyMaskOnFly(e) {
+    let cursorPos = e.target.selectionStart;
+    applyPhoneMask(e.target);
+    if (e.target.value.length < cursorPos) cursorPos = e.target.value.length;
+    e.target.setSelectionRange(cursorPos, cursorPos);
+  }
+
+  // Валидация и отправка
+  const form = document.getElementById('callbackForm');
+  const formStatus = document.getElementById('formStatus');
+  const submitBtn = form.querySelector('.submit-btn');
+
+  // Настройка подключения к Bitrix24 API.
+  // Вставьте сюда URL входящего вебхука, например:
+  // https://<ваш_портал>.bitrix24.by/rest/1/<код>/crm.lead.add.json
+  const BITRIX_WEBHOOK_URL = 'https://your-domain.bitrix24.ru/rest/1/your-webhook-code/crm.lead.add.json';
+
+  function isBitrixConfigured() {
+    return BITRIX_WEBHOOK_URL && !BITRIX_WEBHOOK_URL.includes('your-domain.bitrix24');
+  }
+
+  function showFieldError(field, message) {
+    const parent = field.closest('.form-group');
+    if (parent) {
+      const errDiv = parent.querySelector('.error-msg');
+      if (errDiv) errDiv.innerText = message || '';
+    } else if (field.name === 'contactMethod') {
+      const methodErr = document.getElementById('methodError');
+      if (methodErr) methodErr.innerText = message || '';
+    }
+  }
+
+  function clearAllErrors() {
+    document.querySelectorAll('.error-msg').forEach(el => el.innerText = '');
+  }
+
+  function validateForm() {
+    let isValid = true;
+    clearAllErrors();
+
+    const name = document.getElementById('name').value.trim();
+    if (!name) {
+      showFieldError(document.getElementById('name'), 'Укажите имя');
+      isValid = false;
+    }
+
+    const phone = document.getElementById('phone').value.trim();
+    const phoneDigits = phone.replace(/\D/g, '');
+    if (!phoneDigits || phoneDigits.length < 9) {
+      showFieldError(document.getElementById('phone'), 'Введите корректный номер телефона');
+      isValid = false;
+    }
+
+    const email = document.getElementById('email').value.trim();
+    const emailPattern = /^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/;
+    if (!email || !emailPattern.test(email)) {
+      showFieldError(document.getElementById('email'), 'Введите корректный email (пример: name@domain.com)');
+      isValid = false;
+    }
+
+    const radioSelected = document.querySelector('input[name="contactMethod"]:checked');
+    if (!radioSelected) {
+      const methodErr = document.getElementById('methodError');
+      if (methodErr) methodErr.innerText = 'Выберите способ взаимодействия';
+      isValid = false;
+    }
+
+    const privacyOk = document.getElementById('privacyAgree').checked;
+    if (!privacyOk) {
+      const pe = document.getElementById('privacyError');
+      if (pe) pe.innerText = 'Подтвердите согласие с политикой конфиденциальности';
+      isValid = false;
+    }
+
+    // telegram поле не обязательное, но можно автоформат
+    let tg = document.getElementById('telegram').value.trim();
+    if (tg && !tg.startsWith('@')) {
+      document.getElementById('telegram').value = '@' + tg;
+    }
+
+    return isValid;
+  }
+
+  // Формируем структуру данных для метода crm.lead.add
+  function buildBitrixLeadPayload(formData) {
+    const contactMethodLabel = formData.contactMethod === 'telegram' ? 'Telegram' : 'Телефон';
+    return {
+      fields: {
+        TITLE: 'Заявка с сайта Флекс-н-Ролл ПРО',
+        NAME: formData.name,
+        PHONE: [{ VALUE: formData.phone, VALUE_TYPE: 'WORK' }],
+        EMAIL: [{ VALUE: formData.email, VALUE_TYPE: 'WORK' }],
+        COMPANY_TITLE: formData.company || '',
+        COMMENTS:
+          `Способ связи: ${contactMethodLabel}\n` +
+          `Telegram: ${formData.telegram || 'не указан'}\n` +
+          `Сообщение: ${formData.message || 'не указано'}`,
+        SOURCE_DESCRIPTION: 'Форма обратной связи с сайта',
+      },
+      params: { REGISTER_SONET_EVENT: 'Y' }
+    };
+  }
+
+  // Отправка формы в Bitrix24 по API
+  async function sendLeadToBitrix(formData) {
+    if (!isBitrixConfigured()) {
+      throw new Error('Не настроен URL вебхука Bitrix24 в BITRIX_WEBHOOK_URL');
+    }
+
+    const payload = buildBitrixLeadPayload(formData);
+    const response = await fetch(BITRIX_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: не удалось отправить заявку`);
+    }
+
+    const data = await response.json();
+    if (data.error) {
+      throw new Error(data.error_description || data.error);
+    }
+
+    return data;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!validateForm()) {
+      formStatus.innerHTML = '<span style="color:#e03a3a;">❌ Пожалуйста, заполните все обязательные поля корректно.</span>';
+      return;
+    }
+
+    // сбор данных формы
+    const formData = {
+      name: document.getElementById('name').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      company: document.getElementById('company').value.trim(),
+      telegram: document.getElementById('telegram').value.trim(),
+      contactMethod: document.querySelector('input[name="contactMethod"]:checked')?.value,
+      message: document.getElementById('message').value.trim(),
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Отправка...';
+    formStatus.innerHTML = '<span style="color:#1e6fdf;">⏳ Отправляем заявку в Bitrix...</span>';
+
+    try {
+      const result = await sendLeadToBitrix(formData);
+      console.log('✅ Заявка отправлена в Bitrix:', result);
+      formStatus.innerHTML = '<span style="color:#2b7e3a;">✅ Заявка успешно отправлена в Bitrix! Наш менеджер свяжется с вами в ближайшее время.</span>';
+      form.reset();
+      // сбросим radio
+      document.querySelectorAll('input[name="contactMethod"]').forEach(r => r.checked = false);
+      document.getElementById('privacyAgree').checked = false;
+      // дополнительно очистим ошибки
+      clearAllErrors();
+      setTimeout(() => {
+        formStatus.innerHTML = '';
+      }, 5000);
+    } catch (error) {
+      console.error('Ошибка отправки в Bitrix:', error);
+      formStatus.innerHTML = `<span style="color:#e03a3a;">❌ Ошибка отправки: ${error.message}</span>`;
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = SUBMIT_BTN_HTML;
+    }
+  });
+
+  // JSON-LD schema (организация)
+  const scriptSchema = document.createElement('script');
+  scriptSchema.type = 'application/ld+json';
+  scriptSchema.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Флекс-н-Ролл ПРО",
+    "legalName": "ООО «Флекс-н-Ролл ПРО»",
+    "url": "https://flex-n-roll-pro.by",
+    "description": "Производство инновационных этикеток, интеграция цифровых печатных модулей и выпуск самоклеящихся полиграфических материалов",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Смолевичский район",
+      "addressRegion": "Минская область",
+      "streetAddress": "ул. Сапфировая, д.20",
+      "addressCountry": "BY"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+375175910316",
+      "contactType": "sales",
+      "email": "sales@flex-n-roll.com",
+      "availableLanguage": ["Russian", "English"]
+    },
+    "foundingDate": "2009"
+  });
+  document.head.appendChild(scriptSchema);
+</script>
+</body>
+</html>

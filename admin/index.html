@@ -1,11 +1,69 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Polygraph AI Sales — админка</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кабинет | Флекс-н-Ролл ПРО</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
-<body>
-  <p>Админка — каркас. Подключите сборщик при необходимости.</p>
+<body class="admin-body">
+  <div class="admin-shell">
+    <aside class="admin-sidebar">
+      <h1>Флекс-н-Ролл ПРО</h1>
+      <div class="sub">Админ-панель (каркас)</div>
+      <ul class="admin-nav">
+        <!-- Позже: реальные разделы (заявки из Bitrix, настройки вебхука и т.д.) -->
+        <li><a href="index.html" class="active">Обзор</a></li>
+        <li><a href="#" onclick="return false;">Заявки (Bitrix)</a></li>
+        <li><a href="#" onclick="return false;">Настройки</a></li>
+      </ul>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-topbar">
+        <h2>Обзор</h2>
+        <div>
+          <span id="userLabel" style="color: var(--fnr-muted); font-size: 0.9rem; margin-right: 12px;"></span>
+          <button type="button" class="btn btn-ghost" id="logoutBtn">Выйти</button>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3>Заявки с сайта</h3>
+        <p class="admin-placeholder">
+          Здесь позже появится список лидов из Bitrix24 (crm.lead.list или ваш промежуточный API).
+          Сейчас публичная форма на <a href="../flexn.html#contact" style="color: var(--fnr-primary);">главной странице</a> уже может отправлять данные в Bitrix по вебхуку.
+        </p>
+      </div>
+
+      <div class="admin-card" style="margin-top: 20px;">
+        <h3>Интеграция</h3>
+        <p class="admin-placeholder">
+          URL вебхука и маппинг полей задаются в скрипте формы на <code>flexn.html</code> (переменная <code>BITRIX_WEBHOOK_URL</code>).
+          Для админки отдельно понадобится серверный слой или OAuth Bitrix — иначе секреты вебхука нельзя безопасно хранить только в браузере.
+        </p>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/js/auth-session.js"></script>
+  <script>
+    // Защита страницы: без сессии — только на login
+    FnrAuth.requireAdminPage();
+
+    const s = FnrAuth.getSession();
+    const label = document.getElementById('userLabel');
+    if (s && s.user) {
+      label.textContent = s.user;
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', function () {
+      FnrAuth.logout();
+      window.location.href = 'login.html';
+    });
+  </script>
 </body>
 </html>
