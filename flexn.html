@@ -842,6 +842,14 @@
               <div class="error-msg" data-for="phone"></div>
             </div>
             <div class="field">
+              <label for="companyName"><i class="fas fa-building field-label-icon"></i> Название компании</label>
+              <div class="input-icon-wrap">
+                <i class="fas fa-building input-icon"></i>
+                <input type="text" id="companyName" name="company" placeholder="ООО «Пример»" autocomplete="organization">
+              </div>
+              <div class="error-msg" data-for="company"></div>
+            </div>
+            <div class="field">
               <label for="selectCustomTrigger"><i class="fas fa-comment-dots field-label-icon"></i> Способ связи <span class="required-star" style="color:#e879a0">*</span></label>
               <div class="select-wrap select-custom" id="contactMethodBox">
                 <select id="contactMethodSelect" name="contactMethod" required class="select-custom-native" tabindex="-1" aria-hidden="true">
@@ -869,6 +877,11 @@
                 <input type="text" id="contactDetail" name="contactDetail" placeholder="@username" autocomplete="username">
               </div>
               <div class="error-msg" data-for="contactDetail"></div>
+            </div>
+            <div class="field field-message">
+              <label for="message"><i class="fas fa-align-left field-label-icon"></i> Комментарий к заказу</label>
+              <textarea id="message" name="message" placeholder="Тираж, формат, сроки…" rows="4"></textarea>
+              <div class="error-msg" data-for="message"></div>
             </div>
             <div class="privacy privacy-after-message">
               <label>
@@ -936,6 +949,13 @@
   })();
 
   const SUBMIT_BTN_HTML = 'Отправить заявку';
+  var FNR_LEAD_URL = (function () {
+    try {
+      return new URL('/fnr-api/lead', window.location.href).href;
+    } catch (e) {
+      return '/fnr-api/lead';
+    }
+  })();
   const BITRIX_WEBHOOK_URL = 'https://your-domain.bitrix24.ru/rest/1/your-webhook-code/crm.lead.add.json';
 
   function isBitrixConfigured() {
@@ -1034,6 +1054,7 @@
   const selectMethodIcon = document.getElementById('selectMethodIcon');
 
   function syncContactField() {
+    if (!methodSelect || !contactDetail || !contactDetailLabel) return;
     const m = methodSelect.value;
     if (m === 'telegram') {
       contactDetailLabel.innerHTML = '<i class="fab fa-telegram field-label-icon" id="contactDetailLabelIcon"></i> Telegram';
@@ -1058,10 +1079,13 @@
       if (selectMethodIcon) { selectMethodIcon.className = 'fas fa-envelope select-method-icon'; }
     }
     contactDetail.value = '';
-    document.querySelector('[data-for="contactDetail"]').textContent = '';
+    var cde = document.querySelector('[data-for="contactDetail"]');
+    if (cde) cde.textContent = '';
   }
-  methodSelect.addEventListener('change', syncContactField);
-  syncContactField();
+  if (methodSelect) {
+    methodSelect.addEventListener('change', syncContactField);
+    syncContactField();
+  }
 
   (function initCustomSelect() {
     var box = document.getElementById('contactMethodBox');
@@ -1141,13 +1165,13 @@
       ok = false;
     }
 
-    const method = methodSelect.value;
-    const detail = contactDetail.value.trim();
+    const method = methodSelect ? methodSelect.value : 'telegram';
+    const detail = contactDetail ? contactDetail.value.trim() : '';
 
     if (method === 'telegram') {
       let tg = detail;
       if (tg && !tg.startsWith('@')) tg = '@' + tg;
-      if (tg) contactDetail.value = tg;
+      if (tg && contactDetail) contactDetail.value = tg;
       if (!tg || !USER_RE.test(tg)) {
         showErr('contactDetail', 'Укажите username Telegram (@username)');
         ok = false;
@@ -1183,9 +1207,11 @@
         NAME: formData.name,
         PHONE: [{ VALUE: formData.phone, VALUE_TYPE: 'WORK' }],
         EMAIL: formData.email ? [{ VALUE: formData.email, VALUE_TYPE: 'WORK' }] : [],
+        COMPANY_TITLE: formData.company || '',
         COMMENTS:
           'Предпочитаемая связь: ' + methodLabel + '\n' +
-          'Контакт: ' + (formData.contactDetail || '—'),
+          'Контакт: ' + (formData.contactDetail || '—') + '\n' +
+          'Комментарий: ' + (formData.message || '—'),
         SOURCE_DESCRIPTION: 'Форма сайта flex-n-roll',
       },
       params: { REGISTER_SONET_EVENT: 'Y' }
@@ -1206,45 +1232,77 @@
     return data;
   }
 
+  function fnrApiErrorText(code) {
+    if (code === 'too_many_requests') return 'Слишком много заявок с вашего адреса. Попробуйте позже.';
+    return code || '';
+  }
+
+  function scrollFormFeedback() {
+    if (formStatus && typeof formStatus.scrollIntoView === 'function') {
+      formStatus.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  if (form && formStatus) {
   form.addEventListener('submit', async function (e) {
     e.preventDefault();
-    if (!validateForm()) {
-      formStatus.innerHTML = '<span style="color:#c02626;">Проверьте поля выше.</span>';
-      return;
-    }
-
-    const method = methodSelect.value;
-    const detailRaw = contactDetail.value.trim();
-    let telegram = '';
-    let email = '';
-    if (method === 'telegram') {
-      telegram = detailRaw.startsWith('@') ? detailRaw : ('@' + detailRaw);
-    } else if (method === 'email') {
-      email = detailRaw;
-    }
-
-    const formData = {
-      name: document.getElementById('name').value.trim(),
-      phone: document.getElementById('phone').value.trim(),
-      contactMethod: method,
-      contactDetail: detailRaw,
-      telegram: telegram,
-      email: email,
-    };
-
-    const submitBtn = form.querySelector('.submit-btn');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = 'Отправка…';
-    formStatus.innerHTML = '<span style="color:#e9d5ff;">Отправляем…</span>';
-
+    var submitBtn = null;
     try {
-      const fnrRes = await fetch('/fnr-api/lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      if (!validateForm()) {
+        formStatus.innerHTML = '<span style="color:#fecaca;">Проверьте поля выше.</span>';
+        scrollFormFeedback();
+        return;
+      }
+
+      submitBtn = form.querySelector('.submit-btn');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Отправка…';
+      }
+      formStatus.innerHTML = '<span style="color:#e9d5ff;">Отправляем…</span>';
+      scrollFormFeedback();
+
+      const method = methodSelect ? methodSelect.value : 'telegram';
+      const detailRaw = contactDetail ? contactDetail.value.trim() : '';
+      let telegram = '';
+      let email = '';
+      if (method === 'telegram') {
+        telegram = detailRaw.startsWith('@') ? detailRaw : ('@' + detailRaw);
+      } else if (method === 'email') {
+        email = detailRaw;
+      }
+
+      const formData = {
+        name: document.getElementById('name').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        company: document.getElementById('companyName').value.trim(),
+        contactMethod: method,
+        contactDetail: detailRaw,
+        telegram: telegram,
+        email: email,
+        message: document.getElementById('message').value.trim(),
+      };
+
+      var ctrl = new AbortController();
+      var tId = setTimeout(function () { ctrl.abort(); }, 45000);
+
+      var fnrRes;
+      try {
+        fnrRes = await fetch(FNR_LEAD_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+          signal: ctrl.signal,
+        });
+      } finally {
+        clearTimeout(tId);
+      }
+
       const fnrJson = await fnrRes.json().catch(function () { return {}; });
-      if (!fnrRes.ok) throw new Error(fnrJson.error || ('HTTP ' + fnrRes.status));
+      if (!fnrRes.ok) {
+        var errCode = fnrJson.error || ('HTTP ' + fnrRes.status);
+        throw new Error(fnrApiErrorText(errCode) || errCode);
+      }
 
       let bitrixNote = '';
       if (isBitrixConfigured()) {
@@ -1258,25 +1316,42 @@
       }
 
       let msg = 'Заявка принята.' + bitrixNote;
-      if (fnrJson.telegram_started) msg += ' Мы написали вам в Telegram.';
-      else if (method === 'telegram' && formData.telegram && fnrJson.telegram_error) {
-        msg += ' Telegram: ' + fnrJson.telegram_error;
+      if (fnrJson.telegram_started) {
+        msg += ' Мы написали вам в Telegram.';
+      } else if (method === 'telegram' && formData.telegram) {
+        if (fnrJson.telegram_error) {
+          msg += ' Не удалось написать в Telegram: ' + fnrJson.telegram_error + ' Заявка сохранена.';
+        } else {
+          msg += ' Мы свяжемся с вами по указанным данным.';
+        }
       }
-      formStatus.innerHTML = '<span style="color:#15803d;">' + msg + '</span>';
+      formStatus.innerHTML = '<span style="color:#86efac;">' + msg + '</span>';
       form.reset();
-      methodSelect.value = 'telegram';
+      if (methodSelect) methodSelect.value = 'telegram';
       syncContactField();
-      document.getElementById('privacyAgree').checked = false;
+      var pa = document.getElementById('privacyAgree');
+      if (pa) pa.checked = false;
       clearErrors();
-      setTimeout(function () { formStatus.innerHTML = ''; }, 8000);
+      setTimeout(function () { formStatus.innerHTML = ''; }, 12000);
+      scrollFormFeedback();
     } catch (err) {
       console.error(err);
-      formStatus.innerHTML = '<span style="color:#c02626;">Ошибка: ' + err.message + '</span>';
+      var em = (err && err.name === 'AbortError')
+        ? 'Сервер не ответил вовремя. Попробуйте ещё раз.'
+        : ((err && err.message) || String(err));
+      if (em === 'Failed to fetch' || em === 'Load failed' || em === 'NetworkError when attempting to fetch resource.') {
+        em = 'Нет связи с сервером. Проверьте сеть или откройте сайт по HTTPS (не из файла на диске).';
+      }
+      formStatus.innerHTML = '<span style="color:#fecaca;">Ошибка: ' + em + '</span>';
+      scrollFormFeedback();
     } finally {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = SUBMIT_BTN_HTML;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = SUBMIT_BTN_HTML;
+      }
     }
   });
+  }
 
   /* ── Entrance animations ── */
   (function() {

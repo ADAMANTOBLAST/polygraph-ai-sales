@@ -13,6 +13,8 @@ from typing import Any
 
 from aiohttp import web
 from telethon import TelegramClient
+from telethon.errors import FloodWaitError
+from telethon.errors.rpcerrorlist import PeerFloodError
 
 from accounts_registry import get_accounts
 from ai_messaging.channels.telethon_client import build_client
@@ -49,6 +51,27 @@ def _client_ip(request: web.Request) -> str:
         if peer:
             return peer[0]
     return "unknown"
+
+
+def _format_telegram_error(exc: BaseException) -> str:
+    if isinstance(exc, FloodWaitError):
+        return f"Лимит Telegram: подождите ~{exc.seconds} с и повторите отправку."
+    if isinstance(exc, PeerFloodError):
+        return (
+            "Telegram временно ограничил исходящие сообщения. "
+            "Попробуйте позже или напишите нам в Telegram сами."
+        )
+    s = str(exc)
+    if "Too many requests" in s or "FLOOD_WAIT" in s.upper():
+        return "Лимит сообщений Telegram. Попробуйте через несколько минут."
+    if "USERNAME_NOT_OCCUPIED" in s or "No user has" in s or "not found" in s.lower():
+        return "Такой username в Telegram не найден. Проверьте написание."
+    if "can't write" in s.lower() or "write in this chat" in s.lower():
+        return (
+            "Не удалось написать первое сообщение в Telegram (ограничения аккаунта). "
+            "Мы свяжемся по телефону из заявки."
+        )
+    return s[:220]
 
 
 def _rate_ok(ip: str) -> bool:
@@ -88,7 +111,7 @@ async def _handle_lead(request: web.Request) -> web.Response:
             sent = True
             log.info("Первое сообщение отправлено %s (id=%s)", telegram, uid)
         except Exception as e:
-            err = str(e)
+            err = _format_telegram_error(e)
             log.exception("Не удалось написать в Telegram %s: %s", telegram, e)
 
     return web.json_response(
