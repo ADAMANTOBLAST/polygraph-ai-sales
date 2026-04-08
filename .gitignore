@@ -8,3 +8,9 @@ __pycache__/
 *.log
 .idea/
 .vscode/
+
+# Фронтенды user / admin (когда появятся)
+user/node_modules/
+user/dist/
+admin/node_modules/
+admin/dist/
