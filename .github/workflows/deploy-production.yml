@@ -1,8 +1,17 @@
 # Деплой на VPS при каждом push в main (в т.ч. после merge из dev).
+# Push только в dev — этот workflow НЕ запускается (депой после merge в main).
 #
-# Secrets (Actions или Environment «production»):
-#   DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY — SSH на VPS
-#   comet_api_key — ключ Comet API (в .env на сервере пишется как COMET_API_KEY)
+# Secrets (обязательно; репозиторий ИЛИ Environment «production» — см. ниже):
+#   DEPLOY_HOST      — IP или hostname VPS (без ssh://)
+#   DEPLOY_USER      — пользователь SSH (например root)
+#   DEPLOY_SSH_KEY   — приватный ключ (весь PEM, с BEGIN/END)
+#   comet_api_key    — опционально, для COMET_API_KEY в .env на сервере
+#
+# Если в логах: "Error: missing server host" — не задан DEPLOY_HOST или секреты
+# привязаны не к тому месту: Settings → Secrets → Actions, либо
+# Settings → Environments → production → Environment secrets (job использует environment: production).
+#
+# Форки и PR из форка: секреты не передаются — деплой только с веток репозитория с секретами.
 #
 name: Deploy production
 
@@ -17,6 +26,20 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - name: Проверка секретов деплоя
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          ok=1
+          if [ -z "$DEPLOY_HOST" ]; then echo "::error::Не задан secret DEPLOY_HOST (IP/hostname VPS)"; ok=0; fi
+          if [ -z "$DEPLOY_USER" ]; then echo "::error::Не задан secret DEPLOY_USER"; ok=0; fi
+          if [ -z "$DEPLOY_SSH_KEY" ]; then echo "::error::Не задан secret DEPLOY_SSH_KEY (приватный SSH-ключ)"; ok=0; fi
+          if [ "$ok" != 1 ]; then
+            echo "::error::Добавьте секреты в репозиторий (Settings → Secrets → Actions) или в Environment «production»."
+            exit 1
+          fi
       - name: SSH — COMET_API_KEY в .env, git pull, деплой
         uses: appleboy/ssh-action@v1.2.0
         with:
