@@ -170,24 +170,23 @@
       z-index: 102;
     }
 
-    /* Логотип PNG: обрезаем пустые поля — умеренный масштаб внутри шапки */
+    /* Логотип SVG (широкий горизонтальный знак) — без обрезки, по высоте шапки */
     .brand-logo-wrap {
-      height: 64px;
-      width: min(152px, 34vw);
+      flex: 0 0 auto;
+      height: 44px;
+      max-width: min(200px, 52vw);
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      overflow: hidden;
     }
 
     .brand-logo-wrap img {
-      height: 118%;
+      height: 100%;
       width: auto;
-      max-width: none;
+      max-width: 100%;
       object-fit: contain;
-      object-position: center center;
-      transform: scale(1.1);
-      transform-origin: center center;
+      object-position: left center;
+      display: block;
     }
 
     .brand span {
@@ -450,12 +449,8 @@
         padding: 6px 0;
       }
       .brand-logo-wrap {
-        height: 52px;
-        width: min(128px, 40vw);
-      }
-      .brand-logo-wrap img {
-        height: 112%;
-        transform: scale(1.06);
+        height: 36px;
+        max-width: min(168px, 56vw);
       }
       .brand span { font-size: 1.05rem; }
       .hero {
@@ -1033,7 +1028,7 @@
     <div class="container site-header-inner">
       <a class="brand" href="#top">
         <span class="brand-logo-wrap">
-          <img src="logo2.png" width="256" height="256" alt="Flex-n-roll">
+          <img src="logo.svg" width="176" height="60" alt="Flex-n-roll">
         </span>
         <span>Flex-n-roll</span>
       </a>

@@ -15,37 +15,338 @@
       <h1>Флекс-н-Ролл ПРО</h1>
       <div class="sub">Админ-панель (каркас)</div>
       <ul class="admin-nav">
-        <!-- Позже: реальные разделы (заявки из Bitrix, настройки вебхука и т.д.) -->
-        <li><a href="index.html" class="active">Обзор</a></li>
-        <li><a href="#" onclick="return false;">Заявки (Bitrix)</a></li>
-        <li><a href="#" onclick="return false;">Настройки</a></li>
+        <li><a href="#people" class="active" data-section="people">Команда и роли</a></li>
+        <li><a href="#agent-script" data-section="agent-script">Скрипт AI-агента</a></li>
+        <li><a href="#funnel" data-section="funnel">Воронка общения</a></li>
+        <li><a href="#knowledge" data-section="knowledge">База данных агента</a></li>
+        <li><a href="#vip-clients" data-section="vip-clients">VIP-клиенты</a></li>
+        <li><a href="#alerts" data-section="alerts">Будилки и уведомления</a></li>
       </ul>
     </aside>
 
     <main class="admin-main">
-      <div class="admin-topbar">
+      <div class="admin-topbar" id="overview">
         <h2>Обзор</h2>
-        <div>
+        <div class="topbar-actions">
           <span id="userLabel" style="color: var(--fnr-muted); font-size: 0.9rem; margin-right: 12px;"></span>
           <button type="button" class="btn btn-ghost" id="logoutBtn">Выйти</button>
         </div>
       </div>
 
-      <div class="admin-card">
-        <h3>Заявки с сайта</h3>
-        <p class="admin-placeholder">
-          Здесь позже появится список лидов из Bitrix24 (crm.lead.list или ваш промежуточный API).
-          Сейчас публичная форма на <a href="../index.html#contact" style="color: var(--fnr-primary);">главной странице</a> уже может отправлять данные в Bitrix по вебхуку.
-        </p>
-      </div>
+      <section class="admin-card admin-card-section module-section" id="people">
+        <h3>Данные технологов, менеджеров, экономистов</h3>
+        <p class="admin-placeholder">Рабочий модуль: добавление, редактирование и удаление сотрудников. Хранение пока в localStorage (без сервера).</p>
 
-      <div class="admin-card" style="margin-top: 20px;">
-        <h3>Интеграция</h3>
-        <p class="admin-placeholder">
-          URL вебхука и маппинг полей задаются в скрипте формы на <code>flexn.html</code> (переменная <code>BITRIX_WEBHOOK_URL</code>).
-          Для админки отдельно понадобится серверный слой или OAuth Bitrix — иначе секреты вебхука нельзя безопасно хранить только в браузере.
-        </p>
-      </div>
+        <form id="peopleForm" class="module-form" novalidate>
+          <input type="hidden" id="personId" value="">
+          <div class="module-grid module-grid-3">
+            <label class="field">
+              <span>ФИО</span>
+              <input type="text" id="personName" placeholder="Иванов Иван" required>
+            </label>
+            <label class="field">
+              <span>Роль</span>
+              <select id="personRole" required>
+                <option value="Технолог">Технолог</option>
+                <option value="Менеджер">Менеджер</option>
+                <option value="Экономист">Экономист</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Контакт</span>
+              <input type="text" id="personContact" placeholder="+375..., @telegram, email">
+            </label>
+          </div>
+          <label class="field" style="margin-top:10px;">
+            <span>Зона ответственности / примечание</span>
+            <textarea id="personScope" rows="2" placeholder="Материалы, клиенты, расчёты..."></textarea>
+          </label>
+          <div class="module-actions">
+            <button type="submit" class="btn btn-primary" id="personSubmitBtn">Добавить</button>
+            <button type="button" class="btn btn-ghost" id="personCancelBtn">Отменить редактирование</button>
+          </div>
+          <p id="peopleFormMsg" class="admin-placeholder" style="margin-top:8px;"></p>
+        </form>
+
+        <div class="module-list-wrap">
+          <div class="module-list-head">
+            <h4>Сотрудники</h4>
+            <span id="peopleCount" class="module-badge">0</span>
+          </div>
+          <div id="peopleList" class="module-list"></div>
+        </div>
+      </section>
+
+      <section class="admin-card admin-card-section module-section" id="agent-script">
+        <h3>Скрипт общения AI-агента</h3>
+        <p class="admin-placeholder">Рабочий модуль: этапы диалога, шаблон ответа, условие эскалации. Хранение в localStorage.</p>
+
+        <form id="scriptForm" class="module-form" novalidate>
+          <input type="hidden" id="scriptId" value="">
+          <div class="module-grid module-grid-3">
+            <label class="field">
+              <span>Название этапа</span>
+              <input type="text" id="scriptTitle" placeholder="Квалификация" required>
+            </label>
+            <label class="field">
+              <span>Порядок</span>
+              <input type="number" id="scriptOrder" min="1" step="1" value="1" required>
+            </label>
+            <label class="field">
+              <span>Эскалация</span>
+              <select id="scriptEscalation" required>
+                <option value="Нет">Нет</option>
+                <option value="Менеджер">Менеджер</option>
+                <option value="Технолог">Технолог</option>
+                <option value="Экономист">Экономист</option>
+              </select>
+            </label>
+          </div>
+          <label class="field" style="margin-top:10px;">
+            <span>Шаблон сообщения агента</span>
+            <textarea id="scriptTemplate" rows="3" placeholder="Здравствуйте! Подскажите, какой материал и тираж вас интересует?" required></textarea>
+          </label>
+          <label class="field" style="margin-top:10px;">
+            <span>Условие перехода на следующий этап</span>
+            <input type="text" id="scriptCondition" placeholder="Получен материал + размер + тираж">
+          </label>
+          <div class="module-actions">
+            <button type="submit" class="btn btn-primary" id="scriptSubmitBtn">Добавить этап</button>
+            <button type="button" class="btn btn-ghost" id="scriptCancelBtn">Отменить редактирование</button>
+          </div>
+          <p id="scriptFormMsg" class="admin-placeholder" style="margin-top:8px;"></p>
+        </form>
+
+        <div class="module-list-wrap">
+          <div class="module-list-head">
+            <h4>Этапы скрипта</h4>
+            <span id="scriptCount" class="module-badge">0</span>
+          </div>
+          <div id="scriptList" class="module-list"></div>
+        </div>
+      </section>
+
+      <section class="admin-card admin-card-section module-section" id="funnel">
+        <h3>Настройки воронки общения</h3>
+        <p class="admin-placeholder">Рабочий модуль: этапы воронки, SLA, автопереходы и статус активности. Хранение в localStorage.</p>
+
+        <form id="funnelForm" class="module-form" novalidate>
+          <input type="hidden" id="funnelId" value="">
+          <div class="module-grid module-grid-3">
+            <label class="field">
+              <span>Название этапа</span>
+              <input type="text" id="funnelTitle" placeholder="Квалификация" required>
+            </label>
+            <label class="field">
+              <span>Порядок</span>
+              <input type="number" id="funnelOrder" min="1" step="1" value="1" required>
+            </label>
+            <label class="field">
+              <span>SLA (минуты)</span>
+              <input type="number" id="funnelSla" min="1" step="1" value="30" required>
+            </label>
+          </div>
+          <div class="module-grid module-grid-2" style="margin-top:10px;">
+            <label class="field">
+              <span>Следующий этап</span>
+              <input type="text" id="funnelNext" placeholder="Расчёт / согласование">
+            </label>
+            <label class="field">
+              <span>Статус</span>
+              <select id="funnelStatus" required>
+                <option value="Активен">Активен</option>
+                <option value="Пауза">Пауза</option>
+                <option value="Архив">Архив</option>
+              </select>
+            </label>
+          </div>
+          <label class="field" style="margin-top:10px;">
+            <span>Условие автоперехода</span>
+            <input type="text" id="funnelAutoRule" placeholder="Есть материал + тираж + контакт">
+          </label>
+          <div class="module-actions">
+            <button type="submit" class="btn btn-primary" id="funnelSubmitBtn">Добавить этап</button>
+            <button type="button" class="btn btn-ghost" id="funnelCancelBtn">Отменить редактирование</button>
+          </div>
+          <p id="funnelFormMsg" class="admin-placeholder" style="margin-top:8px;"></p>
+        </form>
+
+        <div class="module-list-wrap">
+          <div class="module-list-head">
+            <h4>Этапы воронки</h4>
+            <span id="funnelCount" class="module-badge">0</span>
+          </div>
+          <div id="funnelList" class="module-list"></div>
+        </div>
+      </section>
+
+      <section class="admin-card admin-card-section module-section" id="knowledge">
+        <h3>База данных агента</h3>
+        <p class="admin-placeholder">Рабочий модуль знаний: категория, вопрос, ответ, теги и статус публикации. Хранение в localStorage.</p>
+
+        <form id="knowledgeForm" class="module-form" novalidate>
+          <input type="hidden" id="knowledgeId" value="">
+          <div class="module-grid module-grid-3">
+            <label class="field">
+              <span>Категория</span>
+              <select id="knowledgeCategory" required>
+                <option value="Материалы">Материалы</option>
+                <option value="Услуги">Услуги</option>
+                <option value="Ценообразование">Ценообразование</option>
+                <option value="FAQ">FAQ</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Статус</span>
+              <select id="knowledgeStatus" required>
+                <option value="Опубликовано">Опубликовано</option>
+                <option value="Черновик">Черновик</option>
+                <option value="Архив">Архив</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Теги (через запятую)</span>
+              <input type="text" id="knowledgeTags" placeholder="термоусадка, флексо, тираж">
+            </label>
+          </div>
+          <label class="field" style="margin-top:10px;">
+            <span>Вопрос / тема</span>
+            <input type="text" id="knowledgeQuestion" placeholder="Какой материал лучше для влажной среды?" required>
+          </label>
+          <label class="field" style="margin-top:10px;">
+            <span>Ответ</span>
+            <textarea id="knowledgeAnswer" rows="4" placeholder="Рекомендуем ... потому что ..." required></textarea>
+          </label>
+          <div class="module-actions">
+            <button type="submit" class="btn btn-primary" id="knowledgeSubmitBtn">Добавить запись</button>
+            <button type="button" class="btn btn-ghost" id="knowledgeCancelBtn">Отменить редактирование</button>
+          </div>
+          <p id="knowledgeFormMsg" class="admin-placeholder" style="margin-top:8px;"></p>
+        </form>
+
+        <div class="module-list-wrap">
+          <div class="module-list-head">
+            <h4>Записи базы знаний</h4>
+            <span id="knowledgeCount" class="module-badge">0</span>
+          </div>
+          <div id="knowledgeList" class="module-list"></div>
+        </div>
+      </section>
+
+      <section class="admin-card admin-card-section module-section" id="vip-clients">
+        <h3>База VIP-клиентов</h3>
+        <p class="admin-placeholder">Компании и контакты с особыми условиями: единый статус VIP, ответственный менеджер, примечания. Хранение в localStorage.</p>
+
+        <form id="vipForm" class="module-form" novalidate>
+          <input type="hidden" id="vipId" value="">
+          <div class="module-grid module-grid-2">
+            <label class="field">
+              <span>Компания / название</span>
+              <input type="text" id="vipCompany" placeholder='ООО «Партнёр»' required>
+            </label>
+            <label class="field">
+              <span>Статус</span>
+              <select id="vipStatus" required>
+                <option value="Активен">Активен</option>
+                <option value="Пауза">Пауза</option>
+                <option value="Архив">Архив</option>
+              </select>
+            </label>
+          </div>
+          <div class="module-grid module-grid-3" style="margin-top:10px;">
+            <label class="field">
+              <span>Контакт (телефон, email, Telegram)</span>
+              <input type="text" id="vipContact" placeholder="+375..., name@firma.by, @telegram">
+            </label>
+            <label class="field">
+              <span>Ответственный менеджер</span>
+              <input type="text" id="vipManager" placeholder="ФИО или подразделение">
+            </label>
+            <label class="field">
+              <span>Условия / скидка (кратко)</span>
+              <input type="text" id="vipTerms" placeholder="-10%, отсрочка 14 дней, фикс. прайс">
+            </label>
+          </div>
+          <label class="field" style="margin-top:10px;">
+            <span>Примечания</span>
+            <textarea id="vipNotes" rows="3" placeholder="Особые пожелания, история сотрудничества, ограничения по материалам..."></textarea>
+          </label>
+          <div class="module-actions">
+            <button type="submit" class="btn btn-primary" id="vipSubmitBtn">Добавить клиента</button>
+            <button type="button" class="btn btn-ghost" id="vipCancelBtn">Отменить редактирование</button>
+          </div>
+          <p id="vipFormMsg" class="admin-placeholder" style="margin-top:8px;"></p>
+        </form>
+
+        <div class="module-list-wrap">
+          <div class="module-list-head">
+            <h4>VIP-клиенты</h4>
+            <span id="vipCount" class="module-badge">0</span>
+          </div>
+          <div id="vipList" class="module-list"></div>
+        </div>
+      </section>
+
+      <section class="admin-card admin-card-section module-section" id="alerts">
+        <h3>Будилки (Telegram / звонок на номер)</h3>
+        <p class="admin-placeholder">Рабочий модуль уведомлений: канал, событие, получатель, расписание и статус. Хранение в localStorage.</p>
+
+        <form id="alertForm" class="module-form" novalidate>
+          <input type="hidden" id="alertId" value="">
+          <div class="module-grid module-grid-3">
+            <label class="field">
+              <span>Канал</span>
+              <select id="alertChannel" required>
+                <option value="Telegram">Telegram</option>
+                <option value="Звонок">Звонок</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Событие</span>
+              <select id="alertEvent" required>
+                <option value="Новый лид">Новый лид</option>
+                <option value="Просрочка SLA">Просрочка SLA</option>
+                <option value="Эскалация">Эскалация</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Статус</span>
+              <select id="alertStatus" required>
+                <option value="Активен">Активен</option>
+                <option value="Пауза">Пауза</option>
+                <option value="Архив">Архив</option>
+              </select>
+            </label>
+          </div>
+          <div class="module-grid module-grid-2" style="margin-top:10px;">
+            <label class="field">
+              <span>Получатель (чат / номер)</span>
+              <input type="text" id="alertTarget" placeholder="@sales_chat или +375291234567" required>
+            </label>
+            <label class="field">
+              <span>Расписание / окно</span>
+              <input type="text" id="alertSchedule" placeholder="09:00-21:00, будни">
+            </label>
+          </div>
+          <label class="field" style="margin-top:10px;">
+            <span>Условие срабатывания</span>
+            <input type="text" id="alertCondition" placeholder="Лид без ответа > 30 минут">
+          </label>
+          <div class="module-actions">
+            <button type="submit" class="btn btn-primary" id="alertSubmitBtn">Добавить правило</button>
+            <button type="button" class="btn btn-ghost" id="alertCancelBtn">Отменить редактирование</button>
+          </div>
+          <p id="alertFormMsg" class="admin-placeholder" style="margin-top:8px;"></p>
+        </form>
+
+        <div class="module-list-wrap">
+          <div class="module-list-head">
+            <h4>Правила уведомлений</h4>
+            <span id="alertCount" class="module-badge">0</span>
+          </div>
+          <div id="alertList" class="module-list"></div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -64,6 +365,977 @@
       FnrAuth.logout();
       window.location.href = 'login.html';
     });
+
+    // --- Навигация: показываем только один блок секции ---
+    const navLinks = Array.from(document.querySelectorAll('.admin-nav a[data-section]'));
+    const moduleSections = Array.from(document.querySelectorAll('.module-section'));
+
+    function showSection(sectionId) {
+      moduleSections.forEach(function (section) {
+        section.hidden = section.id !== sectionId;
+      });
+
+      navLinks.forEach(function (link) {
+        link.classList.toggle('active', link.dataset.section === sectionId);
+      });
+    }
+
+    navLinks.forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        const sectionId = link.dataset.section;
+        if (!sectionId) return;
+        showSection(sectionId);
+      });
+    });
+
+    // --- Модуль "Команда и роли" (локальный CRUD) ---
+    const PEOPLE_STORAGE_KEY = 'fnr_admin_people_v1';
+    const peopleForm = document.getElementById('peopleForm');
+    const personIdInput = document.getElementById('personId');
+    const personNameInput = document.getElementById('personName');
+    const personRoleInput = document.getElementById('personRole');
+    const personContactInput = document.getElementById('personContact');
+    const personScopeInput = document.getElementById('personScope');
+    const peopleFormMsg = document.getElementById('peopleFormMsg');
+    const peopleList = document.getElementById('peopleList');
+    const peopleCount = document.getElementById('peopleCount');
+    const personSubmitBtn = document.getElementById('personSubmitBtn');
+    const personCancelBtn = document.getElementById('personCancelBtn');
+
+    function getPeople() {
+      try {
+        const raw = localStorage.getItem(PEOPLE_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function savePeople(items) {
+      localStorage.setItem(PEOPLE_STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function resetFormState() {
+      personIdInput.value = '';
+      peopleForm.reset();
+      personRoleInput.value = 'Технолог';
+      personSubmitBtn.textContent = 'Добавить';
+      peopleFormMsg.textContent = '';
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function renderPeople() {
+      const items = getPeople();
+      peopleCount.textContent = String(items.length);
+      if (!items.length) {
+        peopleList.innerHTML = '<p class="admin-placeholder">Список пуст. Добавьте первого сотрудника.</p>';
+        return;
+      }
+
+      peopleList.innerHTML = items
+        .map(function (item) {
+          return (
+            '<article class="person-card">' +
+            '<div class="person-card-head">' +
+            '<strong>' + escapeHtml(item.name) + '</strong>' +
+            '<span class="module-badge">' + escapeHtml(item.role) + '</span>' +
+            '</div>' +
+            '<p><b>Контакт:</b> ' + escapeHtml(item.contact || '—') + '</p>' +
+            '<p><b>Зона:</b> ' + escapeHtml(item.scope || '—') + '</p>' +
+            '<div class="module-actions">' +
+            '<button type="button" class="btn btn-ghost" data-action="edit" data-id="' + item.id + '">Редактировать</button>' +
+            '<button type="button" class="btn btn-ghost" data-action="delete" data-id="' + item.id + '">Удалить</button>' +
+            '</div>' +
+            '</article>'
+          );
+        })
+        .join('');
+    }
+
+    peopleForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const name = personNameInput.value.trim();
+      const role = personRoleInput.value.trim();
+      const contact = personContactInput.value.trim();
+      const scope = personScopeInput.value.trim();
+
+      if (!name) {
+        peopleFormMsg.textContent = 'Введите ФИО сотрудника.';
+        return;
+      }
+
+      const id = personIdInput.value;
+      const items = getPeople();
+
+      let formMessage = '';
+      if (id) {
+        const idx = items.findIndex(function (x) { return x.id === id; });
+        if (idx !== -1) {
+          items[idx] = { id: id, name: name, role: role, contact: contact, scope: scope };
+        }
+        formMessage = 'Сотрудник обновлён.';
+      } else {
+        items.unshift({
+          id: String(Date.now()),
+          name: name,
+          role: role,
+          contact: contact,
+          scope: scope
+        });
+        formMessage = 'Сотрудник добавлен.';
+      }
+
+      savePeople(items);
+      renderPeople();
+      resetFormState();
+      peopleFormMsg.textContent = formMessage;
+    });
+
+    personCancelBtn.addEventListener('click', function () {
+      resetFormState();
+    });
+
+    peopleList.addEventListener('click', function (e) {
+      const target = e.target;
+      if (!(target instanceof HTMLElement)) return;
+      const action = target.dataset.action;
+      const id = target.dataset.id;
+      if (!action || !id) return;
+
+      const items = getPeople();
+      const person = items.find(function (x) { return x.id === id; });
+      if (!person) return;
+
+      if (action === 'edit') {
+        personIdInput.value = person.id;
+        personNameInput.value = person.name || '';
+        personRoleInput.value = person.role || 'Технолог';
+        personContactInput.value = person.contact || '';
+        personScopeInput.value = person.scope || '';
+        personSubmitBtn.textContent = 'Сохранить';
+        peopleFormMsg.textContent = 'Режим редактирования.';
+        personNameInput.focus();
+      }
+
+      if (action === 'delete') {
+        const next = items.filter(function (x) { return x.id !== id; });
+        savePeople(next);
+        renderPeople();
+        peopleFormMsg.textContent = 'Сотрудник удалён.';
+        if (personIdInput.value === id) {
+          resetFormState();
+        }
+      }
+    });
+
+    // --- Модуль "Скрипт AI-агента" (локальный CRUD) ---
+    const SCRIPT_STORAGE_KEY = 'fnr_admin_agent_script_v1';
+    const scriptForm = document.getElementById('scriptForm');
+    const scriptIdInput = document.getElementById('scriptId');
+    const scriptTitleInput = document.getElementById('scriptTitle');
+    const scriptOrderInput = document.getElementById('scriptOrder');
+    const scriptEscalationInput = document.getElementById('scriptEscalation');
+    const scriptTemplateInput = document.getElementById('scriptTemplate');
+    const scriptConditionInput = document.getElementById('scriptCondition');
+    const scriptSubmitBtn = document.getElementById('scriptSubmitBtn');
+    const scriptCancelBtn = document.getElementById('scriptCancelBtn');
+    const scriptFormMsg = document.getElementById('scriptFormMsg');
+    const scriptList = document.getElementById('scriptList');
+    const scriptCount = document.getElementById('scriptCount');
+
+    function getScriptStages() {
+      try {
+        const raw = localStorage.getItem(SCRIPT_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function saveScriptStages(items) {
+      localStorage.setItem(SCRIPT_STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function resetScriptFormState() {
+      scriptIdInput.value = '';
+      scriptForm.reset();
+      scriptOrderInput.value = '1';
+      scriptEscalationInput.value = 'Нет';
+      scriptSubmitBtn.textContent = 'Добавить этап';
+      scriptFormMsg.textContent = '';
+    }
+
+    function renderScriptStages() {
+      const stages = getScriptStages().slice().sort(function (a, b) {
+        return Number(a.order || 0) - Number(b.order || 0);
+      });
+
+      scriptCount.textContent = String(stages.length);
+      if (!stages.length) {
+        scriptList.innerHTML = '<p class="admin-placeholder">Этапы пока не добавлены.</p>';
+        return;
+      }
+
+      scriptList.innerHTML = stages
+        .map(function (stage) {
+          return (
+            '<article class="script-card">' +
+            '<div class="person-card-head">' +
+            '<strong>' + escapeHtml(stage.title) + '</strong>' +
+            '<span class="module-badge">Этап ' + escapeHtml(stage.order) + '</span>' +
+            '</div>' +
+            '<p><b>Эскалация:</b> ' + escapeHtml(stage.escalation) + '</p>' +
+            '<p><b>Шаблон:</b> ' + escapeHtml(stage.template) + '</p>' +
+            '<p><b>Переход:</b> ' + escapeHtml(stage.condition || '—') + '</p>' +
+            '<div class="module-actions">' +
+            '<button type="button" class="btn btn-ghost" data-script-action="edit" data-script-id="' + stage.id + '">Редактировать</button>' +
+            '<button type="button" class="btn btn-ghost" data-script-action="delete" data-script-id="' + stage.id + '">Удалить</button>' +
+            '</div>' +
+            '</article>'
+          );
+        })
+        .join('');
+    }
+
+    scriptForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const title = scriptTitleInput.value.trim();
+      const order = Number(scriptOrderInput.value);
+      const escalation = scriptEscalationInput.value.trim();
+      const template = scriptTemplateInput.value.trim();
+      const condition = scriptConditionInput.value.trim();
+
+      if (!title || !template) {
+        scriptFormMsg.textContent = 'Заполните название этапа и шаблон сообщения.';
+        return;
+      }
+      if (!Number.isFinite(order) || order < 1) {
+        scriptFormMsg.textContent = 'Порядок этапа должен быть числом от 1.';
+        return;
+      }
+
+      const id = scriptIdInput.value;
+      const items = getScriptStages();
+      let msg = '';
+
+      if (id) {
+        const idx = items.findIndex(function (x) { return x.id === id; });
+        if (idx !== -1) {
+          items[idx] = { id: id, title: title, order: order, escalation: escalation, template: template, condition: condition };
+        }
+        msg = 'Этап обновлён.';
+      } else {
+        items.push({
+          id: String(Date.now()),
+          title: title,
+          order: order,
+          escalation: escalation,
+          template: template,
+          condition: condition
+        });
+        msg = 'Этап добавлен.';
+      }
+
+      saveScriptStages(items);
+      renderScriptStages();
+      resetScriptFormState();
+      scriptFormMsg.textContent = msg;
+    });
+
+    scriptCancelBtn.addEventListener('click', function () {
+      resetScriptFormState();
+    });
+
+    scriptList.addEventListener('click', function (e) {
+      const target = e.target;
+      if (!(target instanceof HTMLElement)) return;
+
+      const action = target.dataset.scriptAction;
+      const id = target.dataset.scriptId;
+      if (!action || !id) return;
+
+      const items = getScriptStages();
+      const stage = items.find(function (x) { return x.id === id; });
+      if (!stage) return;
+
+      if (action === 'edit') {
+        scriptIdInput.value = stage.id;
+        scriptTitleInput.value = stage.title || '';
+        scriptOrderInput.value = String(stage.order || 1);
+        scriptEscalationInput.value = stage.escalation || 'Нет';
+        scriptTemplateInput.value = stage.template || '';
+        scriptConditionInput.value = stage.condition || '';
+        scriptSubmitBtn.textContent = 'Сохранить этап';
+        scriptFormMsg.textContent = 'Режим редактирования этапа.';
+        scriptTitleInput.focus();
+      }
+
+      if (action === 'delete') {
+        const next = items.filter(function (x) { return x.id !== id; });
+        saveScriptStages(next);
+        renderScriptStages();
+        scriptFormMsg.textContent = 'Этап удалён.';
+        if (scriptIdInput.value === id) {
+          resetScriptFormState();
+        }
+      }
+    });
+
+    // --- Модуль "Воронка общения" (локальный CRUD) ---
+    const FUNNEL_STORAGE_KEY = 'fnr_admin_funnel_v1';
+    const funnelForm = document.getElementById('funnelForm');
+    const funnelIdInput = document.getElementById('funnelId');
+    const funnelTitleInput = document.getElementById('funnelTitle');
+    const funnelOrderInput = document.getElementById('funnelOrder');
+    const funnelSlaInput = document.getElementById('funnelSla');
+    const funnelNextInput = document.getElementById('funnelNext');
+    const funnelStatusInput = document.getElementById('funnelStatus');
+    const funnelAutoRuleInput = document.getElementById('funnelAutoRule');
+    const funnelSubmitBtn = document.getElementById('funnelSubmitBtn');
+    const funnelCancelBtn = document.getElementById('funnelCancelBtn');
+    const funnelFormMsg = document.getElementById('funnelFormMsg');
+    const funnelList = document.getElementById('funnelList');
+    const funnelCount = document.getElementById('funnelCount');
+
+    function getFunnelStages() {
+      try {
+        const raw = localStorage.getItem(FUNNEL_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function saveFunnelStages(items) {
+      localStorage.setItem(FUNNEL_STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function resetFunnelFormState() {
+      funnelIdInput.value = '';
+      funnelForm.reset();
+      funnelOrderInput.value = '1';
+      funnelSlaInput.value = '30';
+      funnelStatusInput.value = 'Активен';
+      funnelSubmitBtn.textContent = 'Добавить этап';
+      funnelFormMsg.textContent = '';
+    }
+
+    function getStatusClass(status) {
+      if (status === 'Активен') return 'status-active';
+      if (status === 'Пауза') return 'status-paused';
+      return 'status-archived';
+    }
+
+    function renderFunnelStages() {
+      const stages = getFunnelStages().slice().sort(function (a, b) {
+        return Number(a.order || 0) - Number(b.order || 0);
+      });
+
+      funnelCount.textContent = String(stages.length);
+      if (!stages.length) {
+        funnelList.innerHTML = '<p class="admin-placeholder">Этапы воронки пока не добавлены.</p>';
+        return;
+      }
+
+      funnelList.innerHTML = stages
+        .map(function (stage) {
+          return (
+            '<article class="funnel-card">' +
+            '<div class="person-card-head">' +
+            '<strong>' + escapeHtml(stage.title) + '</strong>' +
+            '<span class="module-badge">Этап ' + escapeHtml(stage.order) + '</span>' +
+            '</div>' +
+            '<p><b>SLA:</b> ' + escapeHtml(stage.sla) + ' мин</p>' +
+            '<p><b>Следующий этап:</b> ' + escapeHtml(stage.next || '—') + '</p>' +
+            '<p><b>Автопереход:</b> ' + escapeHtml(stage.autoRule || '—') + '</p>' +
+            '<p><b>Статус:</b> <span class="status-chip ' + getStatusClass(stage.status) + '">' + escapeHtml(stage.status) + '</span></p>' +
+            '<div class="module-actions">' +
+            '<button type="button" class="btn btn-ghost" data-funnel-action="edit" data-funnel-id="' + stage.id + '">Редактировать</button>' +
+            '<button type="button" class="btn btn-ghost" data-funnel-action="delete" data-funnel-id="' + stage.id + '">Удалить</button>' +
+            '</div>' +
+            '</article>'
+          );
+        })
+        .join('');
+    }
+
+    funnelForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const title = funnelTitleInput.value.trim();
+      const order = Number(funnelOrderInput.value);
+      const sla = Number(funnelSlaInput.value);
+      const next = funnelNextInput.value.trim();
+      const status = funnelStatusInput.value.trim();
+      const autoRule = funnelAutoRuleInput.value.trim();
+
+      if (!title) {
+        funnelFormMsg.textContent = 'Введите название этапа.';
+        return;
+      }
+      if (!Number.isFinite(order) || order < 1) {
+        funnelFormMsg.textContent = 'Порядок должен быть числом от 1.';
+        return;
+      }
+      if (!Number.isFinite(sla) || sla < 1) {
+        funnelFormMsg.textContent = 'SLA должен быть числом от 1 минуты.';
+        return;
+      }
+
+      const id = funnelIdInput.value;
+      const items = getFunnelStages();
+      let msg = '';
+
+      if (id) {
+        const idx = items.findIndex(function (x) { return x.id === id; });
+        if (idx !== -1) {
+          items[idx] = { id: id, title: title, order: order, sla: sla, next: next, status: status, autoRule: autoRule };
+        }
+        msg = 'Этап воронки обновлён.';
+      } else {
+        items.push({
+          id: String(Date.now()),
+          title: title,
+          order: order,
+          sla: sla,
+          next: next,
+          status: status,
+          autoRule: autoRule
+        });
+        msg = 'Этап воронки добавлен.';
+      }
+
+      saveFunnelStages(items);
+      renderFunnelStages();
+      resetFunnelFormState();
+      funnelFormMsg.textContent = msg;
+    });
+
+    funnelCancelBtn.addEventListener('click', function () {
+      resetFunnelFormState();
+    });
+
+    funnelList.addEventListener('click', function (e) {
+      const target = e.target;
+      if (!(target instanceof HTMLElement)) return;
+      const action = target.dataset.funnelAction;
+      const id = target.dataset.funnelId;
+      if (!action || !id) return;
+
+      const items = getFunnelStages();
+      const stage = items.find(function (x) { return x.id === id; });
+      if (!stage) return;
+
+      if (action === 'edit') {
+        funnelIdInput.value = stage.id;
+        funnelTitleInput.value = stage.title || '';
+        funnelOrderInput.value = String(stage.order || 1);
+        funnelSlaInput.value = String(stage.sla || 30);
+        funnelNextInput.value = stage.next || '';
+        funnelStatusInput.value = stage.status || 'Активен';
+        funnelAutoRuleInput.value = stage.autoRule || '';
+        funnelSubmitBtn.textContent = 'Сохранить этап';
+        funnelFormMsg.textContent = 'Режим редактирования этапа воронки.';
+        funnelTitleInput.focus();
+      }
+
+      if (action === 'delete') {
+        const nextItems = items.filter(function (x) { return x.id !== id; });
+        saveFunnelStages(nextItems);
+        renderFunnelStages();
+        funnelFormMsg.textContent = 'Этап воронки удалён.';
+        if (funnelIdInput.value === id) {
+          resetFunnelFormState();
+        }
+      }
+    });
+
+    // --- Модуль "База данных агента" (локальный CRUD) ---
+    const KNOWLEDGE_STORAGE_KEY = 'fnr_admin_knowledge_v1';
+    const knowledgeForm = document.getElementById('knowledgeForm');
+    const knowledgeIdInput = document.getElementById('knowledgeId');
+    const knowledgeCategoryInput = document.getElementById('knowledgeCategory');
+    const knowledgeStatusInput = document.getElementById('knowledgeStatus');
+    const knowledgeTagsInput = document.getElementById('knowledgeTags');
+    const knowledgeQuestionInput = document.getElementById('knowledgeQuestion');
+    const knowledgeAnswerInput = document.getElementById('knowledgeAnswer');
+    const knowledgeSubmitBtn = document.getElementById('knowledgeSubmitBtn');
+    const knowledgeCancelBtn = document.getElementById('knowledgeCancelBtn');
+    const knowledgeFormMsg = document.getElementById('knowledgeFormMsg');
+    const knowledgeCount = document.getElementById('knowledgeCount');
+    const knowledgeList = document.getElementById('knowledgeList');
+
+    function getKnowledgeItems() {
+      try {
+        const raw = localStorage.getItem(KNOWLEDGE_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function saveKnowledgeItems(items) {
+      localStorage.setItem(KNOWLEDGE_STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function resetKnowledgeFormState() {
+      knowledgeIdInput.value = '';
+      knowledgeForm.reset();
+      knowledgeCategoryInput.value = 'Материалы';
+      knowledgeStatusInput.value = 'Опубликовано';
+      knowledgeSubmitBtn.textContent = 'Добавить запись';
+      knowledgeFormMsg.textContent = '';
+    }
+
+    function getKnowledgeStatusClass(status) {
+      if (status === 'Опубликовано') return 'status-active';
+      if (status === 'Черновик') return 'status-paused';
+      return 'status-archived';
+    }
+
+    function renderKnowledgeItems() {
+      const items = getKnowledgeItems().slice();
+      knowledgeCount.textContent = String(items.length);
+
+      if (!items.length) {
+        knowledgeList.innerHTML = '<p class="admin-placeholder">База знаний пока пустая.</p>';
+        return;
+      }
+
+      knowledgeList.innerHTML = items
+        .map(function (item) {
+          return (
+            '<article class="knowledge-card">' +
+            '<div class="person-card-head">' +
+            '<strong>' + escapeHtml(item.question) + '</strong>' +
+            '<span class="module-badge">' + escapeHtml(item.category) + '</span>' +
+            '</div>' +
+            '<p><b>Статус:</b> <span class="status-chip ' + getKnowledgeStatusClass(item.status) + '">' + escapeHtml(item.status) + '</span></p>' +
+            '<p><b>Теги:</b> ' + escapeHtml(item.tags || '—') + '</p>' +
+            '<p><b>Ответ:</b> ' + escapeHtml(item.answer) + '</p>' +
+            '<div class="module-actions">' +
+            '<button type="button" class="btn btn-ghost" data-knowledge-action="edit" data-knowledge-id="' + item.id + '">Редактировать</button>' +
+            '<button type="button" class="btn btn-ghost" data-knowledge-action="delete" data-knowledge-id="' + item.id + '">Удалить</button>' +
+            '</div>' +
+            '</article>'
+          );
+        })
+        .join('');
+    }
+
+    knowledgeForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const category = knowledgeCategoryInput.value.trim();
+      const status = knowledgeStatusInput.value.trim();
+      const tags = knowledgeTagsInput.value.trim();
+      const question = knowledgeQuestionInput.value.trim();
+      const answer = knowledgeAnswerInput.value.trim();
+
+      if (!question || !answer) {
+        knowledgeFormMsg.textContent = 'Заполните вопрос и ответ.';
+        return;
+      }
+
+      const id = knowledgeIdInput.value;
+      const items = getKnowledgeItems();
+      let msg = '';
+
+      if (id) {
+        const idx = items.findIndex(function (x) { return x.id === id; });
+        if (idx !== -1) {
+          items[idx] = { id: id, category: category, status: status, tags: tags, question: question, answer: answer };
+        }
+        msg = 'Запись обновлена.';
+      } else {
+        items.unshift({
+          id: String(Date.now()),
+          category: category,
+          status: status,
+          tags: tags,
+          question: question,
+          answer: answer
+        });
+        msg = 'Запись добавлена.';
+      }
+
+      saveKnowledgeItems(items);
+      renderKnowledgeItems();
+      resetKnowledgeFormState();
+      knowledgeFormMsg.textContent = msg;
+    });
+
+    knowledgeCancelBtn.addEventListener('click', function () {
+      resetKnowledgeFormState();
+    });
+
+    knowledgeList.addEventListener('click', function (e) {
+      const target = e.target;
+      if (!(target instanceof HTMLElement)) return;
+      const action = target.dataset.knowledgeAction;
+      const id = target.dataset.knowledgeId;
+      if (!action || !id) return;
+
+      const items = getKnowledgeItems();
+      const record = items.find(function (x) { return x.id === id; });
+      if (!record) return;
+
+      if (action === 'edit') {
+        knowledgeIdInput.value = record.id;
+        knowledgeCategoryInput.value = record.category || 'Материалы';
+        knowledgeStatusInput.value = record.status || 'Опубликовано';
+        knowledgeTagsInput.value = record.tags || '';
+        knowledgeQuestionInput.value = record.question || '';
+        knowledgeAnswerInput.value = record.answer || '';
+        knowledgeSubmitBtn.textContent = 'Сохранить запись';
+        knowledgeFormMsg.textContent = 'Режим редактирования записи.';
+        knowledgeQuestionInput.focus();
+      }
+
+      if (action === 'delete') {
+        const next = items.filter(function (x) { return x.id !== id; });
+        saveKnowledgeItems(next);
+        renderKnowledgeItems();
+        knowledgeFormMsg.textContent = 'Запись удалена.';
+        if (knowledgeIdInput.value === id) {
+          resetKnowledgeFormState();
+        }
+      }
+    });
+
+    // --- Модуль "Будилки / уведомления" (локальный CRUD) ---
+    const ALERT_STORAGE_KEY = 'fnr_admin_alerts_v1';
+    const alertForm = document.getElementById('alertForm');
+    const alertIdInput = document.getElementById('alertId');
+    const alertChannelInput = document.getElementById('alertChannel');
+    const alertEventInput = document.getElementById('alertEvent');
+    const alertStatusInput = document.getElementById('alertStatus');
+    const alertTargetInput = document.getElementById('alertTarget');
+    const alertScheduleInput = document.getElementById('alertSchedule');
+    const alertConditionInput = document.getElementById('alertCondition');
+    const alertSubmitBtn = document.getElementById('alertSubmitBtn');
+    const alertCancelBtn = document.getElementById('alertCancelBtn');
+    const alertFormMsg = document.getElementById('alertFormMsg');
+    const alertCount = document.getElementById('alertCount');
+    const alertList = document.getElementById('alertList');
+
+    function getAlertRules() {
+      try {
+        const raw = localStorage.getItem(ALERT_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function saveAlertRules(items) {
+      localStorage.setItem(ALERT_STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function resetAlertFormState() {
+      alertIdInput.value = '';
+      alertForm.reset();
+      alertChannelInput.value = 'Telegram';
+      alertEventInput.value = 'Новый лид';
+      alertStatusInput.value = 'Активен';
+      alertSubmitBtn.textContent = 'Добавить правило';
+      alertFormMsg.textContent = '';
+    }
+
+    function renderAlertRules() {
+      const items = getAlertRules().slice();
+      alertCount.textContent = String(items.length);
+      if (!items.length) {
+        alertList.innerHTML = '<p class="admin-placeholder">Правила уведомлений пока не добавлены.</p>';
+        return;
+      }
+
+      alertList.innerHTML = items
+        .map(function (item) {
+          return (
+            '<article class="alert-card">' +
+            '<div class="person-card-head">' +
+            '<strong>' + escapeHtml(item.event) + '</strong>' +
+            '<span class="module-badge">' + escapeHtml(item.channel) + '</span>' +
+            '</div>' +
+            '<p><b>Получатель:</b> ' + escapeHtml(item.target) + '</p>' +
+            '<p><b>Расписание:</b> ' + escapeHtml(item.schedule || '—') + '</p>' +
+            '<p><b>Условие:</b> ' + escapeHtml(item.condition || '—') + '</p>' +
+            '<p><b>Статус:</b> <span class="status-chip ' + getStatusClass(item.status) + '">' + escapeHtml(item.status) + '</span></p>' +
+            '<div class="module-actions">' +
+            '<button type="button" class="btn btn-ghost" data-alert-action="edit" data-alert-id="' + item.id + '">Редактировать</button>' +
+            '<button type="button" class="btn btn-ghost" data-alert-action="delete" data-alert-id="' + item.id + '">Удалить</button>' +
+            '</div>' +
+            '</article>'
+          );
+        })
+        .join('');
+    }
+
+    alertForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const channel = alertChannelInput.value.trim();
+      const event = alertEventInput.value.trim();
+      const status = alertStatusInput.value.trim();
+      const target = alertTargetInput.value.trim();
+      const schedule = alertScheduleInput.value.trim();
+      const condition = alertConditionInput.value.trim();
+
+      if (!target) {
+        alertFormMsg.textContent = 'Укажите получателя (чат или номер).';
+        return;
+      }
+
+      const id = alertIdInput.value;
+      const items = getAlertRules();
+      let msg = '';
+
+      if (id) {
+        const idx = items.findIndex(function (x) { return x.id === id; });
+        if (idx !== -1) {
+          items[idx] = { id: id, channel: channel, event: event, status: status, target: target, schedule: schedule, condition: condition };
+        }
+        msg = 'Правило уведомления обновлено.';
+      } else {
+        items.unshift({
+          id: String(Date.now()),
+          channel: channel,
+          event: event,
+          status: status,
+          target: target,
+          schedule: schedule,
+          condition: condition
+        });
+        msg = 'Правило уведомления добавлено.';
+      }
+
+      saveAlertRules(items);
+      renderAlertRules();
+      resetAlertFormState();
+      alertFormMsg.textContent = msg;
+    });
+
+    alertCancelBtn.addEventListener('click', function () {
+      resetAlertFormState();
+    });
+
+    alertList.addEventListener('click', function (e) {
+      const target = e.target;
+      if (!(target instanceof HTMLElement)) return;
+      const action = target.dataset.alertAction;
+      const id = target.dataset.alertId;
+      if (!action || !id) return;
+
+      const items = getAlertRules();
+      const record = items.find(function (x) { return x.id === id; });
+      if (!record) return;
+
+      if (action === 'edit') {
+        alertIdInput.value = record.id;
+        alertChannelInput.value = record.channel || 'Telegram';
+        alertEventInput.value = record.event || 'Новый лид';
+        alertStatusInput.value = record.status || 'Активен';
+        alertTargetInput.value = record.target || '';
+        alertScheduleInput.value = record.schedule || '';
+        alertConditionInput.value = record.condition || '';
+        alertSubmitBtn.textContent = 'Сохранить правило';
+        alertFormMsg.textContent = 'Режим редактирования правила.';
+        alertTargetInput.focus();
+      }
+
+      if (action === 'delete') {
+        const next = items.filter(function (x) { return x.id !== id; });
+        saveAlertRules(next);
+        renderAlertRules();
+        alertFormMsg.textContent = 'Правило уведомления удалено.';
+        if (alertIdInput.value === id) {
+          resetAlertFormState();
+        }
+      }
+    });
+
+    // --- Модуль «VIP-клиенты» (локальный CRUD) ---
+    const VIP_STORAGE_KEY = 'fnr_admin_vip_clients_v1';
+    const vipForm = document.getElementById('vipForm');
+    const vipIdInput = document.getElementById('vipId');
+    const vipCompanyInput = document.getElementById('vipCompany');
+    const vipStatusInput = document.getElementById('vipStatus');
+    const vipContactInput = document.getElementById('vipContact');
+    const vipManagerInput = document.getElementById('vipManager');
+    const vipTermsInput = document.getElementById('vipTerms');
+    const vipNotesInput = document.getElementById('vipNotes');
+    const vipSubmitBtn = document.getElementById('vipSubmitBtn');
+    const vipCancelBtn = document.getElementById('vipCancelBtn');
+    const vipFormMsg = document.getElementById('vipFormMsg');
+    const vipList = document.getElementById('vipList');
+    const vipCount = document.getElementById('vipCount');
+
+    function getVipClients() {
+      try {
+        const raw = localStorage.getItem(VIP_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function saveVipClients(items) {
+      localStorage.setItem(VIP_STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function resetVipFormState() {
+      vipIdInput.value = '';
+      vipForm.reset();
+      vipStatusInput.value = 'Активен';
+      vipSubmitBtn.textContent = 'Добавить клиента';
+      vipFormMsg.textContent = '';
+    }
+
+    function renderVipClients() {
+      const items = getVipClients().slice();
+      vipCount.textContent = String(items.length);
+
+      if (!items.length) {
+        vipList.innerHTML = '<p class="admin-placeholder">VIP-клиенты ещё не добавлены.</p>';
+        return;
+      }
+
+      items.sort(function (a, b) {
+        return String(a.company || '').localeCompare(String(b.company || ''), 'ru');
+      });
+
+      vipList.innerHTML = items
+        .map(function (item) {
+          return (
+            '<article class="vip-card">' +
+            '<div class="person-card-head">' +
+            '<strong>' + escapeHtml(item.company) + '</strong>' +
+            '<span class="module-badge">VIP</span>' +
+            '</div>' +
+            '<p><b>Статус:</b> <span class="status-chip ' + getStatusClass(item.status) + '">' + escapeHtml(item.status || '—') + '</span></p>' +
+            '<p><b>Контакт:</b> ' + escapeHtml(item.contact || '—') + '</p>' +
+            '<p><b>Менеджер:</b> ' + escapeHtml(item.manager || '—') + '</p>' +
+            '<p><b>Условия:</b> ' + escapeHtml(item.terms || '—') + '</p>' +
+            '<p><b>Примечания:</b> ' + escapeHtml(item.notes || '—') + '</p>' +
+            '<div class="module-actions">' +
+            '<button type="button" class="btn btn-ghost" data-vip-action="edit" data-vip-id="' + item.id + '">Редактировать</button>' +
+            '<button type="button" class="btn btn-ghost" data-vip-action="delete" data-vip-id="' + item.id + '">Удалить</button>' +
+            '</div>' +
+            '</article>'
+          );
+        })
+        .join('');
+    }
+
+    vipForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const company = vipCompanyInput.value.trim();
+      const tier = 'VIP';
+      const status = vipStatusInput.value.trim();
+      const contact = vipContactInput.value.trim();
+      const manager = vipManagerInput.value.trim();
+      const terms = vipTermsInput.value.trim();
+      const notes = vipNotesInput.value.trim();
+
+      if (!company) {
+        vipFormMsg.textContent = 'Укажите компанию или название.';
+        return;
+      }
+
+      const id = vipIdInput.value;
+      const items = getVipClients();
+      let msg = '';
+
+      if (id) {
+        const idx = items.findIndex(function (x) { return x.id === id; });
+        if (idx !== -1) {
+          items[idx] = { id: id, company: company, tier: tier, status: status, contact: contact, manager: manager, terms: terms, notes: notes };
+        }
+        msg = 'VIP-клиент обновлён.';
+      } else {
+        items.unshift({
+          id: String(Date.now()),
+          company: company,
+          tier: tier,
+          status: status,
+          contact: contact,
+          manager: manager,
+          terms: terms,
+          notes: notes
+        });
+        msg = 'VIP-клиент добавлен.';
+      }
+
+      saveVipClients(items);
+      renderVipClients();
+      resetVipFormState();
+      vipFormMsg.textContent = msg;
+    });
+
+    vipCancelBtn.addEventListener('click', function () {
+      resetVipFormState();
+    });
+
+    vipList.addEventListener('click', function (e) {
+      const target = e.target;
+      if (!(target instanceof HTMLElement)) return;
+      const action = target.dataset.vipAction;
+      const id = target.dataset.vipId;
+      if (!action || !id) return;
+
+      const items = getVipClients();
+      const record = items.find(function (x) { return x.id === id; });
+      if (!record) return;
+
+      if (action === 'edit') {
+        vipIdInput.value = record.id;
+        vipCompanyInput.value = record.company || '';
+        vipStatusInput.value = record.status || 'Активен';
+        vipContactInput.value = record.contact || '';
+        vipManagerInput.value = record.manager || '';
+        vipTermsInput.value = record.terms || '';
+        vipNotesInput.value = record.notes || '';
+        vipSubmitBtn.textContent = 'Сохранить клиента';
+        vipFormMsg.textContent = 'Режим редактирования VIP-клиента.';
+        vipCompanyInput.focus();
+      }
+
+      if (action === 'delete') {
+        const next = items.filter(function (x) { return x.id !== id; });
+        saveVipClients(next);
+        renderVipClients();
+        vipFormMsg.textContent = 'VIP-клиент удалён.';
+        if (vipIdInput.value === id) {
+          resetVipFormState();
+        }
+      }
+    });
+
+    renderPeople();
+    renderScriptStages();
+    renderFunnelStages();
+    renderKnowledgeItems();
+    renderVipClients();
+    renderAlertRules();
+
+    const initialHash = window.location.hash ? window.location.hash.slice(1) : '';
+    const initialSection = moduleSections.some(function (x) { return x.id === initialHash; }) ? initialHash : 'people';
+    showSection(initialSection);
   </script>
 </body>
 </html>
