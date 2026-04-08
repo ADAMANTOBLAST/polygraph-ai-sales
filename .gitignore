@@ -9,6 +9,12 @@ __pycache__/
 .idea/
 .vscode/
 
+# Telegram session files (только на сервере / у разработчика локально)
+sessions/*.session
+
+# Секреты реестра — на сервере свой accounts_registry.json (не в git)
+accounts_registry.json
+
 # Фронтенды user / admin (когда появятся)
 user/node_modules/
 user/dist/
