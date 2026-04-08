@@ -158,7 +158,7 @@
       justify-content: space-between;
       gap: 20px;
       padding: 8px 0;
-      min-height: 100px;
+      min-height: 84px;
     }
 
     .brand {
@@ -170,10 +170,10 @@
       z-index: 102;
     }
 
-    /* Логотип PNG: обрезаем пустые поля — масштаб внутри фиксированной высоты шапки */
+    /* Логотип PNG: обрезаем пустые поля — умеренный масштаб внутри шапки */
     .brand-logo-wrap {
-      height: 92px;
-      width: min(200px, 42vw);
+      height: 64px;
+      width: min(152px, 34vw);
       display: flex;
       align-items: center;
       justify-content: flex-start;
@@ -181,12 +181,12 @@
     }
 
     .brand-logo-wrap img {
-      height: 145%;
+      height: 118%;
       width: auto;
       max-width: none;
       object-fit: contain;
       object-position: center center;
-      transform: scale(1.42);
+      transform: scale(1.1);
       transform-origin: center center;
     }
 
@@ -446,16 +446,16 @@
       html { font-size: 100%; }
       .container { padding: 0 16px; }
       .site-header-inner {
-        min-height: 76px;
+        min-height: 68px;
         padding: 6px 0;
       }
       .brand-logo-wrap {
-        height: 72px;
-        width: min(168px, 46vw);
+        height: 52px;
+        width: min(128px, 40vw);
       }
       .brand-logo-wrap img {
-        height: 140%;
-        transform: scale(1.32);
+        height: 112%;
+        transform: scale(1.06);
       }
       .brand span { font-size: 1.05rem; }
       .hero {
@@ -919,10 +919,18 @@
     }
 
     .privacy {
-      margin: 20px 0 10px;
       font-size: 0.95rem;
       color: rgba(248, 250, 252, 0.82);
       line-height: 1.5;
+    }
+
+    /* Под комментарием: мало зазора сверху (к textarea), больше снизу (до кнопки) */
+    .field.field-message {
+      margin-bottom: 8px;
+    }
+    .privacy-after-message {
+      margin-top: 4px;
+      margin-bottom: 20px;
     }
 
     .privacy label {
@@ -1107,7 +1115,7 @@
             </div>
             <div class="field">
               <label for="phone">Номер телефона <span class="required-star" style="color:#c02626">*</span></label>
-              <input type="tel" id="phone" name="phone" placeholder="+375 (29) 123-45-67" required autocomplete="tel">
+              <input type="tel" id="phone" name="phone" placeholder="+375 (29) 123-45-67" inputmode="tel" autocomplete="tel" autocorrect="off" spellcheck="false" required>
               <div class="error-msg" data-for="phone"></div>
             </div>
             <div class="field">
@@ -1140,12 +1148,12 @@
               <input type="text" id="contactDetail" name="contactDetail" placeholder="@username" autocomplete="username">
               <div class="error-msg" data-for="contactDetail"></div>
             </div>
-            <div class="field">
+            <div class="field field-message">
               <label for="message">Комментарий к заказу</label>
               <textarea id="message" name="message" placeholder="Тираж, формат, сроки…"></textarea>
               <div class="error-msg" data-for="message"></div>
             </div>
-            <div class="privacy">
+            <div class="privacy privacy-after-message">
               <label>
                 <input type="checkbox" id="privacyAgree" name="privacyAgree" required>
                 <span>Я согласен с <a class="privacy-link" href="privacy.html" target="_blank" rel="noopener noreferrer">политикой конфиденциальности</a></span>
@@ -1217,33 +1225,87 @@
     return BITRIX_WEBHOOK_URL && !BITRIX_WEBHOOK_URL.includes('your-domain.bitrix24');
   }
 
-  const phoneInput = document.getElementById('phone');
-  if (phoneInput) phoneInput.addEventListener('input', function (e) {
-    let cursorPos = e.target.selectionStart;
-    applyPhoneMask(e.target);
-    if (e.target.value.length < cursorPos) cursorPos = e.target.value.length;
-    e.target.setSelectionRange(cursorPos, cursorPos);
-  });
+  var PHONE_PREFIX_BY = '+375 ';
+
+  function phoneDigitsBefore(str, pos) {
+    return str.slice(0, pos).replace(/\D/g, '').length;
+  }
+
+  /** Позиция курсора после n-й цифры (n=0 — перед первой цифрой) */
+  function phonePosAfterDigits(formatted, n) {
+    if (n <= 0) return 0;
+    var c = 0;
+    for (var i = 0; i < formatted.length; i++) {
+      if (/\d/.test(formatted[i])) {
+        c++;
+        if (c === n) return i + 1;
+      }
+    }
+    return formatted.length;
+  }
 
   function applyPhoneMask(input) {
-    let val = input.value.replace(/\D/g, '');
-    if (val.length === 0) { input.value = ''; return; }
-    let formatted = '';
-    if (val.startsWith('375') && val.length >= 3) {
-      let m = val.slice(3);
-      let code = m.length > 0 ? m.slice(0, 2) : '';
-      let part1 = m.length > 2 ? m.slice(2, 5) : '';
-      let part2 = m.length > 5 ? m.slice(5, 7) : '';
-      let part3 = m.length > 7 ? m.slice(7, 9) : '';
-      formatted = '+375 (' + code + ')' + (part1 ? ' ' + part1 : '') + (part2 ? '-' + part2 : '') + (part3 ? '-' + part3 : '');
-    } else if (val.startsWith('7') && val.length >= 1) {
-      let rest = val.slice(1);
-      formatted = '+7 (' + rest.slice(0, 3) + ')' + (rest.length > 3 ? ' ' + rest.slice(3, 6) : '') +
-        (rest.length > 6 ? '-' + rest.slice(6, 8) : '') + (rest.length > 8 ? '-' + rest.slice(8, 10) : '');
-    } else {
-      formatted = val.length > 0 && !val.startsWith('7') && !val.startsWith('375') ? '+' + val : val;
+    var d = input.value.replace(/\D/g, '');
+    if (d.length === 0) {
+      input.value = '';
+      return;
     }
-    input.value = formatted;
+
+    if (d.startsWith('375')) {
+      var m = d.slice(3);
+      var code = m.slice(0, 2);
+      var part1 = m.slice(2, 5);
+      var part2 = m.slice(5, 7);
+      var part3 = m.slice(7, 9);
+      input.value = '+375 (' + code + ')' + (part1 ? ' ' + part1 : '') + (part2 ? '-' + part2 : '') + (part3 ? '-' + part3 : '');
+      return;
+    }
+
+    if (d.startsWith('7') && d.length >= 1) {
+      var rest = d.slice(1);
+      input.value = '+7 (' + rest.slice(0, 3) + ')' + (rest.length > 3 ? ' ' + rest.slice(3, 6) : '') +
+        (rest.length > 6 ? '-' + rest.slice(6, 8) : '') + (rest.length > 8 ? '-' + rest.slice(8, 10) : '');
+      return;
+    }
+
+    if (d.length > 0 && !d.startsWith('7') && !d.startsWith('375')) {
+      input.value = '+' + d;
+    }
+  }
+
+  const phoneInput = document.getElementById('phone');
+  if (phoneInput) {
+    phoneInput.addEventListener('focus', function (e) {
+      var t = e.target;
+      if (t.value.replace(/\D/g, '').length === 0) {
+        t.value = PHONE_PREFIX_BY;
+        requestAnimationFrame(function () {
+          var pos = t.value.length;
+          t.setSelectionRange(pos, pos);
+        });
+      }
+    });
+
+    phoneInput.addEventListener('blur', function (e) {
+      var t = e.target;
+      if (t.value.replace(/\D/g, '').length === 0) t.value = '';
+    });
+
+    phoneInput.addEventListener('input', function (e) {
+      var t = e.target;
+      var start = t.selectionStart;
+      var end = t.selectionEnd;
+      var db = phoneDigitsBefore(t.value, start);
+      var de = phoneDigitsBefore(t.value, end);
+      applyPhoneMask(t);
+      try {
+        var ns = phonePosAfterDigits(t.value, db);
+        var ne = phonePosAfterDigits(t.value, de);
+        t.setSelectionRange(ns, ne);
+      } catch (err) {
+        t.setSelectionRange(t.value.length, t.value.length);
+      }
+    });
   }
 
   const methodSelect = document.getElementById('contactMethodSelect');
