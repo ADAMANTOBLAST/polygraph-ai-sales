@@ -27,9 +27,10 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
+# Одно сообщение для всех — без подстановки имени из анкеты
 GREETING = (
-    "Приветствую! Меня зовут Виталий, я руководитель отдела по работе с клиентами. "
-    "Рад связи — задавайте вопросы по этикеткам и упаковке, подскажу по задаче."
+    "Приветствую! Меня зовут Борис, я руководитель отдела по работе с клиентами. "
+    "С каким вопросом пришли?"
 )
 
 USER_RE = re.compile(r"^@[A-Za-z][A-Za-z0-9_]{3,31}$")
@@ -109,8 +110,6 @@ async def _handle_lead(request: web.Request) -> web.Response:
 
     telegram = (data.get("telegram") or "").strip()
     contact_method = (data.get("contactMethod") or "").strip()
-    name = (data.get("name") or "").strip()
-
     client: TelegramClient = request.app["telegram"]
     sent = False
     err = None
@@ -120,11 +119,8 @@ async def _handle_lead(request: web.Request) -> web.Response:
             entity = await client.get_entity(telegram)
             uid = int(entity.id)
             add_tracked(uid)
-            personalized = GREETING
-            if name:
-                personalized = f"Здравствуйте, {name}! {GREETING}"
-            await client.send_message(entity, personalized)
-            append_history(uid, "assistant", personalized)
+            await client.send_message(entity, GREETING)
+            append_history(uid, "assistant", GREETING)
             sent = True
             log.info("Первое сообщение отправлено %s (id=%s)", telegram, uid)
         except Exception as e:
