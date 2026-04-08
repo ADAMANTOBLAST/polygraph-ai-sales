@@ -23,6 +23,7 @@ FNR_WWW="/var/www/canwant/flex-n-roll"
 sudo mkdir -p "$FNR_WWW"
 sudo cp "$SCRIPT_DIR/flexn.html" "$FNR_WWW/index.html"
 sudo cp -r "$SCRIPT_DIR/assets" "$FNR_WWW/"
+sudo cp "$SCRIPT_DIR/privacy.html" "$FNR_WWW/privacy.html" 2>/dev/null || true
 sudo cp "$SCRIPT_DIR/logo2.png" "$FNR_WWW/" 2>/dev/null || true
 sudo rm -rf "$FNR_WWW/admin"
 sudo cp -r "$SCRIPT_DIR/admin" "$FNR_WWW/"
