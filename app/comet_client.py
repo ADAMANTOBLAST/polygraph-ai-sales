@@ -10,6 +10,15 @@ from openai import OpenAI
 log = logging.getLogger(__name__)
 
 BASE_URL = "https://api.cometapi.com/v1"
+
+
+def _comet_api_key() -> str:
+    """GitHub / сервер: COMET_API_KEY; совместимость: COMETAPI_KEY."""
+    for name in ("COMET_API_KEY", "COMETAPI_KEY"):
+        v = os.environ.get(name, "").strip()
+        if v:
+            return v
+    return ""
 MODEL = "grok-4-1-fast-non-reasoning"
 
 SYSTEM_PROMPT = """Ты — Виталий, руководитель отдела по работе с клиентами компании «Флекс-н-Ролл ПРО»
@@ -28,9 +37,9 @@ SYSTEM_PROMPT = """Ты — Виталий, руководитель отдел�
 
 
 def get_client() -> OpenAI:
-    key = os.environ.get("COMETAPI_KEY", "").strip()
+    key = _comet_api_key()
     if not key:
-        raise RuntimeError("COMETAPI_KEY не задан в окружении")
+        raise RuntimeError("Задайте COMET_API_KEY (или COMETAPI_KEY) в .env / окружении")
     return OpenAI(base_url=BASE_URL, api_key=key)
 
 

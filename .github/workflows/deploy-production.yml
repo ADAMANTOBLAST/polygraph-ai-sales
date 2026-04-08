@@ -1,11 +1,8 @@
 # Деплой на VPS при каждом push в main (в т.ч. после merge из dev).
 #
-# Secrets в репозитории GitHub → Settings → Secrets and variables → Actions:
-#   DEPLOY_HOST   — IP или hostname сервера (например 203.0.113.10)
-#   DEPLOY_USER   — пользователь SSH (часто root)
-#   DEPLOY_SSH_KEY — приватный ключ (содержимое id_ed25519), пара с ключом в authorized_keys на сервере
-# Опционально:
-#   DEPLOY_PORT   — порт SSH, если не 22
+# Secrets (Actions или Environment «production»):
+#   DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY — SSH на VPS
+#   comet_api_key — ключ Comet API (в .env на сервере пишется как COMET_API_KEY)
 #
 name: Deploy production
 
@@ -18,8 +15,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: production
     steps:
-      - name: SSH — git pull и перезапуск
+      - name: SSH — COMET_API_KEY в .env, git pull, деплой
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.DEPLOY_HOST }}
@@ -29,4 +27,12 @@ jobs:
           script: |
             set -euo pipefail
             cd /root/Projects/PolygraphAiSales
+            COMET_VAL='${{ secrets.comet_api_key }}'
+            if [ -n "$COMET_VAL" ]; then
+              touch .env
+              grep -vE '^(COMET_API_KEY|COMETAPI_KEY)=' .env > .env.tmp 2>/dev/null || true
+              echo "COMET_API_KEY=$COMET_VAL" >> .env.tmp
+              mv .env.tmp .env
+              chmod 600 .env
+            fi
             bash deploy.sh
