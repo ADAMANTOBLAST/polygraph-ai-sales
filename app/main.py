@@ -4,7 +4,6 @@ Telethon: входящие в личку от отслеживаемых — rea
 """
 from __future__ import annotations
 
-import asyncio
 import logging
 import os
 import re
@@ -13,13 +12,13 @@ from collections import defaultdict
 from typing import Any
 
 from aiohttp import web
-from telethon import TelegramClient, events
+from telethon import TelegramClient
 
 from accounts_registry import get_accounts
 from ai_messaging.channels.telethon_client import build_client
 
-from .comet_client import complete_dialog
-from .state_store import add_tracked, append_history, get_history, is_tracked, load_state
+from .state_store import add_tracked, append_history, load_state
+from .tg_handlers import register_private_handlers
 
 logging.basicConfig(
     level=logging.INFO,
@@ -59,41 +58,6 @@ def _rate_ok(ip: str) -> bool:
     hits.append(now)
     _rate[ip] = hits
     return len(hits) <= _RATE_MAX
-
-
-def _register_handlers(client: TelegramClient) -> None:
-    @client.on(events.NewMessage(incoming=True))
-    async def on_pm(event: events.NewMessage.Event) -> None:
-        if not event.is_private:
-            return
-        sender = await event.get_sender()
-        if sender is None:
-            return
-        uid = int(sender.id)
-        if not is_tracked(uid):
-            return
-
-        text = (event.raw_text or "").strip()
-        if not text:
-            return
-
-        try:
-            await client.send_read_acknowledge(event.chat_id, max_id=event.id)
-        except Exception as e:
-            log.debug("read_ack: %s", e)
-
-        try:
-            append_history(uid, "user", text)
-            hist = get_history(uid)
-            async with client.action(event.chat_id, "typing"):
-                reply = await asyncio.to_thread(complete_dialog, hist)
-            append_history(uid, "assistant", reply)
-            await event.respond(reply)
-        except Exception as e:
-            log.exception("comet / send: %s", e)
-            await event.respond(
-                "Сейчас техническая заминка — напишите ещё раз через минуту или позвоните на номер с сайта."
-            )
 
 
 async def _handle_lead(request: web.Request) -> web.Response:
@@ -142,7 +106,7 @@ async def _health(_request: web.Request) -> web.Response:
 
 async def _init_app(app: web.Application) -> None:
     client = build_client(0)
-    _register_handlers(client)
+    register_private_handlers(client)
     await client.start()
     app["telegram"] = client
     load_state()

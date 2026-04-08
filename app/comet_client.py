@@ -19,6 +19,8 @@ def _comet_api_key() -> str:
         if v:
             return v
     return ""
+
+
 MODEL = "grok-4-1-fast-non-reasoning"
 
 SYSTEM_PROMPT = """Ты — Борис, руководитель отдела по работе с клиентами компании «Флекс-н-Ролл ПРО»

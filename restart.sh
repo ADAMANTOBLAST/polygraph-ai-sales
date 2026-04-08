@@ -1,5 +1,5 @@
 #!/bin/bash
-# Перезапуск бота PolygraphAiSales — только процессы с cwd == эта папка и bot.py.
+# Перезапуск PolygraphAiSales (python -m app.main) — только процессы с cwd == эта папка.
 set -euo pipefail
 BOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$BOT_DIR"
