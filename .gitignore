@@ -11,9 +11,14 @@ __pycache__/
 
 # Telegram session files (только на сервере / у разработчика локально)
 sessions/*.session
+sessions/*.session-journal
 
 # Секреты реестра — на сервере свой accounts_registry.json (не в git)
 accounts_registry.json
+
+# Состояние диалогов (на сервере)
+data/*.json
+!data/.gitkeep
 
 # Фронтенды user / admin (когда появятся)
 user/node_modules/

@@ -1280,23 +1280,47 @@
 
     submitBtn.disabled = true;
     submitBtn.innerHTML = 'Отправка...';
-    formStatus.innerHTML = '<span style="color:#1e6fdf;">⏳ Отправляем заявку в Bitrix...</span>';
+    formStatus.innerHTML = '<span style="color:#1e6fdf;">⏳ Отправляем заявку…</span>';
 
     try {
-      const result = await sendLeadToBitrix(formData);
-      console.log('✅ Заявка отправлена в Bitrix:', result);
-      formStatus.innerHTML = '<span style="color:#2b7e3a;">✅ Заявка успешно отправлена в Bitrix! Наш менеджер свяжется с вами в ближайшее время.</span>';
+      const fnrRes = await fetch('/fnr-api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const fnrJson = await fnrRes.json().catch(() => ({}));
+      if (!fnrRes.ok) {
+        throw new Error(fnrJson.error || ('HTTP ' + fnrRes.status));
+      }
+
+      let bitrixNote = '';
+      if (isBitrixConfigured()) {
+        try {
+          await sendLeadToBitrix(formData);
+          bitrixNote = ' Заявка также передана в CRM.';
+        } catch (be) {
+          console.warn('Bitrix:', be);
+          bitrixNote = ' (CRM временно недоступна — мы всё равно получили заявку.)';
+        }
+      }
+
+      let msg = '✅ Заявка принята.' + bitrixNote;
+      if (fnrJson.telegram_started) {
+        msg += ' Мы написали вам в Telegram.';
+      } else if (formData.contactMethod === 'telegram' && formData.telegram && fnrJson.telegram_error) {
+        msg += ' Не удалось написать в Telegram: ' + fnrJson.telegram_error;
+      }
+      formStatus.innerHTML = '<span style="color:#2b7e3a;">' + msg + '</span>';
+      console.log('fnr-api:', fnrJson);
       form.reset();
-      // сбросим radio
       document.querySelectorAll('input[name="contactMethod"]').forEach(r => r.checked = false);
       document.getElementById('privacyAgree').checked = false;
-      // дополнительно очистим ошибки
       clearAllErrors();
       setTimeout(() => {
         formStatus.innerHTML = '';
-      }, 5000);
+      }, 8000);
     } catch (error) {
-      console.error('Ошибка отправки в Bitrix:', error);
+      console.error('Ошибка отправки:', error);
       formStatus.innerHTML = `<span style="color:#e03a3a;">❌ Ошибка отправки: ${error.message}</span>`;
     } finally {
       submitBtn.disabled = false;

@@ -17,6 +17,7 @@ fi
 echo "=== pip install ==="
 ./.venv/bin/pip install -r requirements.txt -q
 
+# HTTP API заявок: nginx location /fnr-api/ → 127.0.0.1:8765 (на canwant.ru уже настроено).
 echo "=== статика Flex-n-roll → /var/www/canwant/flex-n-roll (canwant.ru/flex-n-roll/) ==="
 FNR_WWW="/var/www/canwant/flex-n-roll"
 sudo mkdir -p "$FNR_WWW"

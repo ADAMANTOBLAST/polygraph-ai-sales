@@ -14,17 +14,21 @@ else
   exit 1
 fi
 
-echo "=== остановка старых процессов ($BOT_DIR/bot.py) ==="
-for pid in $(pgrep -f "$BOT_DIR/bot.py" 2>/dev/null || true); do
+echo "=== остановка старых процессов (bot.py или -m app.main) ==="
+for pid in $(pgrep -f "$BOT_DIR/.venv/bin/python" 2>/dev/null || true); do
   [ ! -d "/proc/$pid" ] && continue
   cwd=$(readlink -f "/proc/$pid/cwd" 2>/dev/null || true)
-  [ "$cwd" = "$BOT_DIR" ] && kill "$pid" 2>/dev/null || true
+  [ "$cwd" != "$BOT_DIR" ] && continue
+  cmd=$(tr '\0' ' ' <"/proc/$pid/cmdline" 2>/dev/null || true)
+  case "$cmd" in
+    *bot.py*|*-m\ app.main*) kill "$pid" 2>/dev/null || true ;;
+  esac
 done
 sleep 2
 
 LOG="$BOT_DIR/bot.log"
 echo "=== запуск ==="
-nohup "$PYTHON" "$BOT_DIR/bot.py" >>"$LOG" 2>&1 &
+nohup "$PYTHON" -m app.main >>"$LOG" 2>&1 &
 echo "PID $!. Лог: $LOG"
 sleep 1
 tail -5 "$LOG" 2>/dev/null || true
