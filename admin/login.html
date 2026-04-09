@@ -12,51 +12,88 @@
 <body class="admin-body">
   <div class="login-page">
     <div class="login-card">
-      <h1>Админ-панель</h1>
-      <p class="hint">Вход только для сотрудников. Дальше сюда подключим авторизацию через Bitrix или ваш API.</p>
-      <form id="loginForm" novalidate>
-        <label for="email">E-mail</label>
-        <input type="email" id="email" name="email" autocomplete="username" placeholder="admin@company.com" required>
+      <div class="login-card__hero" aria-hidden="true"></div>
+      <div class="login-card__body">
+        <h1>Админ-панель</h1>
+        <p class="hint">Вход только для сотрудников. Дальше сюда подключим авторизацию через Bitrix или ваш API.</p>
+        <form id="loginForm" novalidate>
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" autocomplete="username" placeholder="admin@company.com" required>
 
-        <label for="password">Пароль</label>
-        <input type="password" id="password" name="password" autocomplete="current-password" placeholder="••••••••" required>
+          <label for="password">Пароль</label>
+          <input type="password" id="password" name="password" autocomplete="current-password" placeholder="••••••••" required>
 
-        <button type="submit" class="btn btn-primary">Войти</button>
-        <p id="loginError" class="login-error" aria-live="polite"></p>
-      </form>
-      <p class="hint" style="margin-top: 20px; margin-bottom: 0;">
-        <a href="../index.html" style="color: var(--fnr-primary);">← На главную</a>
-      </p>
+          <button type="submit" class="btn btn-primary" id="loginSubmitBtn">Войти</button>
+          <p id="loginError" class="login-error" aria-live="polite"></p>
+        </form>
+      </div>
+      <div class="login-card__footer">
+        <p class="hint">
+          <a href="../flexn.html">← На главную</a>
+        </p>
+      </div>
     </div>
   </div>
 
   <script src="../assets/js/auth-session.js"></script>
   <script>
-    // Если уже вошли — сразу в кабинет
-    if (window.FnrAuth && FnrAuth.isLoggedIn()) {
-      window.location.replace('index.html');
-    }
-
-    /**
-     * Заглушка входа: любой непустой email + пароль создаёт сессию.
-     * Замените на fetch к вашему бэкенду / Bitrix (проверка логина на сервере).
-     */
-    document.getElementById('loginForm').addEventListener('submit', function (e) {
-      e.preventDefault();
+    (function () {
+      const form = document.getElementById('loginForm');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const submitBtn = document.getElementById('loginSubmitBtn');
       const err = document.getElementById('loginError');
-      err.textContent = '';
+      const submitBtnDefaultText = submitBtn.textContent;
 
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
+      function setError(message) {
+        err.textContent = message || '';
+      }
 
-      if (!email || !password) {
-        err.textContent = 'Заполните e-mail и пароль.';
+      function setSubmitting(isSubmitting) {
+        emailInput.disabled = isSubmitting;
+        passwordInput.disabled = isSubmitting;
+        submitBtn.disabled = isSubmitting;
+        submitBtn.textContent = isSubmitting ? 'Входим...' : submitBtnDefaultText;
+        submitBtn.setAttribute('aria-busy', isSubmitting ? 'true' : 'false');
+      }
+
+      // Если уже вошли — сразу в кабинет.
+      if (window.FnrAuth && typeof FnrAuth.isLoggedIn === 'function' && FnrAuth.isLoggedIn()) {
+        window.location.replace('index.html');
         return;
       }
 
-      FnrAuth.setSessionStub({ user: email });
-      window.location.href = 'index.html';
-    });
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        setError('');
+        setSubmitting(true);
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        if (!email || !password) {
+          setError('Заполните e-mail и пароль.');
+          setSubmitting(false);
+          return;
+        }
+
+        if (!window.FnrAuth || typeof FnrAuth.setSessionStub !== 'function') {
+          setError('Не удалось инициализировать авторизацию. Обновите страницу.');
+          setSubmitting(false);
+          return;
+        }
+
+        try {
+          // Заглушка входа: любой непустой email + пароль создаёт сессию.
+          // Позже заменить на реальный запрос к вашему API/Bitrix.
+          FnrAuth.setSessionStub({ user: email });
+          window.location.href = 'index.html';
+        } catch (error) {
+          setError('Ошибка входа. Попробуйте снова.');
+          setSubmitting(false);
+        }
+      });
+    })();
   </script>
 </body>
 </html>
