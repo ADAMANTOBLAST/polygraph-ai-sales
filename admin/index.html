@@ -18,7 +18,7 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="../assets/css/admin.css?v=4">
+  <link rel="stylesheet" href="../assets/css/admin.css?v=6">
 </head>
 <body class="admin-body">
   <div class="admin-shell">
@@ -38,6 +38,7 @@
         <li><a href="#agent-script" data-section="agent-script"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Настройка AI-агента</span></a></li>
         <li><a href="#vip-clients" data-section="vip-clients"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">VIP-клиенты</span></a></li>
         <li><a href="#alerts" data-section="alerts"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Уведомления</span></a></li>
+        <li><a href="#bitrix-rest" data-section="bitrix-rest"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">REST API Bitrix24</span></a></li>
       </ul>
       </div>
     </aside>
@@ -322,6 +323,262 @@
             <span id="alertCount" class="module-badge">0</span>
           </div>
           <div id="alertList" class="module-list"></div>
+        </div>
+      </section>
+
+      <section class="admin-card admin-card-section module-section" id="bitrix-rest">
+        <h3>REST API Bitrix24</h3>
+        <p class="admin-placeholder">Секретный URL вебхука задаётся <strong>только в <code class="admin-code-inline">.env</code> на сервере</strong> с fnr-api. Админка его не хранит — только дергает <code class="admin-code-inline">/fnr-api</code>.</p>
+
+        <div class="admin-bitrix-doc">
+          <details class="admin-bitrix-mini-guide">
+            <summary class="admin-bitrix-mini-guide__summary">Мини-гайд: как подключить Bitrix к сайту и кнопке проверки</summary>
+            <div class="admin-bitrix-mini-guide__body">
+              <ol class="admin-bitrix-mini-guide__steps">
+                <li><strong>Bitrix24:</strong> внизу слева <strong>Разработчикам</strong> → <strong>Другое</strong> → <strong>Входящий вебхук</strong>. Имя любое. Включите право <strong>crm</strong> (без него проверка и лиды не заработают). Сохраните.</li>
+                <li><strong>Скопируйте URL</strong> вида <code class="admin-code-inline">https://ваш-портал.bitrix24.ru/rest/1/…/</code>. Не публикуйте его в открытый код и не вставляйте в HTML.</li>
+                <li><strong>Сервер с API:</strong> в файле <code class="admin-code-inline">.env</code> в корне проекта добавьте <code class="admin-code-inline">BITRIX_INCOMING_WEBHOOK=</code> и этот URL (достаточно строки со слэшем на конце). Подробности — в <code class="admin-code-inline">.env.example</code>.</li>
+                <li><strong>Перезапуск:</strong> перезапустите процесс fnr-api (иначе подхватится старое значение).</li>
+                <li><strong>Кнопка ниже</strong> «Проверить вебхук» спрашивает <em>ваш сервер</em>, а сервер уже ходит в Bitrix — так обходится CORS. Ожидается сообщение с числом полей лида.</li>
+                <li><strong>Хостинг:</strong> админка должна открываться с сайта по HTTP(S); путь <code class="admin-code-inline">/fnr-api</code> должен проксироваться на тот же fnr-api, что и для формы на лендинге.</li>
+              </ol>
+            </div>
+          </details>
+
+          <div class="module-actions admin-bitrix-ping-row">
+            <button type="button" class="btn btn-primary" id="bitrixPingBtn">Проверить вебхук (crm.lead.fields)</button>
+          </div>
+          <p id="bitrixPingMsg" class="admin-form-msg admin-bitrix-ping-msg" role="status" aria-live="polite"></p>
+
+          <details class="admin-bitrix-details-full">
+            <summary class="admin-bitrix-details-full__summary">Полная справка: вебхук, лимиты, примеры REST (curl), локальное приложение</summary>
+            <div class="admin-bitrix-details-full__body">
+
+          <h4 class="admin-doc-h4">4. REST API — ваш главный инструмент</h4>
+
+          <h4 class="admin-doc-h4">Входящий вебхук</h4>
+          <p>Вебхук — самый быстрый способ начать работать с API. Не нужен OAuth, не нужно приложение.</p>
+          <p><strong>Как создать:</strong></p>
+          <ol class="admin-doc-ol">
+            <li>Перейдите: <strong>Разработчикам</strong> (в левом меню, внизу) → <strong>Другое</strong> → <strong>Входящий вебхук</strong>.</li>
+            <li>Укажите название, например: <code class="admin-code-inline">hackathon-api</code>.</li>
+            <li>Выберите права доступа:
+              <ul class="admin-doc-ul">
+                <li><code class="admin-code-inline">crm</code> — CRM (лиды, сделки, контакты)</li>
+                <li><code class="admin-code-inline">im</code> — мессенджер</li>
+                <li><code class="admin-code-inline">imopenlines</code> — открытые линии</li>
+                <li><code class="admin-code-inline">task</code> — задачи</li>
+                <li><code class="admin-code-inline">user</code> — пользователи</li>
+                <li><code class="admin-code-inline">telephony</code> — телефония</li>
+              </ul>
+            </li>
+            <li>Нажмите «Сохранить».</li>
+          </ol>
+          <p>Вы получите URL вида:</p>
+          <pre class="admin-doc-pre" translate="no">https://hackathon-team-xx.bitrix24.ru/rest/1/abc123def456/</pre>
+          <p>Этот URL — ключ ко всему API. Храните его в секрете. <strong>Скопируйте его в <code class="admin-code-inline">BITRIX_INCOMING_WEBHOOK</code> в <code class="admin-code-inline">.env</code> на сервере</strong> (достаточно строки с завершающим <code class="admin-code-inline">/</code> или полного URL с <code class="admin-code-inline">crm.lead.add.json</code> — см. <code class="admin-code-inline">.env.example</code> в репозитории).</p>
+          <div class="admin-doc-callout admin-doc-callout--warn">
+            <strong>Rate limit:</strong> не более <strong>2 запросов в секунду</strong> на один вебхук. При превышении — ошибка <code class="admin-code-inline">QUERY_LIMIT_EXCEEDED</code>.
+          </div>
+
+          <h4 class="admin-doc-h4">Полезные методы REST API</h4>
+          <p>Базовый URL во всех примерах (подставьте свой):</p>
+          <pre class="admin-doc-pre" translate="no">https://hackathon-team-xx.bitrix24.ru/rest/1/abc123def456/</pre>
+
+          <h5 class="admin-doc-h5">crm.lead.list — список лидов</h5>
+          <pre class="admin-doc-pre" translate="no">curl "https://hackathon-team-xx.bitrix24.ru/rest/1/abc123def456/crm.lead.list.json?select[]=ID&amp;select[]=TITLE&amp;select[]=NAME&amp;select[]=STATUS_ID"</pre>
+          <p class="admin-doc-muted">Ответ:</p>
+          <pre class="admin-doc-pre" translate="no">{
+  "result": [
+    { "ID": "1", "TITLE": "Лид #1", "NAME": "Олег", "STATUS_ID": "NEW" },
+    { "ID": "2", "TITLE": "Лид #2", "NAME": "Елена", "STATUS_ID": "IN_PROCESS" }
+  ],
+  "total": 2
+}</pre>
+          <p>С фильтром:</p>
+          <pre class="admin-doc-pre" translate="no">curl "https://hackathon-team-xx.bitrix24.ru/rest/1/abc123def456/crm.lead.list.json?filter[STATUS_ID]=NEW&amp;select[]=ID&amp;select[]=TITLE"</pre>
+
+          <h5 class="admin-doc-h5">crm.lead.add — создать лид</h5>
+          <pre class="admin-doc-pre" translate="no">curl -X POST "https://hackathon-team-xx.bitrix24.ru/rest/1/abc123def456/crm.lead.add.json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fields": {
+      "TITLE": "Заявка с сайта",
+      "NAME": "Иван",
+      "LAST_NAME": "Петров",
+      "PHONE": [{"VALUE": "+79001234567", "VALUE_TYPE": "WORK"}],
+      "EMAIL": [{"VALUE": "ivan@example.com", "VALUE_TYPE": "WORK"}],
+      "SOURCE_ID": "WEB",
+      "ASSIGNED_BY_ID": 1
+    }
+  }'</pre>
+          <p class="admin-doc-muted">Ответ: <code class="admin-code-inline">result</code> — ID созданного лида.</p>
+          <pre class="admin-doc-pre" translate="no">{ "result": 3 }</pre>
+
+          <h5 class="admin-doc-h5">crm.deal.list — список сделок</h5>
+          <pre class="admin-doc-pre" translate="no">curl "https://hackathon-team-xx.bitrix24.ru/rest/1/abc123def456/crm.deal.list.json?select[]=ID&amp;select[]=TITLE&amp;select[]=STAGE_ID&amp;select[]=OPPORTUNITY"</pre>
+          <pre class="admin-doc-pre" translate="no">{
+  "result": [
+    { "ID": "1", "TITLE": "Сделка с ООО Ромашка", "STAGE_ID": "NEW", "OPPORTUNITY": "150000.00" }
+  ],
+  "total": 1
+}</pre>
+
+          <h5 class="admin-doc-h5">crm.contact.list — список контактов</h5>
+          <pre class="admin-doc-pre" translate="no">curl "https://hackathon-team-xx.bitrix24.ru/rest/1/abc123def456/crm.contact.list.json?select[]=ID&amp;select[]=NAME&amp;select[]=LAST_NAME&amp;select[]=PHONE&amp;select[]=EMAIL"</pre>
+          <pre class="admin-doc-pre" translate="no">{
+  "result": [
+    {
+      "ID": "1",
+      "NAME": "Олег",
+      "LAST_NAME": "Смирнов",
+      "PHONE": [{"VALUE": "+79001234567", "VALUE_TYPE": "WORK"}],
+      "EMAIL": [{"VALUE": "oleg@example.com", "VALUE_TYPE": "WORK"}]
+    }
+  ],
+  "total": 1
+}</pre>
+
+          <h5 class="admin-doc-h5">crm.activity.list — активности (звонки, письма, задачи)</h5>
+          <pre class="admin-doc-pre" translate="no">curl "https://hackathon-team-xx.bitrix24.ru/rest/1/abc123def456/crm.activity.list.json?filter[OWNER_TYPE_ID]=1&amp;filter[OWNER_ID]=1&amp;select[]=ID&amp;select[]=SUBJECT&amp;select[]=TYPE_ID&amp;select[]=COMPLETED"</pre>
+          <p><code class="admin-code-inline">OWNER_TYPE_ID</code>: 1 = лид, 2 = сделка, 3 = контакт.</p>
+          <p><code class="admin-code-inline">TYPE_ID</code>: 1 = встреча, 2 = звонок, 3 = задача, 4 = email.</p>
+          <pre class="admin-doc-pre" translate="no">{
+  "result": [
+    { "ID": "1", "SUBJECT": "Входящий звонок", "TYPE_ID": "2", "COMPLETED": "N" }
+  ],
+  "total": 1
+}</pre>
+
+          <h5 class="admin-doc-h5">im.message.add — сообщение в чат</h5>
+          <pre class="admin-doc-pre" translate="no">curl -X POST "https://hackathon-team-xx.bitrix24.ru/rest/1/abc123def456/im.message.add.json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "DIALOG_ID": "1",
+    "MESSAGE": "Привет! Новый лид поступил в CRM."
+  }'</pre>
+          <p><code class="admin-code-inline">DIALOG_ID</code>: ID пользователя для личного чата или <code class="admin-code-inline">chatXX</code> для группового.</p>
+          <pre class="admin-doc-pre" translate="no">{ "result": 101 }</pre>
+
+          <h5 class="admin-doc-h5">tasks.task.add — создать задачу</h5>
+          <pre class="admin-doc-pre" translate="no">curl -X POST "https://hackathon-team-xx.bitrix24.ru/rest/1/abc123def456/tasks.task.add.json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fields": {
+      "TITLE": "Перезвонить клиенту Смирнов",
+      "RESPONSIBLE_ID": 2,
+      "CREATED_BY": 1,
+      "DEADLINE": "2026-04-01T18:00:00",
+      "DESCRIPTION": "Обсудить коммерческое предложение",
+      "UF_CRM_TASK": ["L_1"]
+    }
+  }'</pre>
+          <p><code class="admin-code-inline">UF_CRM_TASK</code> — привязка к CRM: <code class="admin-code-inline">L_1</code> лид #1, <code class="admin-code-inline">D_1</code> сделка #1, <code class="admin-code-inline">C_1</code> контакт #1.</p>
+          <pre class="admin-doc-pre" translate="no">{
+  "result": {
+    "task": { "id": "1" }
+  }
+}</pre>
+
+          <h5 class="admin-doc-h5">user.get — сотрудники</h5>
+          <pre class="admin-doc-pre" translate="no">curl "https://hackathon-team-xx.bitrix24.ru/rest/1/abc123def456/user.get.json"</pre>
+          <pre class="admin-doc-pre" translate="no">{
+  "result": [
+    {
+      "ID": "1",
+      "NAME": "Алексей",
+      "LAST_NAME": "Иванов",
+      "EMAIL": "admin@example.com",
+      "WORK_POSITION": "Руководитель отдела продаж",
+      "UF_DEPARTMENT": [1]
+    },
+    {
+      "ID": "2",
+      "NAME": "Мария",
+      "LAST_NAME": "Петрова",
+      "EMAIL": "maria@example.com",
+      "WORK_POSITION": "Менеджер по продажам",
+      "UF_DEPARTMENT": [2]
+    }
+  ],
+  "total": 5
+}</pre>
+
+          <h5 class="admin-doc-h5">telephony.externalcall.register — зарегистрировать звонок</h5>
+          <pre class="admin-doc-pre" translate="no">curl -X POST "https://hackathon-team-xx.bitrix24.ru/rest/1/abc123def456/telephony.externalcall.register.json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "USER_PHONE_INNER": "101",
+    "USER_ID": 2,
+    "PHONE_NUMBER": "+79001234567",
+    "TYPE": 1,
+    "CRM_CREATE": 1
+  }'</pre>
+          <p><code class="admin-code-inline">TYPE</code>: 1 = исходящий, 2 = входящий. <code class="admin-code-inline">CRM_CREATE</code>: 1 = автоматически создать лид/контакт.</p>
+          <pre class="admin-doc-pre" translate="no">{
+  "result": {
+    "CALL_ID": "externalCall.a1b2c3d4",
+    "CRM_CREATED_LEAD": 5,
+    "CRM_ENTITY_TYPE": "LEAD",
+    "CRM_ENTITY_ID": 5
+  }
+}</pre>
+
+          <h4 class="admin-doc-h4">Локальное приложение (для событий)</h4>
+          <p>Вебхук не поддерживает подписку на события — для этого нужно локальное приложение.</p>
+          <p><strong>Как создать:</strong></p>
+          <ol class="admin-doc-ol">
+            <li>Перейдите: <strong>Разработчикам</strong> → <strong>Другое</strong> → <strong>Локальное приложение</strong>.</li>
+            <li>Заполните:
+              <ul class="admin-doc-ul">
+                <li>Название: <code class="admin-code-inline">hackathon-events</code></li>
+                <li>URL обработчика и URL первоначальной установки: например <code class="admin-code-inline">https://your-tunnel-url.trycloudflare.com/install</code></li>
+              </ul>
+            </li>
+            <li>Выберите права (аналогично вебхуку).</li>
+            <li>Нажмите «Сохранить».</li>
+          </ol>
+          <p>Вы получите <code class="admin-code-inline">client_id</code> (application_id) и <code class="admin-code-inline">client_secret</code>.</p>
+
+          <p><strong>Подписка на события</strong> (после установки приложения, с OAuth-токеном):</p>
+          <pre class="admin-doc-pre" translate="no">curl -X POST "https://hackathon-team-xx.bitrix24.ru/rest/event.bind" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "auth": "YOUR_OAUTH_TOKEN",
+    "event": "ONCRMLEADADD",
+    "handler": "https://your-tunnel-url.trycloudflare.com/webhook/lead-created"
+  }'</pre>
+
+          <div class="admin-doc-table-wrap">
+            <table class="admin-doc-table">
+              <caption class="visually-hidden">Полезные события Bitrix24</caption>
+              <thead>
+                <tr><th>Событие</th><th>Описание</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code class="admin-code-inline">ONCRMLEADADD</code></td><td>Создан лид</td></tr>
+                <tr><td><code class="admin-code-inline">ONCRMDEALUPDATE</code></td><td>Обновлена сделка</td></tr>
+                <tr><td><code class="admin-code-inline">ONOPENLINEMESSAGEADD</code></td><td>Сообщение в открытой линии</td></tr>
+                <tr><td><code class="admin-code-inline">ONEXTERNALCALLSTART</code></td><td>Начат внешний звонок</td></tr>
+                <tr><td><code class="admin-code-inline">ONIMCOMMANDADD</code></td><td>Команда в мессенджере</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p><strong>OAuth при установке приложения</strong> — POST на ваш URL обработчика с телом вида:</p>
+          <pre class="admin-doc-pre" translate="no">{
+  "auth": {
+    "access_token": "s1a2b3c4d5...",
+    "refresh_token": "r1a2b3c4d5...",
+    "application_token": "app_token...",
+    "domain": "hackathon-team-xx.bitrix24.ru"
+  }
+}</pre>
+          <p>Сохраните <code class="admin-code-inline">access_token</code> и <code class="admin-code-inline">refresh_token</code>. Токен живёт около часа; обновление:</p>
+          <pre class="admin-doc-pre" translate="no">curl "https://oauth.bitrix.info/oauth/token/?grant_type=refresh_token&amp;client_id=YOUR_CLIENT_ID&amp;client_secret=YOUR_CLIENT_SECRET&amp;refresh_token=YOUR_REFRESH_TOKEN"</pre>
+
+            </div>
+          </details>
         </div>
       </section>
       </div>
@@ -2475,6 +2732,71 @@
         if (Array.isArray(parsed) && parsed.length > 0) return;
         localStorage.setItem(KEY, JSON.stringify([]));
       } catch (e) {}
+    })();
+
+    (function () {
+      function fnrApiRoot() {
+        try {
+          return new URL('/fnr-api/lead', window.location.href).href.replace(/\/lead\/?$/, '');
+        } catch (e) {
+          return '/fnr-api';
+        }
+      }
+      var btn = document.getElementById('bitrixPingBtn');
+      var msg = document.getElementById('bitrixPingMsg');
+      if (btn && msg) {
+        btn.addEventListener('click', function () {
+          btn.disabled = true;
+          msg.textContent = 'Проверка…';
+          msg.className = 'admin-form-msg';
+          fetch(fnrApiRoot() + '/admin/bitrix-ping', { credentials: 'same-origin' })
+            .then(function (r) {
+              return r.text().then(function (t) {
+                var j = null;
+                try {
+                  j = t ? JSON.parse(t) : null;
+                } catch (e) {
+                  j = null;
+                }
+                return { okHttp: r.ok, j: j, status: r.status, raw: t };
+              });
+            })
+            .then(function (x) {
+              if (x.j && x.j.ok) {
+                var n = x.j.lead_fields_count;
+                msg.textContent =
+                  'Вебхук отвечает. Полей лида (crm.lead.fields): ' + (n != null ? String(n) : '—');
+                return;
+              }
+              if (x.j && x.j.error) {
+                var err = String(x.j.error);
+                if (err === 'no_webhook') {
+                  err = 'Вебхук не настроен (нет BITRIX_INCOMING_WEBHOOK на сервере).';
+                }
+                var hint = x.j.hint ? ' ' + String(x.j.hint) : '';
+                msg.textContent = err + hint;
+                return;
+              }
+              if (!x.okHttp) {
+                msg.textContent =
+                  'HTTP ' +
+                  x.status +
+                  ' от API. Проверьте прокси /fnr-api и что fnr-api запущен на сервере.';
+                return;
+              }
+              msg.textContent = 'Неожиданный ответ сервера.';
+            })
+            .catch(function () {
+              msg.textContent =
+                'Сеть или CORS: не ответил ' +
+                fnrApiRoot() +
+                '. Убедитесь, что открываете админку по HTTPS/HTTP с сайта (не file://), и что /fnr-api проксируется на fnr-api.';
+            })
+            .finally(function () {
+              btn.disabled = false;
+            });
+        });
+      }
     })();
 
     renderPeople();

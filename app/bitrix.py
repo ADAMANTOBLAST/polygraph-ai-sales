@@ -257,7 +257,20 @@ async def bitrix_ping_crm() -> dict[str, Any]:
     """Проверка вебхука: crm.lead.fields (нужны права CRM; иначе увидите error)."""
     j, err = await _crm_call_json("crm.lead.fields", {})
     if err:
-        return {"ok": False, "error": err, "hint": "Создайте входящий вебхук с правами crm (не только crm.lead.add)."}
+        if err == "no_webhook":
+            return {
+                "ok": False,
+                "error": err,
+                "hint": (
+                    "На сервере с fnr-api в файле .env задайте BITRIX_INCOMING_WEBHOOK "
+                    "(или BITRIX_WEBHOOK_URL) и перезапустите процесс API."
+                ),
+            }
+        return {
+            "ok": False,
+            "error": err,
+            "hint": "Проверьте URL вебхука и права crm в Bitrix24 (не только отдельный метод crm.lead.add).",
+        }
     res = j.get("result") if j else None
     n = len(res) if isinstance(res, dict) else 0
     return {"ok": True, "lead_fields_count": n}
