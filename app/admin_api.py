@@ -7,6 +7,7 @@ from typing import Any
 from aiohttp import web
 from telethon import TelegramClient
 
+from .bitrix import sync_bitrix_chat_for_uid
 from .sales_sync import load_sales_sync, write_sales_sync
 from .state_store import append_history, get_history, load_state, save_state
 
@@ -101,6 +102,10 @@ async def handle_admin_send(request: web.Request) -> web.Response:
         log.exception("admin send %s: %s", uid, e)
         return web.json_response({"ok": False, "error": str(e)[:200]}, status=500)
     append_history(uid, "assistant", text)
+    try:
+        await sync_bitrix_chat_for_uid(uid)
+    except Exception as e:
+        log.debug("bitrix sync after admin send uid=%s: %s", uid, e)
     return web.json_response({"ok": True})
 
 

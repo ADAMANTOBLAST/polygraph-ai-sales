@@ -12,6 +12,7 @@ from telethon import TelegramClient, events
 from .comet_client import complete_dialog
 from .comet_media import analyze_image_relevance, transcribe_audio_file
 from .media_utils import extract_audio_for_whisper
+from .bitrix import sync_bitrix_chat_for_uid
 from .state_store import append_history, get_history, is_tracked
 
 log = logging.getLogger(__name__)
@@ -53,6 +54,10 @@ async def _reply_boris(client: TelegramClient, event: events.NewMessage.Event, u
             reply = await asyncio.to_thread(complete_dialog, hist, 0)
         append_history(uid, "assistant", reply)
         await event.respond(reply)
+        try:
+            await sync_bitrix_chat_for_uid(uid)
+        except Exception as sync_e:
+            log.debug("bitrix sync uid=%s: %s", uid, sync_e)
     except Exception as e:
         log.exception("comet: %s", e)
         await event.respond(TECH_FAIL)

@@ -12,7 +12,7 @@ DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "fnr_state.json"
 
 
 def _default() -> dict:
-    return {"tracked_user_ids": [], "histories": {}}
+    return {"tracked_user_ids": [], "histories": {}, "bitrix_uid_meta": {}}
 
 
 def load_state() -> dict:
@@ -33,6 +33,8 @@ def load_state() -> dict:
             _STATE["tracked_user_ids"] = []
         if "histories" not in _STATE:
             _STATE["histories"] = {}
+        if "bitrix_uid_meta" not in _STATE:
+            _STATE["bitrix_uid_meta"] = {}
         return _STATE
 
 
@@ -62,6 +64,22 @@ def get_history(uid: int) -> list[dict]:
     st = load_state()
     key = str(uid)
     return list(st["histories"].get(key, []))
+
+
+def set_bitrix_lead_link(uid: int, lead_id: int, comment_header: str) -> None:
+    """Связь Telegram uid → лид CRM; comment_header — блок «заявка с сайта» для поля COMMENTS."""
+    st = load_state()
+    st.setdefault("bitrix_uid_meta", {})[str(int(uid))] = {
+        "lead_id": int(lead_id),
+        "header": comment_header,
+    }
+    save_state()
+
+
+def get_bitrix_lead_link(uid: int) -> dict | None:
+    st = load_state()
+    raw = (st.get("bitrix_uid_meta") or {}).get(str(int(uid)))
+    return raw if isinstance(raw, dict) else None
 
 
 def append_history(uid: int, role: str, content: str, max_pairs: int = 12) -> None:

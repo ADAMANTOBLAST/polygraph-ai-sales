@@ -20,8 +20,8 @@ from accounts_registry import get_accounts
 from ai_messaging.channels.telethon_client import build_client
 
 from .admin_api import setup_admin_routes
-from .bitrix import create_lead_from_form
-from .state_store import add_tracked, append_history, load_state
+from .bitrix import create_lead_from_form, build_lead_comments_initial, sync_bitrix_chat_for_uid
+from .state_store import add_tracked, append_history, load_state, set_bitrix_lead_link
 from .telegram_profiles import greeting_for_account
 from .tg_handlers import register_private_handlers
 
@@ -97,6 +97,7 @@ async def _handle_lead(request: web.Request) -> web.Response:
     client: TelegramClient = request.app["telegram"]
     sent = False
     err = None
+    uid = None
 
     if contact_method == "telegram" and telegram and USER_RE.match(telegram):
         try:
@@ -119,6 +120,13 @@ async def _handle_lead(request: web.Request) -> web.Response:
     except Exception as e:
         log.exception("Bitrix: %s", e)
         bitrix_error = str(e)[:200]
+
+    if bitrix_lead_id is not None and uid is not None:
+        try:
+            set_bitrix_lead_link(uid, bitrix_lead_id, build_lead_comments_initial(data))
+            await sync_bitrix_chat_for_uid(uid)
+        except Exception as e:
+            log.exception("Bitrix sync link: %s", e)
 
     body: dict[str, Any] = {
         "ok": True,
