@@ -208,21 +208,88 @@
     .nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
     @media (max-width: 900px) {
-      .nav-toggle { display: flex; }
-      .site-nav {
-        position: fixed; inset: 0; flex-direction: column; justify-content: center; align-items: center;
-        gap: 8px; padding: 92px 24px 44px;
-        background: rgba(8,2,20,0.7); backdrop-filter: var(--glass-blur-heavy); -webkit-backdrop-filter: var(--glass-blur-heavy);
-        opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .35s ease, visibility .35s ease; z-index: 101;
+      .site-header-inner {
+        position: relative;
       }
-      .site-nav.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
-      .site-nav a { font-size: 1.1rem !important; padding: 13px 24px !important; width: 100%; max-width: 280px; text-align: center; border: 1px solid rgba(255,255,255,.08) !important; border-radius: 16px !important; }
-      .nav-cta { border-color: rgba(196,181,253,.3) !important; }
+      .nav-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,.12);
+        background: rgba(255,255,255,.05);
+        backdrop-filter: blur(18px) saturate(1.4);
+        -webkit-backdrop-filter: blur(18px) saturate(1.4);
+        box-shadow: var(--glass-specular), 0 8px 24px rgba(0,0,0,.16);
+      }
+      .site-nav {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        left: auto;
+        inset: auto 0 auto auto;
+        width: min(272px, calc(100vw - 24px));
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 8px;
+        padding: 10px;
+        border-radius: 18px;
+        border: 1px solid rgba(196,181,253,.32);
+        background: rgba(10,3,24,0.92);
+        backdrop-filter: var(--glass-blur-heavy);
+        -webkit-backdrop-filter: var(--glass-blur-heavy);
+        box-shadow:
+          0 0 0 1px rgba(255,255,255,.06),
+          var(--glass-specular-strong),
+          0 24px 50px rgba(0,0,0,.34);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translateY(-8px) scale(.98);
+        transform-origin: top right;
+        transition: opacity .22s ease, visibility .22s ease, transform .22s ease;
+        z-index: 101;
+        max-height: min(220px, calc(100vh - 88px));
+        overflow-y: auto;
+      }
+      .site-nav.is-open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateY(0) scale(1);
+      }
+      .site-nav a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        font-size: .92rem !important;
+        padding: 10px 14px !important;
+        width: 100%;
+        max-width: none;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,.11) !important;
+        border-radius: 14px !important;
+        background: rgba(255,255,255,.04);
+      }
+      .site-nav a:hover,
+      .site-nav a:focus-visible {
+        color: #fff;
+        background: rgba(255,255,255,.08);
+        border-color: rgba(196,181,253,.24) !important;
+        box-shadow: var(--glass-specular);
+        outline: none;
+      }
+      .nav-cta {
+        border-color: rgba(196,181,253,.3) !important;
+        background: rgba(124,58,237,0.24) !important;
+      }
     }
 
     /* ═══════════ HERO ═══════════ */
     .hero {
-      position: relative; padding: clamp(36px,6.5vw,72px) 0 clamp(36px,6vw,64px);
+      position: relative; padding: clamp(28px,5vw,52px) 0 clamp(24px,4.5vw,42px);
       overflow: hidden; scroll-margin-top: 88px;
     }
 
@@ -337,24 +404,77 @@
         padding: 6px 0;
       }
       .brand-logo-wrap {
-        height: 52px;
-        width: min(128px, 40vw);
+        height: 42px;
+        width: min(98px, 28vw);
       }
       .brand-logo-wrap img {
-        height: 112%;
-        transform: scale(1.06);
+        height: 100%;
+        transform: none;
       }
-      .brand span { font-size: 1.05rem; }
+      .brand-name { font-size: .92rem; letter-spacing: .06em; }
       .hero {
         padding: 28px 0 36px;
         scroll-margin-top: 72px;
       }
+      .hero-bottle-wrap {
+        display: none;
+      }
       .hero-copy h1 { font-size: clamp(1.35rem, 6vw, 1.85rem); }
       .hero-lead { font-size: 1rem; }
       .strip { padding: 24px 0 32px; }
-      .strip-card { padding: 18px; font-size: 0.95rem; }
+      .strip-row {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding: 2px 2px 8px;
+        margin: 0 -2px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .strip-row::-webkit-scrollbar {
+        display: none;
+      }
+      .strip-card {
+        flex: 0 0 min(84vw, 290px);
+        min-height: 88px;
+        padding: 16px;
+        font-size: 0.84rem;
+        line-height: 1.3;
+        scroll-snap-align: start;
+      }
+      .strip-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 1rem;
+      }
       .section-contact { padding: 24px 0 64px; }
       .contact-stack { gap: 36px; }
+      .metrics-grid {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding: 2px 2px 8px;
+        margin: 0 -2px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .metrics-grid::-webkit-scrollbar {
+        display: none;
+      }
+      .metric-card {
+        flex: 0 0 min(84vw, 280px);
+        min-height: 188px;
+        padding: 22px 18px 20px;
+        scroll-snap-align: start;
+      }
+      .metric-value {
+        font-size: clamp(1.8rem, 9vw, 2.3rem);
+      }
+      .metric-label {
+        font-size: .78rem;
+      }
       .glass-form-shell {
         padding: 22px 16px 26px;
         border-radius: 22px;
@@ -368,7 +488,7 @@
     }
 
     /* ═══════════ STRIP ═══════════ */
-    .strip { padding: 44px 0 60px; }
+    .strip { padding: 30px 0 40px; }
 
     .strip-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
     @media (max-width: 768px) { .strip-row { grid-template-columns: 1fr; } }
@@ -409,9 +529,9 @@
     }
 
     /* ═══════════ SECTION CONTACT ═══════════ */
-    .section-contact { padding: 44px 0 108px; }
+    .section-contact { padding: 28px 0 72px; }
 
-    .contact-stack { display: flex; flex-direction: column; gap: clamp(56px,9vw,100px); max-width: 1060px; margin: 0 auto; }
+    .contact-stack { display: flex; flex-direction: column; gap: clamp(32px,6vw,56px); max-width: 1060px; margin: 0 auto; }
 
     #partnership { scroll-margin-top: 100px; }
 
@@ -443,7 +563,7 @@
     }
 
     .about-block p.lead {
-      color: rgba(248,250,252,.62); margin-bottom: 2.6rem;
+      color: rgba(248,250,252,.62); margin-bottom: 1.55rem;
       font-size: 1.1rem; max-width: 44em; line-height: 1.7;
     }
 
@@ -508,7 +628,7 @@
 
     .glass-form-shell {
       width: 100%; max-width: 548px; margin: 0 auto;
-      border-radius: 30px; padding: 46px 42px 50px;
+      border-radius: 30px; padding: 36px 34px 38px;
       background: rgba(255,255,255,0.05);
       backdrop-filter: var(--glass-blur-heavy); -webkit-backdrop-filter: var(--glass-blur-heavy);
       border: 1px solid rgba(255,255,255,0.12);
@@ -526,7 +646,7 @@
 
     .form-section-lead { text-align: center; color: rgba(248,250,252,.52); font-size: .98rem; margin-bottom: 0; }
 
-    .form-divider { height: 1px; margin: 1.75rem 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.11), transparent); }
+    .form-divider { height: 1px; margin: 1.1rem 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.11), transparent); }
 
     .field { margin-bottom: 16px; }
 
@@ -690,7 +810,7 @@
     .animate-up.is-visible { opacity: 1; transform: translateY(0); }
     /* Выше специфичность, чем у .animate-up.is-visible — поднимается вся карточка целиком */
     .strip-card.animate-up.is-visible:hover {
-      transform: translateY(-7px);
+      transform: none;
       background: var(--glass-bg-hover); border-color: var(--glass-border-hover);
       box-shadow: var(--glass-specular-strong), var(--glass-inner-glow), var(--shadow-xl), var(--glow-sm);
       transition: transform 0.5s var(--ease-spring), box-shadow 0.5s var(--ease-spring), background 0.35s ease, border-color 0.35s ease;
@@ -712,18 +832,103 @@
       html { font-size: 100%; }
       .container { padding: 0 16px; }
       .site-header-inner { min-height: 64px; padding: 8px 0; }
-      .brand-logo-wrap { height: 42px; width: min(116px,34vw); }
-      .brand-name { font-size: 1.1rem; }
-      .hero { padding: 22px 0 28px; scroll-margin-top: 72px; }
+      .brand {
+        gap: 8px;
+        min-width: 0;
+        flex: 1 1 auto;
+      }
+      .brand-logo-wrap { height: 36px; width: min(132px, 38vw); flex-shrink: 0; }
+      .brand-logo-img { width: 100%; height: auto; max-height: none; }
+      .brand-name { font-size: .86rem; letter-spacing: .05em; }
+      .hero { padding: 18px 0 22px; scroll-margin-top: 72px; }
+      .hero-bottle-wrap { display: none; }
       .hero-copy h1 { font-size: clamp(1.55rem,7.5vw,2.1rem); }
       .hero-lead { font-size: .97rem; }
-      .strip { padding: 26px 0 38px; }
-      .section-contact { padding: 30px 0 76px; }
-      .contact-stack { gap: 42px; }
-      .glass-form-shell { padding: 30px 20px 34px; border-radius: 24px; }
+      .strip { padding: 18px 0 24px; }
+      .strip-row {
+        display: flex;
+        flex-wrap: nowrap;
+        grid-template-columns: none;
+        gap: 12px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 2px 2px 10px;
+        margin: 0 -2px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .strip-row::-webkit-scrollbar { display: none; }
+      .strip-card {
+        flex: 0 0 min(84vw, 290px);
+        width: min(84vw, 290px);
+        min-width: min(84vw, 290px);
+        min-height: 88px;
+        padding: 16px;
+        font-size: .84rem;
+        line-height: 1.3;
+        scroll-snap-align: start;
+      }
+      .strip-card:hover,
+      .strip-card.animate-up.is-visible:hover {
+        transform: none;
+      }
+      .strip-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 1rem;
+      }
+      .section-contact { padding: 20px 0 52px; }
+      .contact-stack { gap: 24px; }
+      .metrics-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        grid-template-columns: none;
+        gap: 12px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 2px 2px 10px;
+        margin: 0 -2px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .metrics-grid::-webkit-scrollbar { display: none; }
+      .metric-card {
+        flex: 0 0 min(84vw, 280px);
+        width: min(84vw, 280px);
+        min-width: min(84vw, 280px);
+        min-height: 188px;
+        padding: 22px 18px 20px;
+        scroll-snap-align: start;
+      }
+      .metric-value { font-size: clamp(1.8rem, 9vw, 2.3rem); }
+      .metric-label { font-size: .78rem; }
+      .glass-form-shell { padding: 24px 18px 26px; border-radius: 24px; }
       .about-block h2,
       .form-section-title { font-size: clamp(1.05rem, 4.4vw, 1.42rem); }
       #partnership { scroll-margin-top: 78px; }
+      .site-footer {
+        padding: 30px 0 22px;
+      }
+      .footer-grid {
+        gap: 18px;
+      }
+      .footer-col h4 {
+        font-size: .62rem;
+        margin-bottom: 8px;
+      }
+      .footer-col p,
+      .footer-col a {
+        font-size: .76rem;
+        line-height: 1.45;
+        margin-bottom: 2px;
+      }
+      .footer-bottom {
+        margin-top: 16px;
+        padding-top: 12px;
+        font-size: .68rem;
+      }
     }
   </style>
 </head>
@@ -749,9 +954,9 @@
         <span class="nav-toggle-bar"></span>
       </button>
       <nav class="site-nav" id="siteNav" aria-label="Основное меню">
-        <a href="#company">О компании</a>
-        <a href="#partnership">Партнёрство</a>
-        <a href="#contact" class="nav-cta">Заявка</a>
+        <a href="#company" data-target="#company">О компании</a>
+        <a href="#partnership" data-target="#partnership">Партнёрство</a>
+        <a href="#contact" data-target="#contact" class="nav-cta">Заявка</a>
       </nav>
     </div>
   </header>
@@ -927,16 +1132,43 @@
     function closeNav() {
       nav.classList.remove('is-open');
       btn.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
     }
     btn.addEventListener('click', function () {
       var open = !nav.classList.contains('is-open');
       nav.classList.toggle('is-open', open);
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      document.body.style.overflow = open ? 'hidden' : '';
+    });
+    document.addEventListener('click', function (e) {
+      if (!nav.classList.contains('is-open')) return;
+      if (nav.contains(e.target) || btn.contains(e.target)) return;
+      closeNav();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeNav();
     });
     nav.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', closeNav);
+      a.addEventListener('click', function (e) {
+        var href = a.getAttribute('href') || '';
+        var targetSelector = a.getAttribute('data-target') || href;
+        if (href.charAt(0) !== '#') {
+          closeNav();
+          return;
+        }
+        var target = document.querySelector(targetSelector);
+        if (!target) {
+          closeNav();
+          return;
+        }
+        e.preventDefault();
+        closeNav();
+        requestAnimationFrame(function () {
+          if (window.location.hash !== targetSelector) {
+            window.location.hash = targetSelector;
+            return;
+          }
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
     });
     window.addEventListener('resize', function () {
       if (window.innerWidth > 900) closeNav();

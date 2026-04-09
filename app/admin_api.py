@@ -48,6 +48,9 @@ async def handle_admin_chats(request: web.Request) -> web.Response:
     chats: list[dict[str, Any]] = []
     for uid in st.get("tracked_user_ids") or []:
         uid = int(uid)
+
+        title = str(uid)
+        username = ""
         ua = st.get("uid_account") or {}
         aid_raw = ua.get(str(uid), 0)
         try:

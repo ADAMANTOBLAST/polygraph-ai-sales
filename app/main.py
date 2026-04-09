@@ -21,7 +21,6 @@ from accounts_registry import get_accounts
 from ai_messaging.channels.telethon_client import build_client
 
 from .admin_api import setup_admin_routes
-
 from .voximplant_webhook import setup_voximplant_routes
 from .bitrix import create_lead_from_form, build_lead_comments_initial, sync_bitrix_chat_for_uid
 from .manager_router import resolve_account_for_lead_dialog

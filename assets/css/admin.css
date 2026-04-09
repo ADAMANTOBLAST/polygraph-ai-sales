@@ -2313,6 +2313,396 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
   }
 }
 
+@media (max-width: 768px) {
+  body.admin-body {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .admin-main__inner {
+    padding: 0 0 28px;
+  }
+
+  .admin-mobile-header {
+    position: sticky;
+    top: 0;
+    z-index: 25;
+    align-items: center;
+    gap: 10px;
+    background: rgba(7, 1, 20, 0.82);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .admin-mobile-header__brand {
+    min-width: 0;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .admin-topbar {
+    gap: 14px;
+    margin-bottom: 2px;
+  }
+
+  .admin-topbar__title {
+    font-size: 1.35rem;
+  }
+
+  .admin-topbar__desc {
+    max-width: none;
+    font-size: 0.95rem;
+  }
+
+  .topbar-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-user-chip {
+    width: 100%;
+    max-width: none;
+    padding: 10px 12px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    border-radius: 14px;
+  }
+
+  .btn,
+  .btn-sm {
+    min-height: 44px;
+  }
+
+  .module-actions,
+  .vip-form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .module-actions .btn,
+  .vip-form-actions .btn {
+    width: 100%;
+  }
+
+  .admin-card {
+    padding: 22px 16px 24px;
+    margin-bottom: 24px;
+    border-radius: 14px;
+    scroll-margin-top: 84px;
+  }
+
+  .module-section {
+    scroll-margin-top: 84px;
+  }
+
+  .admin-card h3 {
+    margin-bottom: 18px;
+    font-size: 1.18rem;
+  }
+
+  .admin-placeholder,
+  .role-description,
+  .admin-chat-module .chat-module-hint,
+  .admin-doc-callout {
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    font-size: 0.93rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .agent-fieldset,
+  .people-group {
+    margin-bottom: 24px;
+  }
+
+  .agent-fieldset__title {
+    margin-bottom: 10px;
+    font-size: 1rem;
+  }
+
+  .agent-fieldset__hint {
+    margin-bottom: 14px;
+    font-size: 0.92rem;
+  }
+
+  .module-form .field {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .module-form .field > span,
+  .vip-form label {
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+  }
+
+  .module-form .field input,
+  .module-form .field select,
+  .module-form .field textarea,
+  .vip-form input,
+  .vip-form textarea,
+  .chat-list-search,
+  .chat-input,
+  body.admin-body:has(.admin-shell) .module-form .fnr-select__trigger {
+    padding: 12px 14px;
+    font-size: 16px;
+  }
+
+  .module-list-wrap {
+    margin-top: 24px;
+    padding: 18px 14px 14px;
+  }
+
+  .module-list-head {
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .module-list-head h4 {
+    font-size: 0.82rem;
+  }
+
+  .person-card,
+  .script-card,
+  .funnel-card,
+  .knowledge-card,
+  .alert-card,
+  .vip-card {
+    padding: 14px;
+  }
+
+  .person-card-head strong {
+    font-size: 1rem;
+  }
+
+  .person-card p,
+  .script-card p,
+  .funnel-card p,
+  .knowledge-card p,
+  .alert-card p,
+  .vip-card p {
+    font-size: 0.88rem;
+    overflow-wrap: anywhere;
+  }
+
+  .chat-module {
+    gap: 16px;
+  }
+
+  .chat-shell {
+    border-radius: 14px;
+  }
+
+  .chat-accounts-rail {
+    padding-bottom: 8px;
+  }
+
+  .chat-accounts-rail__inner {
+    gap: 8px;
+  }
+
+  .chat-employee-item.chat-account-chip {
+    min-width: 132px;
+    max-width: 75vw;
+    padding: 10px 12px;
+  }
+
+  .chat-list-toolbar {
+    padding: 10px;
+  }
+
+  #chatListRefresh {
+    width: 44px;
+    min-width: 44px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .chat-list-item {
+    padding: 10px;
+  }
+
+  .chat-list-item__title {
+    font-size: 0.95rem;
+  }
+
+  .chat-thread-header {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  .chat-thread-header h4 {
+    font-size: 1.04rem;
+  }
+
+  .chat-thread-header__actions {
+    width: 100%;
+  }
+
+  .chat-ai-toggle {
+    width: 100%;
+  }
+
+  .chat-thread-subtitle,
+  .chat-lead-status,
+  .chat-list-status,
+  .chat-composer-hint {
+    font-size: 0.88rem;
+    overflow-wrap: anywhere;
+  }
+
+  .chat-list-panel {
+    max-height: 220px;
+  }
+
+  .chat-col--leads {
+    max-height: 250px;
+  }
+
+  .chat-thread-panel {
+    min-height: min(58vh, 520px);
+  }
+
+  .chat-messages {
+    min-height: 160px;
+    padding: 14px 12px;
+    gap: 10px;
+  }
+
+  .chat-bubble {
+    max-width: 100%;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+
+  .chat-composer {
+    padding: 10px 12px 12px;
+  }
+
+  .chat-composer__row {
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .chat-composer__attach {
+    width: 44px;
+    height: 44px;
+  }
+
+  .chat-input {
+    flex: 1 1 calc(100% - 54px);
+    min-height: 44px;
+  }
+
+  #chatSendBtn {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .admin-table,
+  .admin-doc-table {
+    font-size: 0.82rem;
+  }
+
+  .admin-table th,
+  .admin-table td,
+  .admin-doc-table th,
+  .admin-doc-table td {
+    padding: 10px 11px;
+  }
+
+  .admin-doc-pre {
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-main {
+    padding: 16px 12px 32px;
+  }
+
+  .admin-mobile-header {
+    margin: -16px -12px 14px -12px;
+    padding: 10px 12px;
+  }
+
+  .admin-sidebar {
+    width: min(320px, 92vw);
+    padding: 22px 14px 24px;
+  }
+
+  .admin-nav a {
+    padding: 12px 12px 12px 10px;
+    font-size: 0.96rem;
+  }
+
+  .admin-topbar__eyebrow {
+    font-size: 0.74rem;
+  }
+
+  .admin-card {
+    padding: 18px 12px 20px;
+  }
+
+  .admin-card h3 {
+    font-size: 1.08rem;
+  }
+
+  .module-list-wrap {
+    padding: 16px 12px 12px;
+  }
+
+  .person-card,
+  .script-card,
+  .funnel-card,
+  .knowledge-card,
+  .alert-card,
+  .vip-card {
+    padding: 12px;
+    border-left-width: 3px;
+  }
+
+  .chat-shell {
+    border-radius: 12px;
+  }
+
+  .chat-list-panel {
+    max-height: 208px;
+  }
+
+  .chat-col--leads {
+    max-height: 232px;
+  }
+
+  .chat-thread-panel {
+    min-height: 52vh;
+  }
+
+  .chat-thread-subtitle,
+  .chat-lead-status,
+  .chat-list-status,
+  .chat-composer-hint,
+  .chat-employee-item__role,
+  .chat-employee-item__status {
+    font-size: 0.84rem;
+  }
+
+  .admin-table th,
+  .admin-table td,
+  .admin-doc-table th,
+  .admin-doc-table td {
+    padding: 9px 10px;
+  }
+}
+
 /* ——— Справка REST API Bitrix24 (admin/index.html) ——— */
 .admin-bitrix-mini-guide,
 .admin-bitrix-details-full {
