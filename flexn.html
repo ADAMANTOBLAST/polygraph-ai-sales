@@ -2,6 +2,13 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
+  <script>
+    (function () {
+      var p = window.location.pathname;
+      var m = p.match(/^(.*\/)([^/]+\.html)$/);
+      if (m) document.write('<base href="' + m[1] + '">');
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Флекс-н-Ролл ПРО — этикетки, упаковка, флексография и цифровая печать.">
   <title>Flex-n-roll | Этикетки и упаковка</title>
@@ -135,7 +142,7 @@
       text-decoration: none; color: #fff; z-index: 102; flex-shrink: 0;
     }
 
-    /* Логотип PNG: обрезаем пустые поля — умеренный масштаб внутри шапки */
+    /* Логотип SVG: обрезаем пустые поля — умеренный масштаб внутри шапки */
     .brand-logo-wrap {
       height: 64px;
       width: min(152px, 34vw);
@@ -145,14 +152,15 @@
       overflow: hidden;
     }
 
-    .brand-logo-wrap img {
-      height: 118%;
+    .brand-logo-wrap img,
+    .brand-logo-img {
+      height: 100%;
       width: auto;
-      max-width: none;
+      max-height: 52px;
       object-fit: contain;
-      object-position: center center;
-      transform: scale(1.1);
-      transform-origin: center center;
+      object-position: left center;
+      /* logo.svg уже белый — без invert */
+      filter: drop-shadow(0 0 14px rgba(124, 58, 237, 0.35));
     }
 
     .brand-name {
@@ -731,7 +739,7 @@
     <div class="container site-header-inner">
       <a class="brand" href="#top">
         <span class="brand-logo-wrap">
-          <img src="logo2.png" width="256" height="256" alt="Flex-n-roll">
+          <img class="brand-logo-img" src="assets/images/logo.svg" width="176" height="60" alt="Flex-n-roll">
         </span>
         <span class="brand-name">Flex-n-roll</span>
       </a>
@@ -765,7 +773,7 @@
         <div class="hero-bottle-wrap">
           <div class="hero-bottle-stage">
             <div class="hero-bottle-shadow" aria-hidden="true"></div>
-            <img class="hero-bottle" src="user/assets/images/hero-bottle.png" alt="Бутылка с этикеткой «Ваш бренд»" width="1024" height="1536" fetchpriority="high" decoding="async">
+            <img class="hero-bottle" src="assets/images/hero-bottle.svg" alt="Бутылка с этикеткой «Ваш бренд»" width="320" height="480" fetchpriority="high" decoding="async">
           </div>
         </div>
       </div>

@@ -3,35 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Кабинет | Флекс-н-Ролл ПРО</title>
+  <title>Кабинет | Flex&Roll PRO</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      var p = window.location.pathname;
+      var m = p.match(/^(.*\/admin)(?:\/[^/]+\.html)?\/?$/);
+      if (m) {
+        document.write('<base href="' + m[1] + '/">');
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 <body class="admin-body">
   <div class="admin-shell">
     <aside class="admin-sidebar">
-      <h1>Флекс-н-Ролл ПРО</h1>
-      <div class="sub">Админ-панель (каркас)</div>
+      <div class="admin-sidebar__brand">
+        <div class="admin-sidebar__mark" aria-hidden="true">FnR</div>
+        <div class="admin-sidebar__titles">
+          <h1>Flex&amp;Roll</h1>
+          <div class="sub">Панель управления</div>
+        </div>
+      </div>
+      <p class="admin-sidebar__label">Разделы</p>
+      <div class="admin-sidebar__nav-wrap">
       <ul class="admin-nav">
-        <li><a href="#people" class="active" data-section="people">Команда и роли</a></li>
-        <li><a href="#agent-script" data-section="agent-script">Скрипт AI-агента</a></li>
-        <li><a href="#funnel" data-section="funnel">Воронка общения</a></li>
-        <li><a href="#knowledge" data-section="knowledge">База данных агента</a></li>
-        <li><a href="#vip-clients" data-section="vip-clients">VIP-клиенты</a></li>
-        <li><a href="#alerts" data-section="alerts">Будилки и уведомления</a></li>
+        <li><a href="#people" class="active" data-section="people"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Команда и роли</span></a></li>
+        <li><a href="#chats" data-section="chats"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Переписки</span></a></li>
+        <li><a href="#agent-script" data-section="agent-script"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Настройка AI-агента</span></a></li>
+        <li><a href="#vip-clients" data-section="vip-clients"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">VIP-клиенты</span></a></li>
+        <li><a href="#alerts" data-section="alerts"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Уведомления</span></a></li>
       </ul>
+      </div>
     </aside>
 
     <main class="admin-main">
-      <div class="admin-topbar" id="overview">
-        <h2>Обзор</h2>
-        <div class="topbar-actions">
-          <span id="userLabel" style="color: var(--fnr-muted); font-size: 0.9rem; margin-right: 12px;"></span>
-          <button type="button" class="btn btn-ghost" id="logoutBtn">Выйти</button>
+      <div class="admin-main__inner">
+      <header class="admin-topbar" id="overview">
+        <div class="admin-topbar__lead">
+          <p class="admin-topbar__eyebrow">Рабочий стол</p>
+          <h2 class="admin-topbar__title">Обзор</h2>
+          <p class="admin-topbar__desc">Настройте команду, сценарии агента и данные для продаж.</p>
         </div>
-      </div>
+        <div class="topbar-actions">
+          <span id="userLabel" class="admin-user-chip"></span>
+          <button type="button" class="btn btn-ghost btn-logout" id="logoutBtn">Выйти</button>
+        </div>
+      </header>
 
       <section class="admin-card admin-card-section module-section" id="people">
         <h3>Данные технологов, менеджеров, экономистов</h3>
@@ -39,7 +60,7 @@
 
         <form id="peopleForm" class="module-form" novalidate>
           <input type="hidden" id="personId" value="">
-          <div class="module-grid module-grid-3">
+          <div class="module-grid module-grid-4">
             <label class="field">
               <span>ФИО</span>
               <input type="text" id="personName" placeholder="Иванов Иван" required>
@@ -47,9 +68,20 @@
             <label class="field">
               <span>Роль</span>
               <select id="personRole" required>
+                <option value="Активный продавец">Активный продавец</option>
+                <option value="Руководитель">Руководитель</option>
                 <option value="Технолог">Технолог</option>
-                <option value="Менеджер">Менеджер</option>
                 <option value="Экономист">Экономист</option>
+                <option value="Диспетчер">Диспетчер</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Статус</span>
+              <select id="personStatus" required>
+                <option value="Активен">Активен</option>
+                <option value="Тестовый период">Тестовый период</option>
+                <option value="На больничном">На больничном</option>
+                <option value="В отпуске">В отпуске</option>
               </select>
             </label>
             <label class="field">
@@ -59,13 +91,13 @@
           </div>
           <label class="field" style="margin-top:10px;">
             <span>Зона ответственности / примечание</span>
-            <textarea id="personScope" rows="2" placeholder="Материалы, клиенты, расчёты..."></textarea>
+            <textarea id="personScope" rows="3" placeholder="Заполняется по выбранной роли; можно отредактировать."></textarea>
           </label>
           <div class="module-actions">
             <button type="submit" class="btn btn-primary" id="personSubmitBtn">Добавить</button>
             <button type="button" class="btn btn-ghost" id="personCancelBtn">Отменить редактирование</button>
           </div>
-          <p id="peopleFormMsg" class="admin-placeholder" style="margin-top:8px;"></p>
+          <p id="peopleFormMsg" class="admin-form-msg"></p>
         </form>
 
         <div class="module-list-wrap">
@@ -77,165 +109,127 @@
         </div>
       </section>
 
+      <section class="admin-card admin-card-section module-section admin-chat-module" id="chats">
+        <h3>Переписки</h3>
+        <p class="admin-placeholder chat-module-hint">Выберите аккаунт менеджера сверху, слева — контакты (лиды), справа — переписка. Медиа в истории как в Telegram; отправка файлов с сервера — в разработке.</p>
+        <div class="chat-module">
+          <div class="chat-accounts-rail-outer">
+            <span class="chat-accounts-rail-outer__label">Аккаунты</span>
+            <div class="chat-accounts-rail" role="tablist" aria-label="Аккаунты менеджеров">
+              <div id="chatEmployeeBody" class="chat-accounts-rail__inner"></div>
+            </div>
+          </div>
+          <div class="chat-shell chat-shell--split">
+          <aside class="chat-col chat-col--leads" aria-label="Контакты">
+            <div class="chat-col__head">Контакты <span class="chat-col__head-hint">(только выбранного аккаунта)</span></div>
+            <div class="chat-list-toolbar">
+              <input type="search" class="chat-list-search" id="chatListSearch" placeholder="Поиск…" autocomplete="off">
+              <button type="button" class="btn btn-ghost btn-sm" id="chatListRefresh" title="Обновить">↻</button>
+            </div>
+            <div id="chatListBody" class="chat-list-body"></div>
+            <p id="chatListStatus" class="chat-list-status"></p>
+          </aside>
+          <div class="chat-thread-panel">
+            <header class="chat-thread-header">
+              <div class="chat-thread-header__text">
+                <h4 id="chatThreadTitle">Выберите аккаунт и контакт</h4>
+                <p id="chatThreadSubtitle" class="chat-thread-subtitle"></p>
+                <p id="chatLeadStatus" class="chat-lead-status" hidden></p>
+              </div>
+              <div class="chat-thread-header__actions">
+                <label class="chat-ai-toggle">
+                  <input type="checkbox" id="chatAiDisabled" disabled>
+                  <span>ИИ отключён для этого лида</span>
+                </label>
+              </div>
+            </header>
+            <div id="chatMessages" class="chat-messages" role="log" aria-live="polite"></div>
+            <div class="chat-composer">
+              <label class="chat-composer__label" for="chatInput" id="chatComposerLabel">Сообщение</label>
+              <div class="chat-composer__attachments">
+                <input type="file" id="chatFileInput" class="chat-file-input" disabled multiple accept="image/*,audio/*,.pdf,.doc,.docx">
+                <button type="button" class="btn btn-ghost btn-sm" id="chatPickFileBtn" disabled title="Файл">Файл</button>
+                <button type="button" class="btn btn-ghost btn-sm" id="chatPickImageBtn" disabled title="Картинка">Фото</button>
+                <button type="button" class="btn btn-ghost btn-sm" id="chatPickVoiceBtn" disabled title="Голос">Голос</button>
+              </div>
+              <div class="chat-composer__row">
+                <textarea id="chatInput" class="chat-input" rows="2" placeholder="Текст…" disabled></textarea>
+                <button type="button" class="btn btn-primary" id="chatSendBtn" disabled>Отправить</button>
+              </div>
+              <p id="chatComposerHint" class="chat-composer-hint"></p>
+            </div>
+          </div>
+          </div>
+        </div>
+      </section>
+
       <section class="admin-card admin-card-section module-section" id="agent-script">
-        <h3>Скрипт общения AI-агента</h3>
-        <p class="admin-placeholder">Рабочий модуль: этапы диалога, шаблон ответа, условие эскалации. Хранение в localStorage.</p>
+        <h3>Настройка AI-агента</h3>
+        <p class="admin-placeholder">Отметьте один или несколько Telegram-аккаунтов. Ниже одна форма: при сохранении одинаковые настройки записываются во все отмеченные аккаунты. На сервер уходит только то, что вы нажмёте «Синхронизировать с сервером»: по заявкам с сайта первое пишут только сотрудники со статусом «Активен», с их текстами и знаниями из формы.</p>
 
-        <form id="scriptForm" class="module-form" novalidate>
-          <input type="hidden" id="scriptId" value="">
-          <div class="module-grid module-grid-3">
-            <label class="field">
-              <span>Название этапа</span>
-              <input type="text" id="scriptTitle" placeholder="Квалификация" required>
-            </label>
-            <label class="field">
-              <span>Порядок</span>
-              <input type="number" id="scriptOrder" min="1" step="1" value="1" required>
-            </label>
-            <label class="field">
-              <span>Эскалация</span>
-              <select id="scriptEscalation" required>
-                <option value="Нет">Нет</option>
-                <option value="Менеджер">Менеджер</option>
-                <option value="Технолог">Технолог</option>
-                <option value="Экономист">Экономист</option>
-              </select>
-            </label>
+        <form id="agentConfigForm" class="module-form agent-config-form" novalidate>
+          <div class="agent-fieldset">
+            <h4 class="agent-fieldset__title">Аккаунты</h4>
+            <p class="agent-fieldset__hint agent-fieldset__hint--rail">Клик по аккаунту со статусом «Активен» — добавить или снять с зелёной группы массового сохранения (повторный клик снимает). Неактивные аккаунты не в группе — только индивидуальные настройки. Фиолетовое кольцо — чей профиль сейчас в форме.</p>
+            <div class="chat-accounts-rail-outer agent-accounts-rail">
+              <span class="chat-accounts-rail-outer__label">Аккаунты</span>
+              <div class="chat-accounts-rail" role="group" aria-label="Аккаунты для ИИ-агента">
+                <div id="agentPickList" class="chat-accounts-rail__inner"></div>
+              </div>
+            </div>
           </div>
-          <label class="field" style="margin-top:10px;">
-            <span>Шаблон сообщения агента</span>
-            <textarea id="scriptTemplate" rows="3" placeholder="Здравствуйте! Подскажите, какой материал и тираж вас интересует?" required></textarea>
+          <label class="field">
+            <span>Первое приветственное сообщение</span>
+            <textarea id="agentGreeting1" rows="2" placeholder="Текст первого сообщения в чате"></textarea>
           </label>
-          <label class="field" style="margin-top:10px;">
-            <span>Условие перехода на следующий этап</span>
-            <input type="text" id="scriptCondition" placeholder="Получен материал + размер + тираж">
+          <label class="field">
+            <span>Второе приветствие (опционально, логически вторая часть)</span>
+            <textarea id="agentGreeting2" rows="2" placeholder="Дополнительный абзац приветствия"></textarea>
           </label>
-          <div class="module-actions">
-            <button type="submit" class="btn btn-primary" id="scriptSubmitBtn">Добавить этап</button>
-            <button type="button" class="btn btn-ghost" id="scriptCancelBtn">Отменить редактирование</button>
-          </div>
-          <p id="scriptFormMsg" class="admin-placeholder" style="margin-top:8px;"></p>
-        </form>
-
-        <div class="module-list-wrap">
-          <div class="module-list-head">
-            <h4>Этапы скрипта</h4>
-            <span id="scriptCount" class="module-badge">0</span>
-          </div>
-          <div id="scriptList" class="module-list"></div>
-        </div>
-      </section>
-
-      <section class="admin-card admin-card-section module-section" id="funnel">
-        <h3>Настройки воронки общения</h3>
-        <p class="admin-placeholder">Рабочий модуль: этапы воронки, SLA, автопереходы и статус активности. Хранение в localStorage.</p>
-
-        <form id="funnelForm" class="module-form" novalidate>
-          <input type="hidden" id="funnelId" value="">
-          <div class="module-grid module-grid-3">
+          <label class="field">
+            <span>База знаний — что бот обязан знать</span>
+            <textarea id="agentKnowledgeBlock" rows="5" placeholder="Факты о компании, продукты, ограничения…"></textarea>
+          </label>
+          <div class="agent-fieldset">
+            <h4 class="agent-fieldset__title">Условия передачи клиента специалистам</h4>
+            <p class="agent-fieldset__hint">Если в переписке выполняется условие, модель выводит кодовое слово; бэкенд подменяет ответ на заготовку и передаёт лид специалисту.</p>
             <label class="field">
-              <span>Название этапа</span>
-              <input type="text" id="funnelTitle" placeholder="Квалификация" required>
+              <span>→ Активный продавец (кодовое слово, напр. seller)</span>
+              <input type="text" id="handoffSeller" placeholder="Условие передачи">
             </label>
             <label class="field">
-              <span>Порядок</span>
-              <input type="number" id="funnelOrder" min="1" step="1" value="1" required>
+              <span>→ Руководитель (manager)</span>
+              <input type="text" id="handoffLead" placeholder="Условие передачи">
             </label>
             <label class="field">
-              <span>SLA (минуты)</span>
-              <input type="number" id="funnelSla" min="1" step="1" value="30" required>
+              <span>→ Технолог (tech)</span>
+              <input type="text" id="handoffTech" placeholder="Условие передачи">
+            </label>
+            <label class="field">
+              <span>→ Экономист (economist)</span>
+              <input type="text" id="handoffEco" placeholder="Условие передачи">
+            </label>
+            <label class="field">
+              <span>→ Диспетчер (dispatcher)</span>
+              <input type="text" id="handoffDisp" placeholder="Условие передачи">
             </label>
           </div>
-          <div class="module-grid module-grid-2" style="margin-top:10px;">
-            <label class="field">
-              <span>Следующий этап</span>
-              <input type="text" id="funnelNext" placeholder="Расчёт / согласование">
-            </label>
-            <label class="field">
-              <span>Статус</span>
-              <select id="funnelStatus" required>
-                <option value="Активен">Активен</option>
-                <option value="Пауза">Пауза</option>
-                <option value="Архив">Архив</option>
-              </select>
-            </label>
-          </div>
-          <label class="field" style="margin-top:10px;">
-            <span>Условие автоперехода</span>
-            <input type="text" id="funnelAutoRule" placeholder="Есть материал + тираж + контакт">
+          <label class="field">
+            <span>Скрипт общения и тон</span>
+            <textarea id="agentDialogScript" rows="5" placeholder="Как формулировать ответы, что не обещать, стиль Telegram…"></textarea>
           </label>
           <div class="module-actions">
-            <button type="submit" class="btn btn-primary" id="funnelSubmitBtn">Добавить этап</button>
-            <button type="button" class="btn btn-ghost" id="funnelCancelBtn">Отменить редактирование</button>
+            <button type="submit" class="btn btn-primary" id="agentConfigSaveBtn">Сохранить конфигурацию</button>
+            <button type="button" class="btn btn-ghost" id="agentServerSyncBtn">Синхронизировать с сервером</button>
           </div>
-          <p id="funnelFormMsg" class="admin-placeholder" style="margin-top:8px;"></p>
+          <p id="agentConfigMsg" class="admin-form-msg"></p>
+          <p id="agentServerSyncMsg" class="admin-form-msg"></p>
         </form>
-
-        <div class="module-list-wrap">
-          <div class="module-list-head">
-            <h4>Этапы воронки</h4>
-            <span id="funnelCount" class="module-badge">0</span>
-          </div>
-          <div id="funnelList" class="module-list"></div>
-        </div>
-      </section>
-
-      <section class="admin-card admin-card-section module-section" id="knowledge">
-        <h3>База данных агента</h3>
-        <p class="admin-placeholder">Рабочий модуль знаний: категория, вопрос, ответ, теги и статус публикации. Хранение в localStorage.</p>
-
-        <form id="knowledgeForm" class="module-form" novalidate>
-          <input type="hidden" id="knowledgeId" value="">
-          <div class="module-grid module-grid-3">
-            <label class="field">
-              <span>Категория</span>
-              <select id="knowledgeCategory" required>
-                <option value="Материалы">Материалы</option>
-                <option value="Услуги">Услуги</option>
-                <option value="Ценообразование">Ценообразование</option>
-                <option value="FAQ">FAQ</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>Статус</span>
-              <select id="knowledgeStatus" required>
-                <option value="Опубликовано">Опубликовано</option>
-                <option value="Черновик">Черновик</option>
-                <option value="Архив">Архив</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>Теги (через запятую)</span>
-              <input type="text" id="knowledgeTags" placeholder="термоусадка, флексо, тираж">
-            </label>
-          </div>
-          <label class="field" style="margin-top:10px;">
-            <span>Вопрос / тема</span>
-            <input type="text" id="knowledgeQuestion" placeholder="Какой материал лучше для влажной среды?" required>
-          </label>
-          <label class="field" style="margin-top:10px;">
-            <span>Ответ</span>
-            <textarea id="knowledgeAnswer" rows="4" placeholder="Рекомендуем ... потому что ..." required></textarea>
-          </label>
-          <div class="module-actions">
-            <button type="submit" class="btn btn-primary" id="knowledgeSubmitBtn">Добавить запись</button>
-            <button type="button" class="btn btn-ghost" id="knowledgeCancelBtn">Отменить редактирование</button>
-          </div>
-          <p id="knowledgeFormMsg" class="admin-placeholder" style="margin-top:8px;"></p>
-        </form>
-
-        <div class="module-list-wrap">
-          <div class="module-list-head">
-            <h4>Записи базы знаний</h4>
-            <span id="knowledgeCount" class="module-badge">0</span>
-          </div>
-          <div id="knowledgeList" class="module-list"></div>
-        </div>
       </section>
 
       <section class="admin-card admin-card-section module-section" id="vip-clients">
         <h3>База VIP-клиентов</h3>
-        <p class="admin-placeholder">Компании и контакты с особыми условиями: единый статус VIP, ответственный менеджер, примечания. Хранение в localStorage.</p>
+        <p class="admin-placeholder">Компании и контакты с особыми условиями. Хранение в localStorage.</p>
 
         <form id="vipForm" class="module-form" novalidate>
           <input type="hidden" id="vipId" value="">
@@ -245,28 +239,16 @@
               <input type="text" id="vipCompany" placeholder='ООО «Партнёр»' required>
             </label>
             <label class="field">
-              <span>Статус</span>
-              <select id="vipStatus" required>
-                <option value="Активен">Активен</option>
-                <option value="Пауза">Пауза</option>
-                <option value="Архив">Архив</option>
+              <span>Ответственный</span>
+              <select id="vipManager" required>
+                <option value="">— выберите сотрудника —</option>
               </select>
             </label>
           </div>
-          <div class="module-grid module-grid-3" style="margin-top:10px;">
-            <label class="field">
-              <span>Контакт (телефон, email, Telegram)</span>
-              <input type="text" id="vipContact" placeholder="+375..., name@firma.by, @telegram">
-            </label>
-            <label class="field">
-              <span>Ответственный менеджер</span>
-              <input type="text" id="vipManager" placeholder="ФИО или подразделение">
-            </label>
-            <label class="field">
-              <span>Условия / скидка (кратко)</span>
-              <input type="text" id="vipTerms" placeholder="-10%, отсрочка 14 дней, фикс. прайс">
-            </label>
-          </div>
+          <label class="field" style="margin-top:10px;">
+            <span>Контакт (телефон, email, Telegram)</span>
+            <input type="text" id="vipContact" placeholder="+375..., name@firma.by, @telegram">
+          </label>
           <label class="field" style="margin-top:10px;">
             <span>Примечания</span>
             <textarea id="vipNotes" rows="3" placeholder="Особые пожелания, история сотрудничества, ограничения по материалам..."></textarea>
@@ -275,7 +257,7 @@
             <button type="submit" class="btn btn-primary" id="vipSubmitBtn">Добавить клиента</button>
             <button type="button" class="btn btn-ghost" id="vipCancelBtn">Отменить редактирование</button>
           </div>
-          <p id="vipFormMsg" class="admin-placeholder" style="margin-top:8px;"></p>
+          <p id="vipFormMsg" class="admin-form-msg"></p>
         </form>
 
         <div class="module-list-wrap">
@@ -289,15 +271,16 @@
 
       <section class="admin-card admin-card-section module-section" id="alerts">
         <h3>Будилки (Telegram / звонок на номер)</h3>
-        <p class="admin-placeholder">Рабочий модуль уведомлений: канал, событие, получатель, расписание и статус. Хранение в localStorage.</p>
+        <p class="admin-placeholder">Канал уведомления, событие, получатель и расписание. Хранение в localStorage.</p>
 
         <form id="alertForm" class="module-form" novalidate>
           <input type="hidden" id="alertId" value="">
-          <div class="module-grid module-grid-3">
+          <div class="module-grid module-grid-2">
             <label class="field">
               <span>Канал</span>
               <select id="alertChannel" required>
                 <option value="Telegram">Telegram</option>
+                <option value="Сообщение">Сообщение</option>
                 <option value="Звонок">Звонок</option>
               </select>
             </label>
@@ -307,14 +290,6 @@
                 <option value="Новый лид">Новый лид</option>
                 <option value="Просрочка SLA">Просрочка SLA</option>
                 <option value="Эскалация">Эскалация</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>Статус</span>
-              <select id="alertStatus" required>
-                <option value="Активен">Активен</option>
-                <option value="Пауза">Пауза</option>
-                <option value="Архив">Архив</option>
               </select>
             </label>
           </div>
@@ -336,7 +311,7 @@
             <button type="submit" class="btn btn-primary" id="alertSubmitBtn">Добавить правило</button>
             <button type="button" class="btn btn-ghost" id="alertCancelBtn">Отменить редактирование</button>
           </div>
-          <p id="alertFormMsg" class="admin-placeholder" style="margin-top:8px;"></p>
+          <p id="alertFormMsg" class="admin-form-msg"></p>
         </form>
 
         <div class="module-list-wrap">
@@ -347,6 +322,7 @@
           <div id="alertList" class="module-list"></div>
         </div>
       </section>
+      </div>
     </main>
   </div>
 
@@ -371,31 +347,691 @@
     const moduleSections = Array.from(document.querySelectorAll('.module-section'));
 
     function showSection(sectionId) {
+      var id = sectionId || 'people';
+      if (!moduleSections.some(function (s) { return s.id === id; })) {
+        id = 'people';
+      }
       moduleSections.forEach(function (section) {
-        section.hidden = section.id !== sectionId;
+        section.hidden = section.id !== id;
       });
 
       navLinks.forEach(function (link) {
-        link.classList.toggle('active', link.dataset.section === sectionId);
+        link.classList.toggle('active', link.dataset.section === id);
       });
+
+      if (id === 'chats' && typeof window.__fnrLoadChats === 'function') {
+        window.__fnrLoadChats();
+      } else if (typeof window.__fnrStopChatPoll === 'function') {
+        window.__fnrStopChatPoll();
+      }
+      if (id === 'agent-script' && typeof window.__fnrRefreshAgentPick === 'function') {
+        window.__fnrRefreshAgentPick();
+      }
+      if (id === 'vip-clients' && typeof window.__fnrPopulateVipManagers === 'function') {
+        window.__fnrPopulateVipManagers();
+      }
     }
 
     navLinks.forEach(function (link) {
       link.addEventListener('click', function (e) {
         e.preventDefault();
-        const sectionId = link.dataset.section;
+        var sectionId = link.dataset.section;
         if (!sectionId) return;
+        try {
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', '#' + sectionId);
+          } else {
+            window.location.hash = sectionId;
+          }
+        } catch (err) {
+          window.location.hash = sectionId;
+        }
         showSection(sectionId);
       });
     });
 
+    (function () {
+      function fnrApiBase() {
+        try {
+          return new URL('/fnr-api/lead', window.location.href).href.replace(/\/lead\/?$/, '');
+        } catch (e) {
+          return '/fnr-api';
+        }
+      }
+
+      function escHtml(value) {
+        return String(value || '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#39;');
+      }
+
+      var chatSelectedUid = null;
+      var chatSelectedFailedId = null;
+      var chatSelectedEmployeeId = null;
+      var chatListData = [];
+      var chatFailedData = [];
+      var chatPollTimer = null;
+
+      function chatEl(id) {
+        return document.getElementById(id);
+      }
+
+      function setChatStatus(msg) {
+        var el = chatEl('chatListStatus');
+        if (el) el.textContent = msg || '';
+      }
+
+      function selectedEmployee() {
+        var people = typeof window.__fnrGetPeople === 'function' ? window.__fnrGetPeople() : [];
+        return people.find(function (p) {
+          return p && p.id === chatSelectedEmployeeId;
+        });
+      }
+
+      function updateComposerLabel() {
+        var label = chatEl('chatComposerLabel');
+        if (!label) return;
+        var p = selectedEmployee();
+        if (!p) {
+          label.textContent = 'Сообщение';
+          return;
+        }
+        var who = (p.name || 'сотрудника').trim();
+        label.textContent = 'Сообщение от имени ' + who;
+      }
+
+      function updateComposerHint(aiOff) {
+        var hint = chatEl('chatComposerHint');
+        if (!hint) return;
+        var p = selectedEmployee();
+        var who = p && p.name ? p.name : 'менеджера';
+        if (aiOff) {
+          hint.textContent =
+            'ИИ отключён — пишите сами; в этом диалоге ответы шли от имени ' + who + '.';
+        } else {
+          hint.textContent =
+            'Та же модель ИИ (Comet), имя в ответах — как в профиле аккаунта ' +
+            who +
+            '. Можете вмешаться сообщением ниже.';
+        }
+      }
+
+      function renderChatEmployees() {
+        var body = chatEl('chatEmployeeBody');
+        if (!body) return;
+        var people = typeof window.__fnrGetPeople === 'function' ? window.__fnrGetPeople() : [];
+        if (!people.length) {
+          body.innerHTML = '<p class="chat-list-empty">Добавьте сотрудников в разделе «Команда».</p>';
+          return;
+        }
+        var accFirst = people.find(function (p) {
+          return p && p.id && /^fnr-acc-\d+$/.test(p.id);
+        });
+        var inList = people.some(function (p) {
+          return p && p.id === chatSelectedEmployeeId;
+        });
+        if (!chatSelectedEmployeeId || !inList) {
+          chatSelectedEmployeeId = accFirst ? accFirst.id : people[0].id;
+        }
+        body.innerHTML = people
+          .map(function (p) {
+            var active = p.id === chatSelectedEmployeeId ? ' is-active' : '';
+            var stOk = (p.status || 'Активен') === 'Активен';
+            var stClass = stOk ? ' chat-status--on' : ' chat-status--off';
+            return (
+              '<button type="button" role="tab" class="chat-employee-item chat-account-chip' +
+              stClass +
+              active +
+              '" data-employee-id="' +
+              escHtml(p.id) +
+              '"><span class="chat-employee-item__name">' +
+              escHtml(p.name || p.id) +
+              '</span><span class="chat-employee-item__role">' +
+              escHtml(p.role || '') +
+              '</span><span class="chat-employee-item__status">' +
+              escHtml(p.status || 'Активен') +
+              '</span></button>'
+            );
+          })
+          .join('');
+        body.querySelectorAll('.chat-employee-item').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var eid = btn.getAttribute('data-employee-id');
+            if (!eid) return;
+            chatSelectedEmployeeId = eid;
+            chatSelectedUid = null;
+            chatSelectedFailedId = null;
+            renderChatEmployees();
+            updateComposerLabel();
+            renderChatList();
+            clearThreadPanel();
+          });
+        });
+        var activeChip = body.querySelector('.chat-account-chip.is-active');
+        if (activeChip && activeChip.scrollIntoView) {
+          activeChip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+        updateComposerLabel();
+      }
+
+      function clearThreadPanel() {
+        chatEl('chatThreadTitle').textContent = 'Выберите контакт слева';
+        chatEl('chatThreadSubtitle').textContent = '';
+        var ls = chatEl('chatLeadStatus');
+        if (ls) {
+          ls.hidden = true;
+          ls.textContent = '';
+        }
+        chatEl('chatMessages').innerHTML = '';
+        chatEl('chatInput').disabled = true;
+        chatEl('chatSendBtn').disabled = true;
+        var f = chatEl('chatFileInput');
+        if (f) f.disabled = true;
+        var b1 = chatEl('chatPickFileBtn');
+        var b2 = chatEl('chatPickImageBtn');
+        var b3 = chatEl('chatPickVoiceBtn');
+        if (b1) b1.disabled = true;
+        if (b2) b2.disabled = true;
+        if (b3) b3.disabled = true;
+        var cb = chatEl('chatAiDisabled');
+        if (cb) {
+          cb.disabled = true;
+          cb.checked = false;
+        }
+        chatEl('chatComposerHint').textContent = '';
+      }
+
+      function isTelegramAccountEmployee() {
+        return /^fnr-acc-\d+$/.test(chatSelectedEmployeeId || '');
+      }
+
+      function selectedTelegramAccountId() {
+        var m = /^fnr-acc-(\d+)$/.exec(chatSelectedEmployeeId || '');
+        return m ? parseInt(m[1], 10) : null;
+      }
+
+      function employeeNameForAccountId(aid) {
+        if (aid === undefined || aid === null) return '';
+        var pid = 'fnr-acc-' + String(aid);
+        var people = typeof window.__fnrGetPeople === 'function' ? window.__fnrGetPeople() : [];
+        var p = people.find(function (x) {
+          return x && x.id === pid;
+        });
+        return p && p.name ? p.name : 'аккаунт #' + aid;
+      }
+
+      function chatBelongsToSelectedAccount(c) {
+        var sel = selectedTelegramAccountId();
+        if (sel === null) return true;
+        var aid = c.account_id;
+        if (aid === undefined || aid === null) return false;
+        return Number(aid) === sel;
+      }
+
+      function failedBelongsToSelectedAccount(f) {
+        var sel = selectedTelegramAccountId();
+        if (sel === null) return true;
+        var aid = f.account_id;
+        if (aid === undefined || aid === null) return false;
+        return Number(aid) === sel;
+      }
+
+      function renderChatList() {
+        var body = chatEl('chatListBody');
+        var q = (chatEl('chatListSearch') && chatEl('chatListSearch').value || '').trim().toLowerCase();
+        if (!body) return;
+        if (!chatSelectedEmployeeId) {
+          body.innerHTML = '<p class="chat-list-empty">Сначала выберите аккаунт менеджера в полосе сверху.</p>';
+          return;
+        }
+        if (!isTelegramAccountEmployee()) {
+          body.innerHTML =
+            '<p class="chat-list-empty">Диалоги в Telegram привязаны к аккаунту. Выберите чип аккаунта выше (не карточку сотрудника без Telegram).</p>';
+          return;
+        }
+        var rows = [];
+        chatListData.forEach(function (c) {
+          if (!chatBelongsToSelectedAccount(c)) return;
+          rows.push({ kind: 'uid', uid: c.uid, chat: c });
+        });
+        chatFailedData.forEach(function (f) {
+          if (!failedBelongsToSelectedAccount(f)) return;
+          rows.push({ kind: 'failed', failed: f });
+        });
+        rows = rows.filter(function (row) {
+          if (!q) return true;
+          if (row.kind === 'uid') {
+            var c = row.chat;
+            var t = (c.title + ' ' + (c.username || '') + ' ' + (c.preview || '')).toLowerCase();
+            return t.indexOf(q) >= 0;
+          }
+          var f = row.failed;
+          var tf =
+            (f.telegram || '') +
+            ' ' +
+            (f.name || '') +
+            ' ' +
+            (f.phone || '') +
+            ' ' +
+            (f.company || '') +
+            ' ' +
+            (f.error || '');
+          return tf.toLowerCase().indexOf(q) >= 0;
+        });
+        if (!rows.length) {
+          body.innerHTML =
+            '<p class="chat-list-empty">Нет диалогов для этого аккаунта. Новые лиды появятся после заявки с сайта, когда очередь дойдёт до этого аккаунта.</p>';
+          return;
+        }
+        body.innerHTML = rows
+          .map(function (row) {
+            if (row.kind === 'uid') {
+              var c = row.chat;
+              var active = chatSelectedUid === c.uid && !chatSelectedFailedId ? ' is-active' : '';
+              var badge = c.ai_disabled ? '<span class="chat-list-item__badge">ИИ off</span>' : '';
+              var accHint =
+                c.account_id !== undefined && c.account_id !== null
+                  ? '<span class="chat-list-item__account">#' + escHtml(String(c.account_id)) + '</span>'
+                  : '';
+              return (
+                '<button type="button" class="chat-list-item' +
+                active +
+                '" data-kind="uid" data-uid="' +
+                c.uid +
+                '">' +
+                '<span class="chat-list-item__title">' +
+                escHtml(c.title) +
+                '</span>' +
+                accHint +
+                badge +
+                '<span class="chat-list-item__preview">' +
+                escHtml((c.preview || '').slice(0, 72)) +
+                '</span>' +
+                '</button>'
+              );
+            }
+            var f = row.failed;
+            var st = f.status === 'not_found' ? 'не найден' : 'ошибка';
+            var fid = f.id || f.telegram || String(f.ts || '');
+            var active = chatSelectedFailedId === fid ? ' is-active' : '';
+            return (
+              '<button type="button" class="chat-list-item chat-list-item--failed' +
+              active +
+              '" data-kind="failed" data-fid="' +
+              escHtml(fid) +
+              '">' +
+              '<span class="chat-list-item__title">' +
+              escHtml(f.name || f.telegram || 'Лид') +
+              '</span>' +
+              '<span class="chat-list-item__badge chat-list-item__badge--bad">' +
+              escHtml(st) +
+              '</span>' +
+              '<span class="chat-list-item__preview">' +
+              escHtml((f.error || f.telegram || '').slice(0, 72)) +
+              '</span>' +
+              '</button>'
+            );
+          })
+          .join('');
+        body.querySelectorAll('.chat-list-item').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var kind = btn.getAttribute('data-kind');
+            if (kind === 'uid') {
+              var uid = parseInt(btn.getAttribute('data-uid'), 10);
+              if (!isNaN(uid)) selectChat(uid);
+            } else if (kind === 'failed') {
+              var fid = btn.getAttribute('data-fid');
+              selectFailedById(fid);
+            }
+          });
+        });
+      }
+
+      function renderChatMessages(messages) {
+        var box = chatEl('chatMessages');
+        if (!box) return;
+        if (!messages || !messages.length) {
+          box.innerHTML = '<p class="chat-messages-empty">Сообщений пока нет.</p>';
+          return;
+        }
+        box.innerHTML = messages
+          .map(function (m) {
+            var role = (m.role || '').toLowerCase();
+            var isUser = role === 'user';
+            var cls = isUser ? 'chat-bubble chat-bubble--user' : 'chat-bubble chat-bubble--boris';
+            var who = isUser ? 'Лид' : 'Борис';
+            var content = escHtml(m.content || '');
+            return '<div class="' + cls + '"><span class="chat-bubble__who">' + who + '</span><div class="chat-bubble__text">' + content.replace(/\n/g, '<br>') + '</div></div>';
+          })
+          .join('');
+        box.scrollTop = box.scrollHeight;
+      }
+
+      function selectChat(uid) {
+        chatSelectedFailedId = null;
+        chatSelectedUid = uid;
+        var ls = chatEl('chatLeadStatus');
+        if (ls) {
+          ls.hidden = true;
+          ls.textContent = '';
+        }
+        renderChatList();
+        loadChatThread(uid, false);
+      }
+
+      function findFailedById(fid) {
+        for (var i = 0; i < chatFailedData.length; i++) {
+          var f = chatFailedData[i];
+          var id = f.id || f.telegram || String(f.ts || '');
+          if (id === fid) return f;
+        }
+        return null;
+      }
+
+      function selectFailedById(fid) {
+        var entry = findFailedById(fid);
+        if (!entry) return;
+        chatSelectedUid = null;
+        chatSelectedFailedId = fid;
+        renderChatList();
+        chatEl('chatThreadTitle').textContent = entry.name || entry.telegram || 'Лид';
+        chatEl('chatThreadSubtitle').textContent = entry.telegram ? 'Telegram: ' + entry.telegram : '';
+        var st = entry.status === 'not_found' ? 'не найден' : 'ошибка доставки';
+        var ls = chatEl('chatLeadStatus');
+        if (ls) {
+          ls.hidden = false;
+          ls.textContent = 'Статус лида: ' + st;
+          ls.className = 'chat-lead-status chat-lead-status--bad';
+        }
+        var lines = [];
+        lines.push('<p><b>Не удалось написать в Telegram</b> ' + escHtml(entry.telegram || '') + '.</p>');
+        lines.push('<p>' + escHtml(entry.error || 'Ошибка отправки.') + '</p>');
+        var hint = [];
+        if (entry.phone) hint.push('тел. ' + escHtml(entry.phone));
+        if (entry.company) hint.push('компания: ' + escHtml(entry.company));
+        if (entry.message) hint.push('текст заявки: ' + escHtml(entry.message));
+        lines.push(
+          '<p class="chat-failed-hint">Свяжитесь с лидом по данным из заявки' +
+            (hint.length ? ': ' + hint.join('; ') + '.' : '.') +
+            '</p>'
+        );
+        chatEl('chatMessages').innerHTML = '<div class="chat-failed-card">' + lines.join('') + '</div>';
+        chatEl('chatInput').disabled = true;
+        chatEl('chatSendBtn').disabled = true;
+        var fIn = chatEl('chatFileInput');
+        if (fIn) fIn.disabled = true;
+        var b1 = chatEl('chatPickFileBtn');
+        var b2 = chatEl('chatPickImageBtn');
+        var b3 = chatEl('chatPickVoiceBtn');
+        if (b1) b1.disabled = true;
+        if (b2) b2.disabled = true;
+        if (b3) b3.disabled = true;
+        var cb = chatEl('chatAiDisabled');
+        if (cb) {
+          cb.disabled = true;
+          cb.checked = false;
+        }
+        chatEl('chatComposerHint').textContent = 'Переписки в Telegram нет — обратитесь к лиду по телефону или другим контактам из заявки.';
+        updateComposerLabel();
+      }
+
+      function loadChatList() {
+        setChatStatus('Загрузка…');
+        fetch(fnrApiBase() + '/admin/chats', { credentials: 'same-origin' })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (data) {
+            if (!data || !data.ok) throw new Error((data && data.error) || 'Ошибка');
+            chatListData = data.chats || [];
+            chatFailedData = data.failed_leads || [];
+            setChatStatus('');
+            if (chatSelectedUid) {
+              var cur = chatListData.find(function (c) {
+                return c.uid === chatSelectedUid;
+              });
+              if (!cur || !chatBelongsToSelectedAccount(cur)) {
+                chatSelectedUid = null;
+                clearThreadPanel();
+              }
+            }
+            renderChatList();
+            if (chatSelectedUid) {
+              var still = chatListData.some(function (c) {
+                return c.uid === chatSelectedUid && chatBelongsToSelectedAccount(c);
+              });
+              if (still) loadChatThread(chatSelectedUid, true);
+              else {
+                chatSelectedUid = null;
+                clearThreadPanel();
+              }
+            } else if (chatSelectedFailedId) {
+              var stillF = findFailedById(chatSelectedFailedId);
+              if (stillF) selectFailedById(chatSelectedFailedId);
+              else {
+                chatSelectedFailedId = null;
+                clearThreadPanel();
+              }
+            }
+          })
+          .catch(function (err) {
+            setChatStatus('Не удалось загрузить: ' + (err && err.message ? err.message : 'сеть') + '. Проверьте, что сервис fnr-api запущен.');
+            chatListData = [];
+            chatFailedData = [];
+            renderChatList();
+          });
+      }
+
+      function loadChatThread(uid, silent) {
+        if (!silent) setChatStatus('');
+        fetch(fnrApiBase() + '/admin/chats/' + uid, { credentials: 'same-origin' })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (data) {
+            if (!data || !data.ok) throw new Error('Ошибка');
+            var item = chatListData.find(function (c) {
+              return c.uid === uid;
+            });
+            var ls0 = chatEl('chatLeadStatus');
+            if (ls0) {
+              ls0.hidden = true;
+              ls0.textContent = '';
+            }
+            chatEl('chatThreadTitle').textContent = item ? item.title : 'Диалог ' + uid;
+            var subParts = [];
+            if (item && item.username) subParts.push(item.username);
+            else subParts.push('Telegram id: ' + uid);
+            if (item && item.account_id !== undefined && item.account_id !== null) {
+              subParts.push('Ответственный аккаунт: ' + employeeNameForAccountId(item.account_id));
+            }
+            chatEl('chatThreadSubtitle').textContent = subParts.join(' · ');
+            renderChatMessages(data.messages || []);
+            var aiOff = !!data.ai_disabled;
+            var cb = chatEl('chatAiDisabled');
+            if (cb) {
+              cb.disabled = false;
+              cb.checked = aiOff;
+            }
+            chatEl('chatInput').disabled = false;
+            chatEl('chatSendBtn').disabled = false;
+            var fIn = chatEl('chatFileInput');
+            if (fIn) fIn.disabled = false;
+            var b1 = chatEl('chatPickFileBtn');
+            var b2 = chatEl('chatPickImageBtn');
+            var b3 = chatEl('chatPickVoiceBtn');
+            if (b1) b1.disabled = false;
+            if (b2) b2.disabled = false;
+            if (b3) b3.disabled = false;
+            updateComposerHint(aiOff);
+          })
+          .catch(function () {
+            if (!silent) setChatStatus('Не удалось загрузить переписку.');
+          });
+      }
+
+      function sendChatMessage() {
+        if (chatSelectedFailedId) return;
+        var uid = chatSelectedUid;
+        var input = chatEl('chatInput');
+        if (!uid || !input) return;
+        var text = (input.value || '').trim();
+        if (!text) return;
+        chatEl('chatSendBtn').disabled = true;
+        fetch(fnrApiBase() + '/admin/chats/' + uid + '/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ text: text }),
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (data) {
+            if (!data || !data.ok) throw new Error((data && data.error) || 'send');
+            input.value = '';
+            loadChatThread(uid, true);
+            loadChatList();
+          })
+          .catch(function (e) {
+            alert('Не отправилось: ' + (e && e.message ? e.message : ''));
+          })
+          .finally(function () {
+            chatEl('chatSendBtn').disabled = false;
+          });
+      }
+
+      function onAiToggle() {
+        if (chatSelectedFailedId) return;
+        var uid = chatSelectedUid;
+        var cb = chatEl('chatAiDisabled');
+        if (!uid || !cb) return;
+        fetch(fnrApiBase() + '/admin/chats/' + uid + '/ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ ai_disabled: cb.checked }),
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (data) {
+            if (!data || !data.ok) throw new Error('ai');
+            loadChatList();
+            updateComposerHint(data.ai_disabled);
+          })
+          .catch(function () {
+            alert('Не удалось сохранить настройку ИИ.');
+            loadChatThread(uid, true);
+          });
+      }
+
+      window.__fnrStopChatPoll = function () {
+        if (chatPollTimer) {
+          clearInterval(chatPollTimer);
+          chatPollTimer = null;
+        }
+      };
+
+      window.__fnrLoadChats = function () {
+        renderChatEmployees();
+        loadChatList();
+        window.__fnrStopChatPoll();
+        chatPollTimer = setInterval(function () {
+          var h = (window.location.hash || '').replace(/^#/, '');
+          if (h !== 'chats') return;
+          if (chatSelectedUid) loadChatThread(chatSelectedUid, true);
+          else loadChatList();
+        }, 10000);
+      };
+
+      var refreshBtn = chatEl('chatListRefresh');
+      if (refreshBtn) refreshBtn.addEventListener('click', function () {
+        renderChatEmployees();
+        loadChatList();
+        if (chatSelectedUid) loadChatThread(chatSelectedUid, true);
+      });
+
+      function stubAttachment(kind) {
+        alert('Отправка ' + kind + ' с сервера — в разработке. Пока можно писать текстом.');
+      }
+      var pickFile = chatEl('chatPickFileBtn');
+      var pickImg = chatEl('chatPickImageBtn');
+      var pickVoice = chatEl('chatPickVoiceBtn');
+      var fileIn = chatEl('chatFileInput');
+      if (pickFile && fileIn) {
+        pickFile.addEventListener('click', function () {
+          if (!fileIn.disabled) fileIn.click();
+        });
+      }
+      if (pickImg && fileIn) {
+        pickImg.addEventListener('click', function () {
+          if (!fileIn.disabled) {
+            try {
+              fileIn.setAttribute('accept', 'image/*');
+            } catch (e) {}
+            fileIn.click();
+          }
+        });
+      }
+      if (pickVoice && fileIn) {
+        pickVoice.addEventListener('click', function () {
+          stubAttachment('голосового');
+        });
+      }
+      if (fileIn) {
+        fileIn.addEventListener('change', function () {
+          if (fileIn.files && fileIn.files.length) stubAttachment('файла');
+          fileIn.value = '';
+        });
+      }
+      var searchInp = chatEl('chatListSearch');
+      if (searchInp) searchInp.addEventListener('input', renderChatList);
+      var sendBtn = chatEl('chatSendBtn');
+      if (sendBtn) sendBtn.addEventListener('click', sendChatMessage);
+      var chatInput = chatEl('chatInput');
+      if (chatInput) {
+        chatInput.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendChatMessage();
+          }
+        });
+      }
+      var aiCb = chatEl('chatAiDisabled');
+      if (aiCb) aiCb.addEventListener('change', onAiToggle);
+    })();
+
     // --- Модуль "Команда и роли" (локальный CRUD) ---
+    const FNR_ROLE_HINTS = {
+      'Активный продавец':
+        'Входящие и исходящие продажи; формирование базы лидов; маркетинговые исследования; холодные контакты; презентация продуктов; ведение переписки и звонков до передачи сделки. ИИ-ассистенты в этой роли общаются с клиентами в Telegram от имени компании.',
+      Руководитель:
+        'Стратегия отдела продаж, контроль KPI и воронки; координация команды; эскалации и спорные ситуации с клиентами; крупные условия сделок.',
+      Технолог:
+        'Проверка ТЗ и макетов этикеток; консультации по материалам и печати; согласование с производством и нормами.',
+      Экономист:
+        'Калькуляция себестоимости и КП; счета, договоры, коммерческие переговоры; дожим сделок; контроль оплат и дебиторки.',
+      Диспетчер:
+        'Сроки производства и отгрузок; статусы заказов; логистика; информирование клиента о готовности.',
+    };
+
+    function applyRoleToScope() {
+      if (!personRoleInput || !personScopeInput) return;
+      var h = FNR_ROLE_HINTS[personRoleInput.value];
+      if (h) personScopeInput.value = h;
+    }
+
     const PEOPLE_STORAGE_KEY = 'fnr_admin_people_v1';
     const peopleForm = document.getElementById('peopleForm');
     const personIdInput = document.getElementById('personId');
     const personNameInput = document.getElementById('personName');
     const personRoleInput = document.getElementById('personRole');
     const personContactInput = document.getElementById('personContact');
+    const personStatusInput = document.getElementById('personStatus');
     const personScopeInput = document.getElementById('personScope');
     const peopleFormMsg = document.getElementById('peopleFormMsg');
     const peopleList = document.getElementById('peopleList');
@@ -403,11 +1039,38 @@
     const personSubmitBtn = document.getElementById('personSubmitBtn');
     const personCancelBtn = document.getElementById('personCancelBtn');
 
+    if (personRoleInput) {
+      personRoleInput.addEventListener('change', applyRoleToScope);
+    }
+
     function getPeople() {
       try {
         const raw = localStorage.getItem(PEOPLE_STORAGE_KEY);
         const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed : [];
+        const items = Array.isArray(parsed) ? parsed : [];
+        const roleMap = { Менеджер: 'Руководитель', 'Менеджер отдела продаж': 'Активный продавец' };
+        let migrated = false;
+        items.forEach(function (p) {
+          if (p && roleMap[p.role]) {
+            p.role = roleMap[p.role];
+            migrated = true;
+          }
+          if (p && p.status === undefined) {
+            p.status = 'Активен';
+            migrated = true;
+          }
+        });
+        if (migrated) {
+          localStorage.setItem(PEOPLE_STORAGE_KEY, JSON.stringify(items));
+        }
+        var next = items.filter(function (p) {
+          return p && p.id !== 'fnr-seed-userbot' && p.id !== 'fnr-seed-boris';
+        });
+        if (next.length !== items.length) {
+          localStorage.setItem(PEOPLE_STORAGE_KEY, JSON.stringify(next));
+          return next;
+        }
+        return items;
       } catch (err) {
         return [];
       }
@@ -417,12 +1080,72 @@
       localStorage.setItem(PEOPLE_STORAGE_KEY, JSON.stringify(items));
     }
 
+    window.__fnrGetPeople = getPeople;
+
     function resetFormState() {
       personIdInput.value = '';
       peopleForm.reset();
       personRoleInput.value = 'Технолог';
+      if (personStatusInput) personStatusInput.value = 'Активен';
       personSubmitBtn.textContent = 'Добавить';
       peopleFormMsg.textContent = '';
+      applyRoleToScope();
+      if (typeof window.fnrSyncAllCustomSelects === 'function') window.fnrSyncAllCustomSelects();
+    }
+
+    function fnrApiBaseUrl() {
+      try {
+        return new URL('/fnr-api/lead', window.location.href).href.replace(/\/lead\/?$/, '');
+      } catch (e) {
+        return '/fnr-api';
+      }
+    }
+
+    function mergeTeamAccountsFromServer() {
+      fetch(fnrApiBaseUrl() + '/team-accounts', { credentials: 'same-origin' })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          if (!data || !data.ok || !data.accounts || !data.accounts.length) return;
+          var items = getPeople().slice();
+          var hint = FNR_ROLE_HINTS['Активный продавец'];
+          var changed = false;
+          data.accounts.forEach(function (a) {
+            var pid = 'fnr-acc-' + a.id;
+            var disp = (a.display_name || a.label || '').trim() || ('Аккаунт #' + a.id);
+            var phone = (a.phone || '').trim();
+            var idx = items.findIndex(function (p) {
+              return p && p.id === pid;
+            });
+            if (idx >= 0) {
+              if (items[idx].name !== disp) {
+                items[idx].name = disp;
+                changed = true;
+              }
+              if (phone && items[idx].contact !== phone) {
+                items[idx].contact = phone;
+                changed = true;
+              }
+              return;
+            }
+            items.push({
+              id: pid,
+              name: disp,
+              role: 'Активный продавец',
+              status: 'Активен',
+              contact: phone,
+              scope: hint,
+              accountRegistryId: a.id,
+            });
+            changed = true;
+          });
+          if (changed) {
+            savePeople(items);
+            renderPeople();
+          }
+        })
+        .catch(function () {});
     }
 
     function escapeHtml(value) {
@@ -434,38 +1157,92 @@
         .replaceAll("'", '&#39;');
     }
 
+    function populateVipManagerSelect() {
+      const sel = document.getElementById('vipManager');
+      if (!sel) return;
+      const keep = sel.value;
+      const people = getPeople();
+      let html = '<option value="">— выберите сотрудника —</option>';
+      people.forEach(function (p) {
+        if (!p || !p.id) return;
+        html +=
+          '<option value="' +
+          escapeHtml(p.id) +
+          '">' +
+          escapeHtml(p.name || p.id) +
+          '</option>';
+      });
+      sel.innerHTML = html;
+      if (keep && people.some(function (p) {
+        return p.id === keep;
+      })) sel.value = keep;
+      if (typeof window.fnrSyncAllCustomSelects === 'function') window.fnrSyncAllCustomSelects();
+    }
+    window.__fnrPopulateVipManagers = populateVipManagerSelect;
+
+    function personCardHtml(item) {
+      var st = item.status || 'Активен';
+      var active = st === 'Активен';
+      var cardClass = 'person-card' + (active ? ' person-card--active' : ' person-card--inactive');
+      return (
+        '<article class="' + cardClass + '">' +
+        '<div class="person-card-head">' +
+        '<strong>' + escapeHtml(item.name) + '</strong>' +
+        '<div class="person-card-badges">' +
+        '<span class="module-badge">' + escapeHtml(item.role) + '</span>' +
+        '<span class="module-badge person-status-badge">' + escapeHtml(st) + '</span>' +
+        '</div></div>' +
+        '<p><b>Контакт:</b> ' + escapeHtml(item.contact || '—') + '</p>' +
+        '<p><b>Зона ответственности:</b> ' + escapeHtml(item.scope || '—') + '</p>' +
+        '<div class="module-actions">' +
+        '<button type="button" class="btn btn-ghost" data-action="edit" data-id="' + item.id + '">Редактировать</button>' +
+        '<button type="button" class="btn btn-ghost" data-action="delete" data-id="' + item.id + '">Удалить</button>' +
+        '</div>' +
+        '</article>'
+      );
+    }
+
     function renderPeople() {
       const items = getPeople();
       peopleCount.textContent = String(items.length);
       if (!items.length) {
         peopleList.innerHTML = '<p class="admin-placeholder">Список пуст. Добавьте первого сотрудника.</p>';
+        populateVipManagerSelect();
         return;
       }
 
-      peopleList.innerHTML = items
-        .map(function (item) {
-          return (
-            '<article class="person-card">' +
-            '<div class="person-card-head">' +
-            '<strong>' + escapeHtml(item.name) + '</strong>' +
-            '<span class="module-badge">' + escapeHtml(item.role) + '</span>' +
-            '</div>' +
-            '<p><b>Контакт:</b> ' + escapeHtml(item.contact || '—') + '</p>' +
-            '<p><b>Зона:</b> ' + escapeHtml(item.scope || '—') + '</p>' +
-            '<div class="module-actions">' +
-            '<button type="button" class="btn btn-ghost" data-action="edit" data-id="' + item.id + '">Редактировать</button>' +
-            '<button type="button" class="btn btn-ghost" data-action="delete" data-id="' + item.id + '">Удалить</button>' +
-            '</div>' +
-            '</article>'
-          );
-        })
-        .join('');
+      const activeItems = items.filter(function (p) {
+        return (p.status || 'Активен') === 'Активен';
+      });
+      const restItems = items.filter(function (p) {
+        return (p.status || 'Активен') !== 'Активен';
+      });
+
+      let html = '';
+      if (activeItems.length) {
+        html += '<div class="people-group people-group--active">';
+        html += '<h4 class="people-group__title">Активные</h4>';
+        html += '<div class="people-group__list">';
+        html += activeItems.map(personCardHtml).join('');
+        html += '</div></div>';
+      }
+      if (restItems.length) {
+        html += '<div class="people-group people-group--away">';
+        html += '<h4 class="people-group__title">Тест / больничный / отпуск</h4>';
+        html += '<div class="people-group__list">';
+        html += restItems.map(personCardHtml).join('');
+        html += '</div></div>';
+      }
+
+      peopleList.innerHTML = html || '<p class="admin-placeholder">Список пуст.</p>';
+      populateVipManagerSelect();
     }
 
     peopleForm.addEventListener('submit', function (e) {
       e.preventDefault();
       const name = personNameInput.value.trim();
       const role = personRoleInput.value.trim();
+      const status = (personStatusInput && personStatusInput.value) || 'Активен';
       const contact = personContactInput.value.trim();
       const scope = personScopeInput.value.trim();
 
@@ -481,7 +1258,16 @@
       if (id) {
         const idx = items.findIndex(function (x) { return x.id === id; });
         if (idx !== -1) {
-          items[idx] = { id: id, name: name, role: role, contact: contact, scope: scope };
+          var prev = items[idx];
+          items[idx] = {
+            id: id,
+            name: name,
+            role: role,
+            status: status,
+            contact: contact,
+            scope: scope,
+            accountRegistryId: prev.accountRegistryId,
+          };
         }
         formMessage = 'Сотрудник обновлён.';
       } else {
@@ -489,8 +1275,9 @@
           id: String(Date.now()),
           name: name,
           role: role,
+          status: status,
           contact: contact,
-          scope: scope
+          scope: scope,
         });
         formMessage = 'Сотрудник добавлен.';
       }
@@ -520,10 +1307,12 @@
         personIdInput.value = person.id;
         personNameInput.value = person.name || '';
         personRoleInput.value = person.role || 'Технолог';
+        if (personStatusInput) personStatusInput.value = person.status || 'Активен';
         personContactInput.value = person.contact || '';
         personScopeInput.value = person.scope || '';
         personSubmitBtn.textContent = 'Сохранить';
         peopleFormMsg.textContent = 'Режим редактирования.';
+        if (typeof window.fnrSyncAllCustomSelects === 'function') window.fnrSyncAllCustomSelects();
         personNameInput.focus();
       }
 
@@ -538,483 +1327,532 @@
       }
     });
 
-    // --- Модуль "Скрипт AI-агента" (локальный CRUD) ---
-    const SCRIPT_STORAGE_KEY = 'fnr_admin_agent_script_v1';
-    const scriptForm = document.getElementById('scriptForm');
-    const scriptIdInput = document.getElementById('scriptId');
-    const scriptTitleInput = document.getElementById('scriptTitle');
-    const scriptOrderInput = document.getElementById('scriptOrder');
-    const scriptEscalationInput = document.getElementById('scriptEscalation');
-    const scriptTemplateInput = document.getElementById('scriptTemplate');
-    const scriptConditionInput = document.getElementById('scriptCondition');
-    const scriptSubmitBtn = document.getElementById('scriptSubmitBtn');
-    const scriptCancelBtn = document.getElementById('scriptCancelBtn');
-    const scriptFormMsg = document.getElementById('scriptFormMsg');
-    const scriptList = document.getElementById('scriptList');
-    const scriptCount = document.getElementById('scriptCount');
+    // --- Настройка AI-агента: отдельный конфиг на каждый Telegram-аккаунт (localStorage v3) ---
+    const AGENT_CFG_KEY_V3 = 'fnr_agent_config_v3';
+    const AGENT_CFG_KEY_V2 = 'fnr_agent_config_v2';
 
-    function getScriptStages() {
+    function emptyAgentHandoff() {
+      return { seller: '', lead: '', tech: '', economist: '', dispatcher: '' };
+    }
+
+    function emptyAgentConfigPayload() {
+      return {
+        greeting1: '',
+        greeting2: '',
+        knowledge: '',
+        dialogScript: '',
+        handoff: emptyAgentHandoff(),
+      };
+    }
+
+    function legacyFromV2Object(o) {
+      const hm = (o && o.handoff) || {};
+      return {
+        greeting1: (o && o.greeting1) || '',
+        greeting2: (o && o.greeting2) || '',
+        knowledge: (o && o.knowledge) || '',
+        dialogScript: (o && o.dialogScript) || '',
+        handoff: {
+          seller: hm.seller || '',
+          lead: hm.lead || '',
+          tech: hm.tech || '',
+          economist: hm.economist || '',
+          dispatcher: hm.dispatcher || '',
+        },
+      };
+    }
+
+    function migrateV2FirstPass() {
+      const base = { byAccount: {}, selectedAccountIds: [], focusAccountId: null };
+      const raw = localStorage.getItem(AGENT_CFG_KEY_V2);
+      if (!raw) return base;
       try {
-        const raw = localStorage.getItem(SCRIPT_STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed : [];
+        const o = JSON.parse(raw);
+        const legacy = legacyFromV2Object(o);
+        const railIds = (o.agentIds || []).filter(function (id) {
+          return id && /^fnr-acc-\d+$/.test(String(id));
+        });
+        if (railIds.length) {
+          railIds.forEach(function (id) {
+            base.byAccount[id] = JSON.parse(JSON.stringify(legacy));
+          });
+          base.selectedAccountIds = railIds.slice();
+          base.focusAccountId = railIds[0];
+        }
+      } catch (e) {}
+      return base;
+    }
+
+    function spreadV2LegacyToAccounts(store, accounts) {
+      if (!accounts.length || Object.keys(store.byAccount).length > 0) return false;
+      const raw = localStorage.getItem(AGENT_CFG_KEY_V2);
+      if (!raw) return false;
+      try {
+        const o = JSON.parse(raw);
+        const legacy = legacyFromV2Object(o);
+        var has =
+          legacy.greeting1 ||
+          legacy.greeting2 ||
+          legacy.knowledge ||
+          legacy.dialogScript ||
+          Object.keys(legacy.handoff).some(function (k) {
+            return legacy.handoff[k];
+          });
+        if (!has) return false;
+        accounts.forEach(function (p) {
+          store.byAccount[p.id] = JSON.parse(JSON.stringify(legacy));
+        });
+        store.selectedAccountIds = accounts.map(function (p) {
+          return p.id;
+        });
+        store.focusAccountId = accounts[0].id;
+        return true;
+      } catch (e) {}
+      return false;
+    }
+
+    function normalizeAgentStore(st) {
+      if (!st || typeof st.byAccount !== 'object') return st;
+      if (Array.isArray(st.selectedAccountIds)) {
+        if (st.selectedAccountId) delete st.selectedAccountId;
+        st.selectedAccountIds = filterMassEligibleIds(st.selectedAccountIds);
+      } else if (st.selectedAccountId) {
+        st.selectedAccountIds = filterMassEligibleIds([st.selectedAccountId]);
+        delete st.selectedAccountId;
+      } else {
+        st.selectedAccountIds = [];
+      }
+      if (st.focusAccountId && typeof getPeople === 'function') {
+        var fp = getPersonById(st.focusAccountId);
+        if (!fp) {
+          var v = validAgentAccountIds();
+          st.focusAccountId = v.length ? v[0] : null;
+        }
+      }
+      return st;
+    }
+
+    function loadAgentStore() {
+      var raw = localStorage.getItem(AGENT_CFG_KEY_V3);
+      if (raw) {
+        try {
+          var s = JSON.parse(raw);
+          if (s && typeof s.byAccount === 'object') {
+            var needPersist =
+              s.selectedAccountId !== undefined && !Array.isArray(s.selectedAccountIds);
+            normalizeAgentStore(s);
+            if (needPersist) {
+              localStorage.setItem(AGENT_CFG_KEY_V3, JSON.stringify(s));
+            }
+            return s;
+          }
+        } catch (e) {}
+      }
+      var st = migrateV2FirstPass();
+      normalizeAgentStore(st);
+      localStorage.setItem(AGENT_CFG_KEY_V3, JSON.stringify(st));
+      return st;
+    }
+
+    function writeAgentStore(store) {
+      normalizeAgentStore(store);
+      try {
+        localStorage.setItem(AGENT_CFG_KEY_V3, JSON.stringify(store));
       } catch (err) {
-        return [];
+        console.error('fnr_agent_config_v3 save failed', err);
       }
     }
 
-    function saveScriptStages(items) {
-      localStorage.setItem(SCRIPT_STORAGE_KEY, JSON.stringify(items));
+    function validAgentAccountIds() {
+      var people = getPeople();
+      return people
+        .filter(function (p) {
+          return p && p.id && /^fnr-acc-\d+$/.test(p.id);
+        })
+        .map(function (p) {
+          return p.id;
+        });
     }
 
-    function resetScriptFormState() {
-      scriptIdInput.value = '';
-      scriptForm.reset();
-      scriptOrderInput.value = '1';
-      scriptEscalationInput.value = 'Нет';
-      scriptSubmitBtn.textContent = 'Добавить этап';
-      scriptFormMsg.textContent = '';
+    function getPersonById(personId) {
+      var people = getPeople();
+      for (var i = 0; i < people.length; i++) {
+        if (people[i] && people[i].id === personId) return people[i];
+      }
+      return null;
     }
 
-    function renderScriptStages() {
-      const stages = getScriptStages().slice().sort(function (a, b) {
-        return Number(a.order || 0) - Number(b.order || 0);
+    function isPersonActive(p) {
+      return p && (p.status || 'Активен') === 'Активен';
+    }
+
+    function filterMassEligibleIds(ids) {
+      return ids.filter(function (id) {
+        return isPersonActive(getPersonById(id));
+      });
+    }
+
+    function getAgentSelectedIds(store, validIds) {
+      var raw = Array.isArray(store.selectedAccountIds) ? store.selectedAccountIds : [];
+      var sel = raw.filter(function (id) {
+        return validIds.indexOf(id) >= 0;
+      });
+      return filterMassEligibleIds(sel);
+    }
+
+    function collectAgentFormPayload() {
+      return {
+        greeting1: (document.getElementById('agentGreeting1') || {}).value || '',
+        greeting2: (document.getElementById('agentGreeting2') || {}).value || '',
+        knowledge: (document.getElementById('agentKnowledgeBlock') || {}).value || '',
+        dialogScript: (document.getElementById('agentDialogScript') || {}).value || '',
+        handoff: {
+          seller: (document.getElementById('handoffSeller') || {}).value || '',
+          lead: (document.getElementById('handoffLead') || {}).value || '',
+          tech: (document.getElementById('handoffTech') || {}).value || '',
+          economist: (document.getElementById('handoffEco') || {}).value || '',
+          dispatcher: (document.getElementById('handoffDisp') || {}).value || '',
+        },
+      };
+    }
+
+    function applyAgentFormPayload(c) {
+      var base = c && typeof c === 'object' ? c : emptyAgentConfigPayload();
+      var hm = base.handoff || emptyAgentHandoff();
+      var g = document.getElementById('agentGreeting1');
+      var g2 = document.getElementById('agentGreeting2');
+      var kb = document.getElementById('agentKnowledgeBlock');
+      var ds = document.getElementById('agentDialogScript');
+      if (g) g.value = base.greeting1 || '';
+      if (g2) g2.value = base.greeting2 || '';
+      if (kb) kb.value = base.knowledge || '';
+      if (ds) ds.value = base.dialogScript || '';
+      var set = function (id, v) {
+        var el = document.getElementById(id);
+        if (el) el.value = v || '';
+      };
+      set('handoffSeller', hm.seller);
+      set('handoffLead', hm.lead);
+      set('handoffTech', hm.tech);
+      set('handoffEco', hm.economist);
+      set('handoffDisp', hm.dispatcher);
+    }
+
+    function agentAccountIdValid(accountId, validIds) {
+      var s = String(accountId);
+      for (var i = 0; i < validIds.length; i++) {
+        if (String(validIds[i]) === s) return true;
+      }
+      return false;
+    }
+
+    function persistDraftToAccount(accountId) {
+      if (!accountId) return;
+      var validIds = validAgentAccountIds();
+      if (!agentAccountIdValid(accountId, validIds)) return;
+      var st = loadAgentStore();
+      if (!st.byAccount || typeof st.byAccount !== 'object') st.byAccount = {};
+      var payload = collectAgentFormPayload();
+      var key = String(accountId);
+      st.byAccount[key] = JSON.parse(JSON.stringify(payload));
+      writeAgentStore(st);
+    }
+
+    function persistCurrentDraftBeforeFocusChange() {
+      var vIds = validAgentAccountIds();
+      if (!vIds.length) return;
+      var st = loadAgentStore();
+      var prev = st.focusAccountId;
+      if (prev && agentAccountIdValid(prev, vIds)) persistDraftToAccount(prev);
+    }
+
+    function commitFormToSelectedAccounts() {
+      var validIds = validAgentAccountIds();
+      if (!validIds.length) return;
+      var st = loadAgentStore();
+      if (!st.byAccount || typeof st.byAccount !== 'object') st.byAccount = {};
+      var sel = getAgentSelectedIds(st, validIds);
+      var payload = collectAgentFormPayload();
+      var targets = new Set();
+      sel.forEach(function (id) {
+        targets.add(String(id));
+      });
+      var fid = st.focusAccountId;
+      if (fid && agentAccountIdValid(fid, validIds)) {
+        targets.add(String(fid));
+      }
+      if (!targets.size) {
+        if (fid && agentAccountIdValid(fid, validIds)) targets.add(String(fid));
+        else targets.add(String(validIds[0]));
+      }
+      var snapshot = JSON.stringify(payload);
+      targets.forEach(function (id) {
+        st.byAccount[id] = JSON.parse(snapshot);
+      });
+      st.selectedAccountIds = sel.slice();
+      writeAgentStore(st);
+    }
+
+    function fillAgentFormForAccount(accountId) {
+      var st = loadAgentStore();
+      var key = String(accountId);
+      var raw = st.byAccount && (st.byAccount[key] || st.byAccount[accountId]);
+      var c = raw || emptyAgentConfigPayload();
+      applyAgentFormPayload(c);
+    }
+
+    function fillAgentFormForFocus() {
+      var validIds = validAgentAccountIds();
+      var msgEl = document.getElementById('agentConfigMsg');
+      if (!validIds.length) {
+        applyAgentFormPayload(emptyAgentConfigPayload());
+        return;
+      }
+      var st = loadAgentStore();
+      var fid = st.focusAccountId;
+      if (!fid || !agentAccountIdValid(fid, validIds)) fid = validIds[0];
+      if (msgEl && msgEl.textContent.indexOf('разные сохранённые') >= 0) msgEl.textContent = '';
+      fillAgentFormForAccount(fid);
+    }
+
+    function renderAgentPickList() {
+      var box = document.getElementById('agentPickList');
+      if (!box) return;
+      persistCurrentDraftBeforeFocusChange();
+      var people = getPeople();
+      var accounts = people.filter(function (p) {
+        return p && p.id && /^fnr-acc-\d+$/.test(p.id);
+      });
+      var validIds = accounts.map(function (p) {
+        return p.id;
+      });
+      var store = loadAgentStore();
+      if (spreadV2LegacyToAccounts(store, accounts)) {
+        writeAgentStore(store);
+        store = loadAgentStore();
+      }
+      if (!accounts.length) {
+        applyAgentFormPayload(emptyAgentConfigPayload());
+        box.innerHTML =
+          '<p class="admin-placeholder">Нет Telegram-аккаунтов в «Команде». Синхронизируйте реестр с сервера или добавьте карточки fnr-acc-*.</p>';
+        return;
+      }
+      var sel = getAgentSelectedIds(store, validIds);
+      store.selectedAccountIds = sel.slice();
+      if (!store.focusAccountId || !agentAccountIdValid(store.focusAccountId, validIds)) {
+        store.focusAccountId = validIds[0];
+      }
+      writeAgentStore(store);
+      var focusId = store.focusAccountId;
+
+      box.innerHTML = accounts
+        .map(function (p) {
+          var id = p.id;
+          var selected = sel.indexOf(id) >= 0 ? ' is-selected' : '';
+          var focused = String(id) === String(focusId) ? ' agent-chip--focus' : '';
+          var stOk = isPersonActive(p);
+          var stClass = stOk ? ' chat-status--on' : ' chat-status--off';
+          return (
+            '<button type="button" class="chat-employee-item chat-account-chip agent-account-chip' +
+            stClass +
+            selected +
+            focused +
+            '" data-agent-id="' +
+            escapeHtml(id) +
+            '" title="Активен: клик добавить/снять с группы сохранения. Неактивен: только свои настройки">' +
+            '<span class="chat-employee-item__name">' +
+            escapeHtml(p.name || id) +
+            '</span>' +
+            '<span class="chat-employee-item__role">' +
+            escapeHtml(p.role || '') +
+            '</span>' +
+            '<span class="chat-employee-item__status">' +
+            escapeHtml(p.status || 'Аккаунт') +
+            '</span>' +
+            '</button>'
+          );
+        })
+        .join('');
+
+      box.querySelectorAll('.agent-account-chip').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = btn.getAttribute('data-agent-id');
+          if (!id) return;
+          id = String(id);
+          var vIds = validAgentAccountIds();
+          persistCurrentDraftBeforeFocusChange();
+          var st = loadAgentStore();
+          var cur = getAgentSelectedIds(st, vIds).slice();
+          var person = getPersonById(id);
+          if (!isPersonActive(person)) {
+            st.selectedAccountIds = filterMassEligibleIds(cur);
+            st.focusAccountId = id;
+            writeAgentStore(st);
+            fillAgentFormForAccount(id);
+            renderAgentPickList();
+            return;
+          }
+          var ix = cur.indexOf(id);
+          if (ix >= 0) {
+            cur.splice(ix, 1);
+          } else {
+            cur.push(id);
+          }
+          st.selectedAccountIds = cur;
+          st.focusAccountId = id;
+          writeAgentStore(st);
+          fillAgentFormForAccount(id);
+          renderAgentPickList();
+        });
       });
 
-      scriptCount.textContent = String(stages.length);
-      if (!stages.length) {
-        scriptList.innerHTML = '<p class="admin-placeholder">Этапы пока не добавлены.</p>';
-        return;
-      }
-
-      scriptList.innerHTML = stages
-        .map(function (stage) {
-          return (
-            '<article class="script-card">' +
-            '<div class="person-card-head">' +
-            '<strong>' + escapeHtml(stage.title) + '</strong>' +
-            '<span class="module-badge">Этап ' + escapeHtml(stage.order) + '</span>' +
-            '</div>' +
-            '<p><b>Эскалация:</b> ' + escapeHtml(stage.escalation) + '</p>' +
-            '<p><b>Шаблон:</b> ' + escapeHtml(stage.template) + '</p>' +
-            '<p><b>Переход:</b> ' + escapeHtml(stage.condition || '—') + '</p>' +
-            '<div class="module-actions">' +
-            '<button type="button" class="btn btn-ghost" data-script-action="edit" data-script-id="' + stage.id + '">Редактировать</button>' +
-            '<button type="button" class="btn btn-ghost" data-script-action="delete" data-script-id="' + stage.id + '">Удалить</button>' +
-            '</div>' +
-            '</article>'
-          );
-        })
-        .join('');
+      fillAgentFormForFocus();
     }
 
-    scriptForm.addEventListener('submit', function (e) {
-      e.preventDefault();
+    function fillAgentFormFromStorage() {
+      fillAgentFormForFocus();
+    }
 
-      const title = scriptTitleInput.value.trim();
-      const order = Number(scriptOrderInput.value);
-      const escalation = scriptEscalationInput.value.trim();
-      const template = scriptTemplateInput.value.trim();
-      const condition = scriptConditionInput.value.trim();
-
-      if (!title || !template) {
-        scriptFormMsg.textContent = 'Заполните название этапа и шаблон сообщения.';
-        return;
-      }
-      if (!Number.isFinite(order) || order < 1) {
-        scriptFormMsg.textContent = 'Порядок этапа должен быть числом от 1.';
-        return;
-      }
-
-      const id = scriptIdInput.value;
-      const items = getScriptStages();
-      let msg = '';
-
-      if (id) {
-        const idx = items.findIndex(function (x) { return x.id === id; });
-        if (idx !== -1) {
-          items[idx] = { id: id, title: title, order: order, escalation: escalation, template: template, condition: condition };
+    function buildSalesSyncPayload() {
+      var people = getPeople();
+      var agent = loadAgentStore();
+      var lead_active = [];
+      var accounts = {};
+      people.forEach(function (p) {
+        if (!p || !p.id) return;
+        var m = /^fnr-acc-(\d+)$/.exec(String(p.id));
+        if (!m) return;
+        if ((p.status || 'Активен') !== 'Активен') return;
+        var numId = m[1];
+        var aid = parseInt(numId, 10);
+        lead_active.push(aid);
+        var cfg =
+          agent.byAccount &&
+          (agent.byAccount[p.id] || agent.byAccount[numId] || agent.byAccount[String(aid)]);
+        var first = cfg && cfg.greeting1 ? String(cfg.greeting1).trim() : '';
+        var parts = [];
+        if (cfg) {
+          if (cfg.greeting2) parts.push('Доп. приветствие: ' + cfg.greeting2);
+          if (cfg.knowledge) parts.push('Знания:\n' + cfg.knowledge);
+          if (cfg.dialogScript) parts.push('Сценарий и тон:\n' + cfg.dialogScript);
+          if (cfg.handoff) {
+            var h = cfg.handoff;
+            parts.push(
+              'Передачи: продавец — ' +
+                (h.seller || '') +
+                '; рук. — ' +
+                (h.lead || '') +
+                '; техн. — ' +
+                (h.tech || '') +
+                '; эконом. — ' +
+                (h.economist || '') +
+                '; дисп. — ' +
+                (h.dispatcher || '')
+            );
+          }
         }
-        msg = 'Этап обновлён.';
-      } else {
-        items.push({
-          id: String(Date.now()),
-          title: title,
-          order: order,
-          escalation: escalation,
-          template: template,
-          condition: condition
-        });
-        msg = 'Этап добавлен.';
-      }
-
-      saveScriptStages(items);
-      renderScriptStages();
-      resetScriptFormState();
-      scriptFormMsg.textContent = msg;
-    });
-
-    scriptCancelBtn.addEventListener('click', function () {
-      resetScriptFormState();
-    });
-
-    scriptList.addEventListener('click', function (e) {
-      const target = e.target;
-      if (!(target instanceof HTMLElement)) return;
-
-      const action = target.dataset.scriptAction;
-      const id = target.dataset.scriptId;
-      if (!action || !id) return;
-
-      const items = getScriptStages();
-      const stage = items.find(function (x) { return x.id === id; });
-      if (!stage) return;
-
-      if (action === 'edit') {
-        scriptIdInput.value = stage.id;
-        scriptTitleInput.value = stage.title || '';
-        scriptOrderInput.value = String(stage.order || 1);
-        scriptEscalationInput.value = stage.escalation || 'Нет';
-        scriptTemplateInput.value = stage.template || '';
-        scriptConditionInput.value = stage.condition || '';
-        scriptSubmitBtn.textContent = 'Сохранить этап';
-        scriptFormMsg.textContent = 'Режим редактирования этапа.';
-        scriptTitleInput.focus();
-      }
-
-      if (action === 'delete') {
-        const next = items.filter(function (x) { return x.id !== id; });
-        saveScriptStages(next);
-        renderScriptStages();
-        scriptFormMsg.textContent = 'Этап удалён.';
-        if (scriptIdInput.value === id) {
-          resetScriptFormState();
-        }
-      }
-    });
-
-    // --- Модуль "Воронка общения" (локальный CRUD) ---
-    const FUNNEL_STORAGE_KEY = 'fnr_admin_funnel_v1';
-    const funnelForm = document.getElementById('funnelForm');
-    const funnelIdInput = document.getElementById('funnelId');
-    const funnelTitleInput = document.getElementById('funnelTitle');
-    const funnelOrderInput = document.getElementById('funnelOrder');
-    const funnelSlaInput = document.getElementById('funnelSla');
-    const funnelNextInput = document.getElementById('funnelNext');
-    const funnelStatusInput = document.getElementById('funnelStatus');
-    const funnelAutoRuleInput = document.getElementById('funnelAutoRule');
-    const funnelSubmitBtn = document.getElementById('funnelSubmitBtn');
-    const funnelCancelBtn = document.getElementById('funnelCancelBtn');
-    const funnelFormMsg = document.getElementById('funnelFormMsg');
-    const funnelList = document.getElementById('funnelList');
-    const funnelCount = document.getElementById('funnelCount');
-
-    function getFunnelStages() {
-      try {
-        const raw = localStorage.getItem(FUNNEL_STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed : [];
-      } catch (err) {
-        return [];
-      }
-    }
-
-    function saveFunnelStages(items) {
-      localStorage.setItem(FUNNEL_STORAGE_KEY, JSON.stringify(items));
-    }
-
-    function resetFunnelFormState() {
-      funnelIdInput.value = '';
-      funnelForm.reset();
-      funnelOrderInput.value = '1';
-      funnelSlaInput.value = '30';
-      funnelStatusInput.value = 'Активен';
-      funnelSubmitBtn.textContent = 'Добавить этап';
-      funnelFormMsg.textContent = '';
-    }
-
-    function getStatusClass(status) {
-      if (status === 'Активен') return 'status-active';
-      if (status === 'Пауза') return 'status-paused';
-      return 'status-archived';
-    }
-
-    function renderFunnelStages() {
-      const stages = getFunnelStages().slice().sort(function (a, b) {
-        return Number(a.order || 0) - Number(b.order || 0);
+        accounts[numId] = {
+          first_message: first,
+          system_extra: parts.join('\n\n'),
+        };
       });
-
-      funnelCount.textContent = String(stages.length);
-      if (!stages.length) {
-        funnelList.innerHTML = '<p class="admin-placeholder">Этапы воронки пока не добавлены.</p>';
-        return;
-      }
-
-      funnelList.innerHTML = stages
-        .map(function (stage) {
-          return (
-            '<article class="funnel-card">' +
-            '<div class="person-card-head">' +
-            '<strong>' + escapeHtml(stage.title) + '</strong>' +
-            '<span class="module-badge">Этап ' + escapeHtml(stage.order) + '</span>' +
-            '</div>' +
-            '<p><b>SLA:</b> ' + escapeHtml(stage.sla) + ' мин</p>' +
-            '<p><b>Следующий этап:</b> ' + escapeHtml(stage.next || '—') + '</p>' +
-            '<p><b>Автопереход:</b> ' + escapeHtml(stage.autoRule || '—') + '</p>' +
-            '<p><b>Статус:</b> <span class="status-chip ' + getStatusClass(stage.status) + '">' + escapeHtml(stage.status) + '</span></p>' +
-            '<div class="module-actions">' +
-            '<button type="button" class="btn btn-ghost" data-funnel-action="edit" data-funnel-id="' + stage.id + '">Редактировать</button>' +
-            '<button type="button" class="btn btn-ghost" data-funnel-action="delete" data-funnel-id="' + stage.id + '">Удалить</button>' +
-            '</div>' +
-            '</article>'
-          );
-        })
-        .join('');
+      return { lead_active_account_ids: lead_active, accounts: accounts };
     }
 
-    funnelForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      const title = funnelTitleInput.value.trim();
-      const order = Number(funnelOrderInput.value);
-      const sla = Number(funnelSlaInput.value);
-      const next = funnelNextInput.value.trim();
-      const status = funnelStatusInput.value.trim();
-      const autoRule = funnelAutoRuleInput.value.trim();
-
-      if (!title) {
-        funnelFormMsg.textContent = 'Введите название этапа.';
-        return;
-      }
-      if (!Number.isFinite(order) || order < 1) {
-        funnelFormMsg.textContent = 'Порядок должен быть числом от 1.';
-        return;
-      }
-      if (!Number.isFinite(sla) || sla < 1) {
-        funnelFormMsg.textContent = 'SLA должен быть числом от 1 минуты.';
-        return;
-      }
-
-      const id = funnelIdInput.value;
-      const items = getFunnelStages();
-      let msg = '';
-
-      if (id) {
-        const idx = items.findIndex(function (x) { return x.id === id; });
-        if (idx !== -1) {
-          items[idx] = { id: id, title: title, order: order, sla: sla, next: next, status: status, autoRule: autoRule };
+    const agentConfigForm = document.getElementById('agentConfigForm');
+    if (agentConfigForm) {
+      if (!agentConfigForm.dataset.fnrAutosave) {
+        agentConfigForm.dataset.fnrAutosave = '1';
+        var fnrDraftTimer = null;
+        function fnrScheduleDraftSave() {
+          if (fnrDraftTimer) clearTimeout(fnrDraftTimer);
+          fnrDraftTimer = setTimeout(function () {
+            var st = loadAgentStore();
+            var fid = st.focusAccountId;
+            var vIds = validAgentAccountIds();
+            if (fid && agentAccountIdValid(fid, vIds)) persistDraftToAccount(fid);
+          }, 300);
         }
-        msg = 'Этап воронки обновлён.';
-      } else {
-        items.push({
-          id: String(Date.now()),
-          title: title,
-          order: order,
-          sla: sla,
-          next: next,
-          status: status,
-          autoRule: autoRule
+        agentConfigForm.addEventListener('input', fnrScheduleDraftSave, true);
+        agentConfigForm.addEventListener('change', fnrScheduleDraftSave, true);
+      }
+      renderAgentPickList();
+      agentConfigForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var validIds = validAgentAccountIds();
+        if (!validIds.length) {
+          var msg0 = document.getElementById('agentConfigMsg');
+          if (msg0) msg0.textContent = 'Нет Telegram-аккаунтов.';
+          return;
+        }
+        commitFormToSelectedAccounts();
+        var st = loadAgentStore();
+        var sel = getAgentSelectedIds(st, validIds);
+        var mass = sel.length;
+        var msg = document.getElementById('agentConfigMsg');
+        if (msg) {
+          if (mass > 1) {
+            msg.textContent =
+              'Сохранено для ' +
+              mass +
+              ' активных аккаунтов (зелёная группа). Подключение к промпту Comet — на сервере.';
+          } else if (mass === 1) {
+            msg.textContent =
+              'Сохранено для аккаунта в группе и для открытого в форме. Подключение к промпту Comet — на сервере.';
+          } else {
+            msg.textContent =
+              'Сохранено только для аккаунта в фокусе (массовая группа пуста или неактивные не в группе). Подключение к промпту Comet — на сервере.';
+          }
+        }
+        fillAgentFormForFocus();
+      });
+      var syncBtn = document.getElementById('agentServerSyncBtn');
+      var syncMsg = document.getElementById('agentServerSyncMsg');
+      if (syncBtn) {
+        syncBtn.addEventListener('click', function () {
+          persistCurrentDraftBeforeFocusChange();
+          var payload = buildSalesSyncPayload();
+          if (syncMsg) syncMsg.textContent = '';
+          syncBtn.disabled = true;
+          fetch(fnrApiBaseUrl() + '/admin/sales-sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload),
+          })
+            .then(function (r) {
+              return r.json().then(function (j) {
+                return { ok: r.ok, json: j };
+              });
+            })
+            .then(function (x) {
+              if (syncMsg) {
+                if (x.ok && x.json && x.json.ok) {
+                  var n = (payload.lead_active_account_ids || []).length;
+                  syncMsg.textContent =
+                    n > 0
+                      ? 'Сервер обновлён: ' + n + ' активных аккаунта(ов) для заявок и их тексты.'
+                      : 'Сервер обновлён: нет активных Telegram-аккаунтов — заявки с сайта не смогут уйти в TG.';
+                } else {
+                  syncMsg.textContent =
+                    'Ошибка синхронизации: ' +
+                    ((x.json && (x.json.error || x.json.message)) || 'запрос не выполнен');
+                }
+              }
+            })
+            .catch(function (err) {
+              if (syncMsg) syncMsg.textContent = 'Сеть: ' + (err && err.message ? err.message : String(err));
+            })
+            .finally(function () {
+              syncBtn.disabled = false;
+            });
         });
-        msg = 'Этап воронки добавлен.';
-      }
-
-      saveFunnelStages(items);
-      renderFunnelStages();
-      resetFunnelFormState();
-      funnelFormMsg.textContent = msg;
-    });
-
-    funnelCancelBtn.addEventListener('click', function () {
-      resetFunnelFormState();
-    });
-
-    funnelList.addEventListener('click', function (e) {
-      const target = e.target;
-      if (!(target instanceof HTMLElement)) return;
-      const action = target.dataset.funnelAction;
-      const id = target.dataset.funnelId;
-      if (!action || !id) return;
-
-      const items = getFunnelStages();
-      const stage = items.find(function (x) { return x.id === id; });
-      if (!stage) return;
-
-      if (action === 'edit') {
-        funnelIdInput.value = stage.id;
-        funnelTitleInput.value = stage.title || '';
-        funnelOrderInput.value = String(stage.order || 1);
-        funnelSlaInput.value = String(stage.sla || 30);
-        funnelNextInput.value = stage.next || '';
-        funnelStatusInput.value = stage.status || 'Активен';
-        funnelAutoRuleInput.value = stage.autoRule || '';
-        funnelSubmitBtn.textContent = 'Сохранить этап';
-        funnelFormMsg.textContent = 'Режим редактирования этапа воронки.';
-        funnelTitleInput.focus();
-      }
-
-      if (action === 'delete') {
-        const nextItems = items.filter(function (x) { return x.id !== id; });
-        saveFunnelStages(nextItems);
-        renderFunnelStages();
-        funnelFormMsg.textContent = 'Этап воронки удалён.';
-        if (funnelIdInput.value === id) {
-          resetFunnelFormState();
-        }
-      }
-    });
-
-    // --- Модуль "База данных агента" (локальный CRUD) ---
-    const KNOWLEDGE_STORAGE_KEY = 'fnr_admin_knowledge_v1';
-    const knowledgeForm = document.getElementById('knowledgeForm');
-    const knowledgeIdInput = document.getElementById('knowledgeId');
-    const knowledgeCategoryInput = document.getElementById('knowledgeCategory');
-    const knowledgeStatusInput = document.getElementById('knowledgeStatus');
-    const knowledgeTagsInput = document.getElementById('knowledgeTags');
-    const knowledgeQuestionInput = document.getElementById('knowledgeQuestion');
-    const knowledgeAnswerInput = document.getElementById('knowledgeAnswer');
-    const knowledgeSubmitBtn = document.getElementById('knowledgeSubmitBtn');
-    const knowledgeCancelBtn = document.getElementById('knowledgeCancelBtn');
-    const knowledgeFormMsg = document.getElementById('knowledgeFormMsg');
-    const knowledgeCount = document.getElementById('knowledgeCount');
-    const knowledgeList = document.getElementById('knowledgeList');
-
-    function getKnowledgeItems() {
-      try {
-        const raw = localStorage.getItem(KNOWLEDGE_STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed : [];
-      } catch (err) {
-        return [];
       }
     }
 
-    function saveKnowledgeItems(items) {
-      localStorage.setItem(KNOWLEDGE_STORAGE_KEY, JSON.stringify(items));
-    }
-
-    function resetKnowledgeFormState() {
-      knowledgeIdInput.value = '';
-      knowledgeForm.reset();
-      knowledgeCategoryInput.value = 'Материалы';
-      knowledgeStatusInput.value = 'Опубликовано';
-      knowledgeSubmitBtn.textContent = 'Добавить запись';
-      knowledgeFormMsg.textContent = '';
-    }
-
-    function getKnowledgeStatusClass(status) {
-      if (status === 'Опубликовано') return 'status-active';
-      if (status === 'Черновик') return 'status-paused';
-      return 'status-archived';
-    }
-
-    function renderKnowledgeItems() {
-      const items = getKnowledgeItems().slice();
-      knowledgeCount.textContent = String(items.length);
-
-      if (!items.length) {
-        knowledgeList.innerHTML = '<p class="admin-placeholder">База знаний пока пустая.</p>';
-        return;
-      }
-
-      knowledgeList.innerHTML = items
-        .map(function (item) {
-          return (
-            '<article class="knowledge-card">' +
-            '<div class="person-card-head">' +
-            '<strong>' + escapeHtml(item.question) + '</strong>' +
-            '<span class="module-badge">' + escapeHtml(item.category) + '</span>' +
-            '</div>' +
-            '<p><b>Статус:</b> <span class="status-chip ' + getKnowledgeStatusClass(item.status) + '">' + escapeHtml(item.status) + '</span></p>' +
-            '<p><b>Теги:</b> ' + escapeHtml(item.tags || '—') + '</p>' +
-            '<p><b>Ответ:</b> ' + escapeHtml(item.answer) + '</p>' +
-            '<div class="module-actions">' +
-            '<button type="button" class="btn btn-ghost" data-knowledge-action="edit" data-knowledge-id="' + item.id + '">Редактировать</button>' +
-            '<button type="button" class="btn btn-ghost" data-knowledge-action="delete" data-knowledge-id="' + item.id + '">Удалить</button>' +
-            '</div>' +
-            '</article>'
-          );
-        })
-        .join('');
-    }
-
-    knowledgeForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      const category = knowledgeCategoryInput.value.trim();
-      const status = knowledgeStatusInput.value.trim();
-      const tags = knowledgeTagsInput.value.trim();
-      const question = knowledgeQuestionInput.value.trim();
-      const answer = knowledgeAnswerInput.value.trim();
-
-      if (!question || !answer) {
-        knowledgeFormMsg.textContent = 'Заполните вопрос и ответ.';
-        return;
-      }
-
-      const id = knowledgeIdInput.value;
-      const items = getKnowledgeItems();
-      let msg = '';
-
-      if (id) {
-        const idx = items.findIndex(function (x) { return x.id === id; });
-        if (idx !== -1) {
-          items[idx] = { id: id, category: category, status: status, tags: tags, question: question, answer: answer };
-        }
-        msg = 'Запись обновлена.';
-      } else {
-        items.unshift({
-          id: String(Date.now()),
-          category: category,
-          status: status,
-          tags: tags,
-          question: question,
-          answer: answer
-        });
-        msg = 'Запись добавлена.';
-      }
-
-      saveKnowledgeItems(items);
-      renderKnowledgeItems();
-      resetKnowledgeFormState();
-      knowledgeFormMsg.textContent = msg;
-    });
-
-    knowledgeCancelBtn.addEventListener('click', function () {
-      resetKnowledgeFormState();
-    });
-
-    knowledgeList.addEventListener('click', function (e) {
-      const target = e.target;
-      if (!(target instanceof HTMLElement)) return;
-      const action = target.dataset.knowledgeAction;
-      const id = target.dataset.knowledgeId;
-      if (!action || !id) return;
-
-      const items = getKnowledgeItems();
-      const record = items.find(function (x) { return x.id === id; });
-      if (!record) return;
-
-      if (action === 'edit') {
-        knowledgeIdInput.value = record.id;
-        knowledgeCategoryInput.value = record.category || 'Материалы';
-        knowledgeStatusInput.value = record.status || 'Опубликовано';
-        knowledgeTagsInput.value = record.tags || '';
-        knowledgeQuestionInput.value = record.question || '';
-        knowledgeAnswerInput.value = record.answer || '';
-        knowledgeSubmitBtn.textContent = 'Сохранить запись';
-        knowledgeFormMsg.textContent = 'Режим редактирования записи.';
-        knowledgeQuestionInput.focus();
-      }
-
-      if (action === 'delete') {
-        const next = items.filter(function (x) { return x.id !== id; });
-        saveKnowledgeItems(next);
-        renderKnowledgeItems();
-        knowledgeFormMsg.textContent = 'Запись удалена.';
-        if (knowledgeIdInput.value === id) {
-          resetKnowledgeFormState();
-        }
-      }
-    });
+    window.__fnrRefreshAgentPick = function () {
+      renderAgentPickList();
+    };
 
     // --- Модуль "Будилки / уведомления" (локальный CRUD) ---
     const ALERT_STORAGE_KEY = 'fnr_admin_alerts_v1';
@@ -1022,7 +1860,6 @@
     const alertIdInput = document.getElementById('alertId');
     const alertChannelInput = document.getElementById('alertChannel');
     const alertEventInput = document.getElementById('alertEvent');
-    const alertStatusInput = document.getElementById('alertStatus');
     const alertTargetInput = document.getElementById('alertTarget');
     const alertScheduleInput = document.getElementById('alertSchedule');
     const alertConditionInput = document.getElementById('alertCondition');
@@ -1051,9 +1888,9 @@
       alertForm.reset();
       alertChannelInput.value = 'Telegram';
       alertEventInput.value = 'Новый лид';
-      alertStatusInput.value = 'Активен';
       alertSubmitBtn.textContent = 'Добавить правило';
       alertFormMsg.textContent = '';
+      if (typeof window.fnrSyncAllCustomSelects === 'function') window.fnrSyncAllCustomSelects();
     }
 
     function renderAlertRules() {
@@ -1075,7 +1912,6 @@
             '<p><b>Получатель:</b> ' + escapeHtml(item.target) + '</p>' +
             '<p><b>Расписание:</b> ' + escapeHtml(item.schedule || '—') + '</p>' +
             '<p><b>Условие:</b> ' + escapeHtml(item.condition || '—') + '</p>' +
-            '<p><b>Статус:</b> <span class="status-chip ' + getStatusClass(item.status) + '">' + escapeHtml(item.status) + '</span></p>' +
             '<div class="module-actions">' +
             '<button type="button" class="btn btn-ghost" data-alert-action="edit" data-alert-id="' + item.id + '">Редактировать</button>' +
             '<button type="button" class="btn btn-ghost" data-alert-action="delete" data-alert-id="' + item.id + '">Удалить</button>' +
@@ -1090,7 +1926,6 @@
       e.preventDefault();
       const channel = alertChannelInput.value.trim();
       const event = alertEventInput.value.trim();
-      const status = alertStatusInput.value.trim();
       const target = alertTargetInput.value.trim();
       const schedule = alertScheduleInput.value.trim();
       const condition = alertConditionInput.value.trim();
@@ -1107,7 +1942,7 @@
       if (id) {
         const idx = items.findIndex(function (x) { return x.id === id; });
         if (idx !== -1) {
-          items[idx] = { id: id, channel: channel, event: event, status: status, target: target, schedule: schedule, condition: condition };
+          items[idx] = { id: id, channel: channel, event: event, target: target, schedule: schedule, condition: condition };
         }
         msg = 'Правило уведомления обновлено.';
       } else {
@@ -1115,7 +1950,6 @@
           id: String(Date.now()),
           channel: channel,
           event: event,
-          status: status,
           target: target,
           schedule: schedule,
           condition: condition
@@ -1148,12 +1982,12 @@
         alertIdInput.value = record.id;
         alertChannelInput.value = record.channel || 'Telegram';
         alertEventInput.value = record.event || 'Новый лид';
-        alertStatusInput.value = record.status || 'Активен';
         alertTargetInput.value = record.target || '';
         alertScheduleInput.value = record.schedule || '';
         alertConditionInput.value = record.condition || '';
         alertSubmitBtn.textContent = 'Сохранить правило';
         alertFormMsg.textContent = 'Режим редактирования правила.';
+        if (typeof window.fnrSyncAllCustomSelects === 'function') window.fnrSyncAllCustomSelects();
         alertTargetInput.focus();
       }
 
@@ -1173,10 +2007,8 @@
     const vipForm = document.getElementById('vipForm');
     const vipIdInput = document.getElementById('vipId');
     const vipCompanyInput = document.getElementById('vipCompany');
-    const vipStatusInput = document.getElementById('vipStatus');
     const vipContactInput = document.getElementById('vipContact');
     const vipManagerInput = document.getElementById('vipManager');
-    const vipTermsInput = document.getElementById('vipTerms');
     const vipNotesInput = document.getElementById('vipNotes');
     const vipSubmitBtn = document.getElementById('vipSubmitBtn');
     const vipCancelBtn = document.getElementById('vipCancelBtn');
@@ -1201,9 +2033,12 @@
     function resetVipFormState() {
       vipIdInput.value = '';
       vipForm.reset();
-      vipStatusInput.value = 'Активен';
       vipSubmitBtn.textContent = 'Добавить клиента';
       vipFormMsg.textContent = '';
+      if (typeof window.__fnrPopulateVipManagers === 'function') {
+        window.__fnrPopulateVipManagers();
+      }
+      if (typeof window.fnrSyncAllCustomSelects === 'function') window.fnrSyncAllCustomSelects();
     }
 
     function renderVipClients() {
@@ -1227,10 +2062,8 @@
             '<strong>' + escapeHtml(item.company) + '</strong>' +
             '<span class="module-badge">VIP</span>' +
             '</div>' +
-            '<p><b>Статус:</b> <span class="status-chip ' + getStatusClass(item.status) + '">' + escapeHtml(item.status || '—') + '</span></p>' +
             '<p><b>Контакт:</b> ' + escapeHtml(item.contact || '—') + '</p>' +
-            '<p><b>Менеджер:</b> ' + escapeHtml(item.manager || '—') + '</p>' +
-            '<p><b>Условия:</b> ' + escapeHtml(item.terms || '—') + '</p>' +
+            '<p><b>Ответственный:</b> ' + escapeHtml(vipManagerDisplayName(item)) + '</p>' +
             '<p><b>Примечания:</b> ' + escapeHtml(item.notes || '—') + '</p>' +
             '<div class="module-actions">' +
             '<button type="button" class="btn btn-ghost" data-vip-action="edit" data-vip-id="' + item.id + '">Редактировать</button>' +
@@ -1242,18 +2075,31 @@
         .join('');
     }
 
+    function vipManagerDisplayName(item) {
+      const mid = item.managerId || '';
+      if (mid) {
+        const p = getPeople().find(function (x) {
+          return x.id === mid;
+        });
+        if (p) return p.name || mid;
+      }
+      return item.manager || '—';
+    }
+
     vipForm.addEventListener('submit', function (e) {
       e.preventDefault();
       const company = vipCompanyInput.value.trim();
       const tier = 'VIP';
-      const status = vipStatusInput.value.trim();
       const contact = vipContactInput.value.trim();
-      const manager = vipManagerInput.value.trim();
-      const terms = vipTermsInput.value.trim();
+      const managerId = (vipManagerInput && vipManagerInput.value) || '';
       const notes = vipNotesInput.value.trim();
 
       if (!company) {
         vipFormMsg.textContent = 'Укажите компанию или название.';
+        return;
+      }
+      if (!managerId) {
+        vipFormMsg.textContent = 'Выберите ответственного из списка сотрудников.';
         return;
       }
 
@@ -1264,7 +2110,14 @@
       if (id) {
         const idx = items.findIndex(function (x) { return x.id === id; });
         if (idx !== -1) {
-          items[idx] = { id: id, company: company, tier: tier, status: status, contact: contact, manager: manager, terms: terms, notes: notes };
+          items[idx] = {
+            id: id,
+            company: company,
+            tier: tier,
+            contact: contact,
+            managerId: managerId,
+            notes: notes,
+          };
         }
         msg = 'VIP-клиент обновлён.';
       } else {
@@ -1272,11 +2125,9 @@
           id: String(Date.now()),
           company: company,
           tier: tier,
-          status: status,
           contact: contact,
-          manager: manager,
-          terms: terms,
-          notes: notes
+          managerId: managerId,
+          notes: notes,
         });
         msg = 'VIP-клиент добавлен.';
       }
@@ -1303,15 +2154,23 @@
       if (!record) return;
 
       if (action === 'edit') {
+        if (typeof window.__fnrPopulateVipManagers === 'function') {
+          window.__fnrPopulateVipManagers();
+        }
         vipIdInput.value = record.id;
         vipCompanyInput.value = record.company || '';
-        vipStatusInput.value = record.status || 'Активен';
         vipContactInput.value = record.contact || '';
-        vipManagerInput.value = record.manager || '';
-        vipTermsInput.value = record.terms || '';
+        vipManagerInput.value = record.managerId || '';
+        if (!vipManagerInput.value && record.manager) {
+          const m = getPeople().find(function (p) {
+            return p.name === record.manager;
+          });
+          if (m) vipManagerInput.value = m.id;
+        }
         vipNotesInput.value = record.notes || '';
         vipSubmitBtn.textContent = 'Сохранить клиента';
         vipFormMsg.textContent = 'Режим редактирования VIP-клиента.';
+        if (typeof window.fnrSyncAllCustomSelects === 'function') window.fnrSyncAllCustomSelects();
         vipCompanyInput.focus();
       }
 
@@ -1326,16 +2185,38 @@
       }
     });
 
+    (function ensureDefaultPeople() {
+      try {
+        var KEY = 'fnr_admin_people_v1';
+        var raw = localStorage.getItem(KEY);
+        var parsed = raw ? JSON.parse(raw) : [];
+        if (Array.isArray(parsed) && parsed.length > 0) return;
+        localStorage.setItem(KEY, JSON.stringify([]));
+      } catch (e) {}
+    })();
+
     renderPeople();
-    renderScriptStages();
-    renderFunnelStages();
-    renderKnowledgeItems();
+    mergeTeamAccountsFromServer();
+    if (typeof window.__fnrRefreshAgentPick === 'function') {
+      window.__fnrRefreshAgentPick();
+    }
     renderVipClients();
     renderAlertRules();
 
-    const initialHash = window.location.hash ? window.location.hash.slice(1) : '';
-    const initialSection = moduleSections.some(function (x) { return x.id === initialHash; }) ? initialHash : 'people';
+    var initialHash = (window.location.hash || '').replace(/^#/, '');
+    var initialSection = 'people';
+    if (initialHash && moduleSections.some(function (x) { return x.id === initialHash; })) {
+      initialSection = initialHash;
+    }
     showSection(initialSection);
+
+    window.addEventListener('hashchange', function () {
+      var h = (window.location.hash || '').replace(/^#/, '');
+      if (h && moduleSections.some(function (x) { return x.id === h; })) {
+        showSection(h);
+      }
+    });
   </script>
+  <script src="../assets/js/admin-select.js"></script>
 </body>
 </html>
