@@ -21,13 +21,9 @@ from accounts_registry import get_accounts
 from ai_messaging.channels.telethon_client import build_client
 
 from .admin_api import setup_admin_routes
-from .bitrix import (
-    build_lead_comments_initial,
-    convert_lead_to_deal,
-    create_deal_from_lead_fallback,
-    create_lead_from_form,
-    sync_bitrix_chat_for_uid,
-)
+
+from .voximplant_webhook import setup_voximplant_routes
+from .bitrix import create_lead_from_form, build_lead_comments_initial, sync_bitrix_chat_for_uid
 from .manager_router import resolve_account_for_lead_dialog
 from .state_store import add_tracked, append_history, load_state, set_bitrix_lead_link
 from .telegram_profiles import first_and_second_greeting
@@ -231,6 +227,7 @@ def create_app() -> web.Application:
     app = web.Application()
     app.router.add_post("/lead", _handle_lead)
     app.router.add_get("/health", _health)
+    setup_voximplant_routes(app)
     setup_admin_routes(app)
     app.on_startup.append(_init_app)
     app.on_cleanup.append(_cleanup_app)

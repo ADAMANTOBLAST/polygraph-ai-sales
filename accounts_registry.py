@@ -39,6 +39,32 @@ def get_accounts() -> dict[int, dict]:
     return out
 
 
+def list_accounts_for_admin() -> list[dict]:
+    """Публичные метаданные аккаунтов для админки /team-accounts (без api_hash и т.п.)."""
+    out: list[dict] = []
+    for a in load_registry():
+        aid = a.get("id")
+        if aid is None:
+            continue
+        try:
+            aid_i = int(aid)
+        except (TypeError, ValueError):
+            continue
+        phone = str(a.get("phone") or "").strip()
+        disp = str(a.get("display_name") or a.get("label") or "").strip()
+        if not disp:
+            disp = phone or f"Аккаунт {aid_i}"
+        out.append(
+            {
+                "id": aid_i,
+                "display_name": disp,
+                "label": disp,
+                "phone": phone,
+            }
+        )
+    return sorted(out, key=lambda x: x["id"])
+
+
 def get_profile_for_account(account_id: int) -> dict:
     return _DEVICE_PROFILES[account_id % len(_DEVICE_PROFILES)].copy()
 
