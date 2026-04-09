@@ -951,12 +951,6 @@
       return '/fnr-api/lead';
     }
   })();
-  const BITRIX_WEBHOOK_URL = 'https://your-domain.bitrix24.ru/rest/1/your-webhook-code/crm.lead.add.json';
-
-  function isBitrixConfigured() {
-    return BITRIX_WEBHOOK_URL && !BITRIX_WEBHOOK_URL.includes('your-domain.bitrix24');
-  }
-
   var PHONE_PREFIX_BY = '+375 ';
 
   function phoneDigitsBefore(str, pos) {
@@ -1194,37 +1188,6 @@
     return ok;
   }
 
-  function buildBitrixLeadPayload(formData) {
-    const methodLabel = { telegram: 'Telegram', phone: 'Телефон', email: 'E-mail' }[formData.contactMethod] || formData.contactMethod;
-    return {
-      fields: {
-        TITLE: 'Заявка с сайта Флекс-н-Ролл ПРО',
-        NAME: formData.name,
-        PHONE: [{ VALUE: formData.phone, VALUE_TYPE: 'WORK' }],
-        EMAIL: formData.email ? [{ VALUE: formData.email, VALUE_TYPE: 'WORK' }] : [],
-        COMMENTS:
-          'Предпочитаемая связь: ' + methodLabel + '\n' +
-          'Контакт: ' + (formData.contactDetail || '—'),
-        SOURCE_DESCRIPTION: 'Форма сайта flex-n-roll',
-      },
-      params: { REGISTER_SONET_EVENT: 'Y' }
-    };
-  }
-
-  async function sendLeadToBitrix(formData) {
-    if (!isBitrixConfigured()) throw new Error('Bitrix не настроен');
-    const payload = buildBitrixLeadPayload(formData);
-    const response = await fetch(BITRIX_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if (!response.ok) throw new Error('HTTP ' + response.status);
-    const data = await response.json();
-    if (data.error) throw new Error(data.error_description || data.error);
-    return data;
-  }
-
   function fnrApiErrorText(code) {
     if (code === 'too_many_requests') return 'Слишком много заявок с вашего адреса. Попробуйте позже.';
     return code || '';
@@ -1295,18 +1258,10 @@
         throw new Error(fnrApiErrorText(errCode) || errCode);
       }
 
-      let bitrixNote = '';
-      if (isBitrixConfigured()) {
-        try {
-          await sendLeadToBitrix(Object.assign({}, formData, { email: formData.email || '' }));
-          bitrixNote = ' Заявка также в CRM.';
-        } catch (be) {
-          console.warn(be);
-          bitrixNote = '';
-        }
+      let msg = 'Заявка принята.';
+      if (fnrJson.bitrix_lead_id != null && fnrJson.bitrix_lead_id !== '') {
+        msg += ' Данные переданы в CRM.';
       }
-
-      let msg = 'Заявка принята.' + bitrixNote;
       if (fnrJson.telegram_started) {
         msg += ' Мы написали вам в Telegram.';
       } else if (method === 'telegram' && formData.telegram) {

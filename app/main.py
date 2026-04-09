@@ -20,6 +20,7 @@ from accounts_registry import get_accounts
 from ai_messaging.channels.telethon_client import build_client
 
 from .admin_api import setup_admin_routes
+from .bitrix import create_lead_from_form
 from .state_store import add_tracked, append_history, load_state
 from .telegram_profiles import greeting_for_account
 from .tg_handlers import register_private_handlers
@@ -111,13 +112,24 @@ async def _handle_lead(request: web.Request) -> web.Response:
             err = _format_telegram_error(e)
             log.exception("Не удалось написать в Telegram %s: %s", telegram, e)
 
-    return web.json_response(
-        {
-            "ok": True,
-            "telegram_started": sent,
-            "telegram_error": err,
-        }
-    )
+    bitrix_lead_id = None
+    bitrix_error = None
+    try:
+        bitrix_lead_id, bitrix_error = await create_lead_from_form(data)
+    except Exception as e:
+        log.exception("Bitrix: %s", e)
+        bitrix_error = str(e)[:200]
+
+    body: dict[str, Any] = {
+        "ok": True,
+        "telegram_started": sent,
+        "telegram_error": err,
+    }
+    if bitrix_lead_id is not None:
+        body["bitrix_lead_id"] = bitrix_lead_id
+    if bitrix_error:
+        body["bitrix_error"] = bitrix_error
+    return web.json_response(body)
 
 
 async def _health(_request: web.Request) -> web.Response:
