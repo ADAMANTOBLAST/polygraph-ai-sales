@@ -18,11 +18,12 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="../assets/css/admin.css?v=6">
+  <link rel="stylesheet" href="../assets/css/admin.css?v=9">
 </head>
 <body class="admin-body">
   <div class="admin-shell">
-    <aside class="admin-sidebar">
+    <div class="admin-sidebar-backdrop" id="adminSidebarBackdrop" hidden></div>
+    <aside class="admin-sidebar" id="adminSidebar">
       <div class="admin-sidebar__brand">
         <div class="admin-sidebar__mark" aria-hidden="true">FnR</div>
         <div class="admin-sidebar__titles">
@@ -44,6 +45,21 @@
     </aside>
 
     <main class="admin-main">
+      <div class="admin-mobile-header" role="banner">
+        <button
+          type="button"
+          class="admin-nav-toggle"
+          id="adminNavToggle"
+          aria-label="Открыть меню разделов"
+          aria-controls="adminSidebar"
+          aria-expanded="false"
+        >
+          <span class="admin-nav-toggle__bar" aria-hidden="true"></span>
+          <span class="admin-nav-toggle__bar" aria-hidden="true"></span>
+          <span class="admin-nav-toggle__bar" aria-hidden="true"></span>
+        </button>
+        <span class="admin-mobile-header__brand">Flex&amp;Roll</span>
+      </div>
       <div class="admin-main__inner">
       <header class="admin-topbar" id="overview">
         <div class="admin-topbar__lead">
@@ -837,6 +853,42 @@
         return Number(f.account_id) === sel;
       }
 
+      /** Если с выбранным чипом нет ни одной строки, а с сервера пришли диалоги — переключаемся на аккаунт первого диалога (у коллег чип по умолчанию мог не совпадать с fnr-acc лидов). */
+      function ensureChatChipForData() {
+        var chats = chatListData || [];
+        var failed = chatFailedData || [];
+        function visibleCount() {
+          var n = 0;
+          chats.forEach(function (c) {
+            if (chatBelongsToSelectedAccount(c)) n++;
+          });
+          failed.forEach(function (f) {
+            if (failedBelongsToSelectedAccount(f)) n++;
+          });
+          return n;
+        }
+        if (!chats.length && !failed.length) return;
+        if (visibleCount() > 0) return;
+        var aid = null;
+        if (chats.length) {
+          var c0 = chats[0];
+          if (c0 && c0.account_id !== undefined && c0.account_id !== null) aid = Number(c0.account_id);
+        }
+        if ((aid === null || isNaN(aid)) && failed.length) {
+          var f0 = failed[0];
+          if (f0 && f0.account_id !== undefined && f0.account_id !== null) aid = Number(f0.account_id);
+        }
+        if (aid === null || isNaN(aid)) return;
+        var pid = 'fnr-acc-' + aid;
+        var people = typeof window.__fnrGetPeople === 'function' ? window.__fnrGetPeople() : [];
+        var hasChip = people.some(function (p) {
+          return p && p.id === pid;
+        });
+        if (!hasChip) return;
+        chatSelectedEmployeeId = pid;
+        renderChatEmployees();
+      }
+
       function renderChatList() {
         var body = chatEl('chatListBody');
         var q = (chatEl('chatListSearch') && chatEl('chatListSearch').value || '').trim().toLowerCase();
@@ -1047,6 +1099,7 @@
             if (!data || !data.ok) throw new Error((data && data.error) || 'Ошибка');
             chatListData = data.chats || [];
             chatFailedData = data.failed_leads || [];
+            ensureChatChipForData();
             setChatStatus('');
             if (chatSelectedUid) {
               var cur = chatListData.find(function (c) {
@@ -1198,8 +1251,7 @@
         chatPollTimer = setInterval(function () {
           var h = (window.location.hash || '').replace(/^#/, '');
           if (h !== 'chats') return;
-          if (chatSelectedUid) loadChatThread(chatSelectedUid, true);
-          else loadChatList();
+          loadChatList();
         }, 10000);
       };
 
@@ -1357,6 +1409,7 @@
     function mergeTeamAccountsFromServer() {
       fetch(fnrApiBaseUrl() + '/team-accounts', { credentials: 'same-origin' })
         .then(function (r) {
+          if (!r.ok) return Promise.reject(new Error('HTTP ' + r.status));
           return r.json();
         })
         .then(function (data) {
@@ -1396,6 +1449,12 @@
           if (changed) {
             savePeople(items);
             renderPeople();
+          }
+          if (typeof window.__fnrRefreshChatsFromPeople === 'function') {
+            window.__fnrRefreshChatsFromPeople();
+          }
+          if (typeof window.__fnrRefreshAgentPick === 'function') {
+            window.__fnrRefreshAgentPick();
           }
         })
         .catch(function () {});
@@ -2837,6 +2896,39 @@
         showSection(h);
       }
     });
+
+    (function () {
+      var mq = window.matchMedia('(max-width: 900px)');
+      var toggle = document.getElementById('adminNavToggle');
+      var backdrop = document.getElementById('adminSidebarBackdrop');
+      function closeNav() {
+        document.documentElement.classList.remove('admin-nav-is-open');
+        if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        if (backdrop) backdrop.hidden = true;
+      }
+      function openNav() {
+        document.documentElement.classList.add('admin-nav-is-open');
+        if (toggle) toggle.setAttribute('aria-expanded', 'true');
+        if (backdrop) backdrop.hidden = false;
+      }
+      function onToggle() {
+        if (document.documentElement.classList.contains('admin-nav-is-open')) closeNav();
+        else openNav();
+      }
+      if (toggle) toggle.addEventListener('click', onToggle);
+      if (backdrop) backdrop.addEventListener('click', closeNav);
+      navLinks.forEach(function (a) {
+        a.addEventListener('click', function () {
+          if (mq.matches) closeNav();
+        });
+      });
+      window.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeNav();
+      });
+      window.addEventListener('resize', function () {
+        if (!mq.matches) closeNav();
+      });
+    })();
   </script>
   <script src="../assets/js/admin-select.js"></script>
 </body>
