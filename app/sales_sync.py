@@ -46,11 +46,24 @@ def people_entries() -> list[dict[str, Any]]:
     return raw if isinstance(raw, list) else []
 
 
+def _person_row_id(e: dict[str, Any]) -> str:
+    """id в people может быть 'fnr-acc-12' или ошибочно '12'."""
+    raw = e.get("id")
+    if raw is None:
+        return ""
+    s = str(raw).strip()
+    if s.isdigit():
+        return f"fnr-acc-{int(s)}"
+    return s
+
+
 def is_account_active(account_id: int) -> bool:
     """Статус «Активен» в карточке сотрудника; без записи — считаем активным."""
     pid = f"fnr-acc-{int(account_id)}"
     for e in people_entries():
-        if str(e.get("id") or "") != pid:
+        if not isinstance(e, dict):
+            continue
+        if _person_row_id(e) != pid:
             continue
         st = (e.get("status") or "Активен").strip()
         return st == "Активен"

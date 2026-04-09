@@ -9,10 +9,16 @@ import logging
 
 from accounts_registry import get_accounts
 
-from .sales_sync import eligible_active_account_ids, is_account_active, lead_eligible_account_ids
+from .sales_sync import (
+    eligible_active_account_ids,
+    is_account_active,
+    lead_eligible_account_ids,
+    load_sales_sync,
+)
 from .state_store import get_uid_account, load_state, save_state, set_uid_account
 
 log = logging.getLogger(__name__)
+_warned_empty_people = False
 
 
 def _connected_sorted() -> list[int]:
@@ -54,9 +60,19 @@ def resolve_account_for_lead_dialog(uid: int) -> tuple[int, bool]:
     Актуальный account_id для ИИ и поля «Ответственный аккаунт» в админке.
     Возвращает (account_id, был_переназначен).
     """
+    global _warned_empty_people
     conn = _connected_sorted()
     if not conn:
         return 0, False
+
+    if not _warned_empty_people:
+        pe = load_sales_sync().get("people")
+        if not isinstance(pe, list) or len(pe) == 0:
+            _warned_empty_people = True
+            log.warning(
+                "В data/fnr_sales_sync.json нет people[] — статусы отпуска не учитываются. "
+                "Откройте админку → конфиг агента → «Синхронизировать с сервером» после правок команды."
+            )
 
     current = get_uid_account(uid)
     if current is None:

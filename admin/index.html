@@ -620,8 +620,13 @@
           return tf.toLowerCase().indexOf(q) >= 0;
         });
         if (!rows.length) {
-          body.innerHTML =
-            '<p class="chat-list-empty">Нет диалогов для этого аккаунта. Новые лиды появятся после заявки с сайта, когда очередь дойдёт до этого аккаунта.</p>';
+          var hint =
+            '<p class="chat-list-empty">Нет диалогов для <strong>выбранного</strong> аккаунта. Новые лиды появятся после заявки с сайта, когда очередь дойдёт до этого аккаунта.</p>';
+          if (chatListData.length > 0 && isTelegramAccountEmployee()) {
+            hint +=
+              '<p class="chat-list-empty chat-list-empty--sub">Если лида переназначили на другого менеджера (отпуск и т.п.), откройте чип того аккаунта, кому ушёл диалог — список фильтруется по выбранному Telegram-аккаунту.</p>';
+          }
+          body.innerHTML = hint;
           return;
         }
         body.innerHTML = rows
@@ -940,6 +945,11 @@
           if (chatSelectedUid) loadChatThread(chatSelectedUid, true);
           else loadChatList();
         }, 10000);
+      };
+
+      window.__fnrRefreshChatsFromPeople = function () {
+        renderChatEmployees();
+        loadChatList();
       };
 
       var refreshBtn = chatEl('chatListRefresh');
@@ -1922,6 +1932,35 @@
       }, 500);
     }
 
+    function mergePeopleFromServer(data) {
+      if (!data || !data.people || !Array.isArray(data.people) || !data.people.length) return false;
+      var items = getPeople().slice();
+      var changed = false;
+      data.people.forEach(function (sp) {
+        if (!sp || !sp.id) return;
+        var sid = String(sp.id);
+        var idx = items.findIndex(function (p) {
+          return p && String(p.id) === sid;
+        });
+        if (idx < 0) return;
+        var t = sp.status != null ? String(sp.status).trim() : 'Активен';
+        if (items[idx].status !== t) {
+          items[idx].status = t;
+          changed = true;
+        }
+        if (sp.name != null && String(sp.name).trim() && items[idx].name !== sp.name) {
+          items[idx].name = String(sp.name).trim();
+          changed = true;
+        }
+      });
+      if (changed) {
+        savePeople(items);
+        if (typeof renderPeople === 'function') renderPeople();
+        if (typeof window.__fnrRefreshChatsFromPeople === 'function') window.__fnrRefreshChatsFromPeople();
+      }
+      return changed;
+    }
+
     function fetchSalesSyncThenRenderAgentPick() {
       fnrAgentFormHydrated = false;
       fetch(fnrApiBaseUrl() + '/admin/sales-sync', { credentials: 'same-origin' })
@@ -1930,6 +1969,7 @@
         })
         .then(function (data) {
           if (data && data.ok && data.accounts) mergeServerAgentIntoStore(data);
+          mergePeopleFromServer(data || {});
         })
         .catch(function () {})
         .finally(function () {

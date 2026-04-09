@@ -112,23 +112,34 @@ async def handle_admin_send(request: web.Request) -> web.Response:
 async def handle_admin_sales_sync_get(request: web.Request) -> web.Response:
     """Текущие настройки с сервера (fnr_sales_sync.json) для подтягивания в админку."""
     blob = load_sales_sync()
+    people = blob.get("people")
+    if not isinstance(people, list):
+        people = []
     return web.json_response(
         {
             "ok": True,
             "lead_active_account_ids": blob.get("lead_active_account_ids"),
             "accounts": blob.get("accounts") if isinstance(blob.get("accounts"), dict) else {},
+            "people": people,
         }
     )
 
 
 async def handle_admin_sales_sync(request: web.Request) -> web.Response:
-    """POST тело как в buildSalesSyncPayload(): lead_active_account_ids + accounts."""
+    """POST тело как в buildSalesSyncPayload(): lead_active_account_ids + accounts + people."""
     try:
         data: dict[str, Any] = await request.json()
     except Exception:
         return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
     if not isinstance(data, dict):
         return web.json_response({"ok": False, "error": "invalid_body"}, status=400)
+    # Не затирать people[], если клиент прислал пустой список (нет fnr-acc в localStorage) или ключ пропал.
+    existing = load_sales_sync()
+    incoming = data.get("people")
+    if not isinstance(incoming, list) or len(incoming) == 0:
+        prev = existing.get("people")
+        if isinstance(prev, list) and len(prev) > 0:
+            data["people"] = prev
     write_sales_sync(data)
     acc_n = len(data.get("accounts") or {})
     log.info("sales-sync: lead_active=%s, accounts=%s", data.get("lead_active_account_ids"), acc_n)
