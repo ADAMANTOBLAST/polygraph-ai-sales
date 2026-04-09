@@ -110,6 +110,85 @@ async def _bitrix_post(session: aiohttp.ClientSession, url: str, payload: dict[s
         return True, None
 
 
+async def _crm_call_json(method: str, payload: dict[str, Any]) -> tuple[dict[str, Any] | None, str | None]:
+    url = bitrix_method_url(method)
+    if not url:
+        return None, "no_webhook"
+    try:
+        timeout = aiohttp.ClientTimeout(total=20)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(url, json=payload) as resp:
+                text = await resp.text()
+                if resp.status >= 400:
+                    return None, f"HTTP {resp.status}: {text[:300]}"
+                try:
+                    j = json.loads(text)
+                except json.JSONDecodeError:
+                    return None, "invalid_json"
+                if j.get("error"):
+                    err = (j.get("error_description") or j.get("error") or "error")[:400]
+                    return None, err
+                return j, None
+    except asyncio.CancelledError:
+        raise
+    except Exception as e:
+        return None, str(e)[:200]
+
+
+async def crm_lead_get(lead_id: int) -> dict[str, Any] | None:
+    """Поля лида (CONTACT_ID и т.д.)."""
+    j, err = await _crm_call_json("crm.lead.get", {"id": int(lead_id)})
+    if err or not j:
+        log.debug("crm.lead.get %s: %s", lead_id, err)
+        return None
+    res = j.get("result")
+    return res if isinstance(res, dict) else None
+
+
+async def crm_timeline_comment_add_lead(lead_id: int, comment: str) -> str | None:
+    """Запись в ленту лида (видно в CRM в таймлайне)."""
+    if len(comment) > 6000:
+        comment = comment[:5900] + "\n…"
+    j, err = await _crm_call_json(
+        "crm.timeline.comment.add",
+        {
+            "fields": {
+                "ENTITY_ID": int(lead_id),
+                "ENTITY_TYPE": "lead",
+                "COMMENT": comment,
+            }
+        },
+    )
+    if err:
+        log.debug("crm.timeline.comment.add lead=%s: %s", lead_id, err)
+        return err
+    return None
+
+
+async def crm_contact_update_comments(contact_id: int, comments: str) -> str | None:
+    """Поле COMMENTS у контакта (карточка контакта)."""
+    url = bitrix_method_url("crm.contact.update")
+    if not url:
+        return "no_webhook"
+    if len(comments) > _MAX_COMMENTS:
+        comments = comments[: _MAX_COMMENTS - 80] + "\n\n… (текст обрезан по лимиту CRM)"
+    payload: dict[str, Any] = {"id": int(contact_id), "fields": {"COMMENTS": comments}}
+    try:
+        timeout = aiohttp.ClientTimeout(total=20)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            ok, err = await _bitrix_post(session, url, payload)
+            if not ok:
+                log.debug("crm.contact.update %s: %s", contact_id, err)
+                return err or "update_failed"
+            log.info("Bitrix contact %s: COMMENTS updated", contact_id)
+            return None
+    except asyncio.CancelledError:
+        raise
+    except Exception as e:
+        log.exception("Bitrix contact.update: %s", e)
+        return str(e)[:200]
+
+
 async def crm_lead_update_comments(lead_id: int, comments: str) -> str | None:
     """Обновляет COMMENTS у лида. Возвращает текст ошибки или None."""
     url = bitrix_method_url("crm.lead.update")
@@ -135,7 +214,7 @@ async def crm_lead_update_comments(lead_id: int, comments: str) -> str | None:
 
 
 async def sync_bitrix_chat_for_uid(uid: int) -> None:
-    """Если uid связан с лидом Bitrix — пишет в COMMENTS заявку + переписку из fnr_state."""
+    """Лид COMMENTS + запись в ленту лида + COMMENTS контакта (если лид связан с контактом)."""
     meta = get_bitrix_lead_link(uid)
     if not meta:
         return
@@ -149,6 +228,27 @@ async def sync_bitrix_chat_for_uid(uid: int) -> None:
     err = await crm_lead_update_comments(int(lead_id), full)
     if err:
         log.debug("Bitrix sync uid=%s lead=%s: %s", uid, lead_id, err)
+
+    tl = f"Переписка Telegram:\n{chat_block}"
+    if len(tl) > 5800:
+        tl = tl[:5700] + "\n…"
+    t_err = await crm_timeline_comment_add_lead(int(lead_id), tl)
+    if t_err:
+        log.debug("Bitrix timeline lead=%s: %s", lead_id, t_err)
+
+    ld = await crm_lead_get(int(lead_id))
+    if ld:
+        raw_cid = ld.get("CONTACT_ID")
+        cid: int | None = None
+        if raw_cid not in (None, "", "0", 0):
+            try:
+                cid = int(raw_cid)
+            except (TypeError, ValueError):
+                cid = None
+        if cid and cid > 0:
+            c_err = await crm_contact_update_comments(cid, full)
+            if c_err:
+                log.debug("Bitrix contact %s: %s", cid, c_err)
 
 
 async def create_lead_from_form(data: dict[str, Any]) -> tuple[int | None, str | None]:

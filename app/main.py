@@ -26,6 +26,7 @@ from .manager_router import resolve_account_for_lead_dialog
 from .state_store import add_tracked, append_history, load_state, set_bitrix_lead_link
 from .telegram_profiles import first_and_second_greeting
 from .tg_handlers import register_private_handlers
+from .tg_pool import get_telegram_client
 
 logging.basicConfig(
     level=logging.INFO,
@@ -96,17 +97,18 @@ async def _handle_lead(request: web.Request) -> web.Response:
 
     telegram = (data.get("telegram") or "").strip()
     contact_method = (data.get("contactMethod") or "").strip()
-    client: TelegramClient = request.app["telegram"]
     sent = False
     err = None
     uid = None
 
     if contact_method == "telegram" and telegram and USER_RE.match(telegram):
         try:
-            entity = await client.get_entity(telegram)
+            client_any: TelegramClient = request.app["telegram"]
+            entity = await client_any.get_entity(telegram)
             uid = int(entity.id)
             add_tracked(uid)
             aid, _ = resolve_account_for_lead_dialog(uid)
+            client = get_telegram_client(request.app, aid)
             first_greet, second_greet = first_and_second_greeting(aid)
             await client.send_message(entity, first_greet)
             append_history(uid, "assistant", first_greet)
@@ -157,18 +159,31 @@ async def _health(_request: web.Request) -> web.Response:
 
 
 async def _init_app(app: web.Application) -> None:
-    client = build_client(0)
-    register_private_handlers(client)
-    await client.start()
-    app["telegram"] = client
+    clients: dict[int, TelegramClient] = {}
+    for aid in sorted(get_accounts().keys()):
+        try:
+            c = build_client(aid)
+            await c.start()
+            register_private_handlers(c)
+            clients[int(aid)] = c
+            log.info("Telethon аккаунт id=%s подключён", aid)
+        except Exception as e:
+            log.exception("Telethon аккаунт id=%s не поднят: %s", aid, e)
+    if not clients:
+        raise RuntimeError("Ни одна Telegram-сессия не авторизована (sessions/*.session)")
+    app["telegram_clients"] = clients
+    app["telegram"] = clients.get(0) or next(iter(clients.values()))
     load_state()
-    log.info("Telethon подключён, отслеживаем диалоги с лидов из state.")
+    log.info("Telethon: пул из %s сессий (лиды и ответы — с аккаунта ответственного)", len(clients))
 
 
 async def _cleanup_app(app: web.Application) -> None:
-    client: TelegramClient = app.get("telegram")
-    if client:
-        await client.disconnect()
+    clients: dict[int, TelegramClient] = app.get("telegram_clients") or {}
+    for c in clients.values():
+        try:
+            await c.disconnect()
+        except Exception as e:
+            log.debug("telethon disconnect: %s", e)
 
 
 def create_app() -> web.Application:

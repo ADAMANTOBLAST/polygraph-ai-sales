@@ -36,14 +36,22 @@ STICKER_REPLY = (
 
 TECH_FAIL = "Сейчас техническая заминка — напишите ещё раз через минуту или позвоните на номер с сайта."
 
+# Маркер из промпта (два сообщения в TG); запасной разделитель — \n\n
+_FNR_SPLIT = "<<<FNR2>>>"
+
 
 def _assistant_reply_parts(text: str, two_messages: bool) -> list[str]:
-    """Сколько TG-сообщений — по настройке аккаунта; разбиение только по \\n\\n, без эвристик."""
+    """Два TG-сообщения по настройке: сначала маркер из инструкции, иначе \\n\\n."""
     t = (text or "").strip()
     if not t:
         return []
     if not two_messages:
         return [t]
+    if _FNR_SPLIT in t:
+        a, b = t.split(_FNR_SPLIT, 1)
+        a, b = a.strip(), b.strip()
+        if a and b:
+            return [a, b]
     if "\n\n" in t:
         a, b = t.split("\n\n", 1)
         a, b = a.strip(), b.strip()

@@ -9,7 +9,8 @@ from telethon import TelegramClient
 
 from .bitrix import sync_bitrix_chat_for_uid
 from .sales_sync import load_sales_sync, write_sales_sync
-from .state_store import append_history, get_history, load_state, save_state
+from .state_store import append_history, get_history, get_uid_account, load_state, save_state
+from .tg_pool import get_telegram_client
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +37,6 @@ def _set_ai_disabled(uid: int, disabled: bool) -> None:
 
 
 async def handle_admin_chats(request: web.Request) -> web.Response:
-    client: TelegramClient = request.app["telegram"]
     st = _st()
     chats: list[dict[str, Any]] = []
     for uid in st.get("tracked_user_ids") or []:
@@ -47,6 +47,13 @@ async def handle_admin_chats(request: web.Request) -> web.Response:
             preview = (hist[-1].get("content") or "")[:160]
         title = str(uid)
         username = ""
+        ua = st.get("uid_account") or {}
+        aid_raw = ua.get(str(uid), 0)
+        try:
+            aid_ent = int(aid_raw)
+        except (TypeError, ValueError):
+            aid_ent = 0
+        client: TelegramClient = get_telegram_client(request.app, aid_ent)
         try:
             ent = await client.get_entity(uid)
             if ent:
@@ -58,7 +65,6 @@ async def handle_admin_chats(request: web.Request) -> web.Response:
                     username = "@" + un
         except Exception as e:
             log.debug("get_entity %s: %s", uid, e)
-        ua = st.get("uid_account") or {}
         aid = ua.get(str(uid), 0)
         try:
             aid = int(aid)
@@ -95,7 +101,10 @@ async def handle_admin_send(request: web.Request) -> web.Response:
     text = (data.get("text") or "").strip()
     if not text:
         return web.json_response({"ok": False, "error": "empty"}, status=400)
-    client: TelegramClient = request.app["telegram"]
+    aid = get_uid_account(uid)
+    if aid is None:
+        aid = 0
+    client: TelegramClient = get_telegram_client(request.app, int(aid))
     try:
         await client.send_message(uid, text)
     except Exception as e:
