@@ -94,13 +94,18 @@ def get_history(uid: int, account_id: int | None = None) -> list[dict]:
     return list(leg or [])
 
 
-def set_bitrix_lead_link(uid: int, lead_id: int, comment_header: str) -> None:
-    """Связь Telegram uid → лид CRM; comment_header — блок «заявка с сайта» для поля COMMENTS."""
+def set_bitrix_lead_link(
+    uid: int, lead_id: int, comment_header: str, deal_id: int | None = None
+) -> None:
+    """Связь Telegram uid → лид CRM (и при конвертации — сделка); comment_header для COMMENTS."""
     st = load_state()
-    st.setdefault("bitrix_uid_meta", {})[str(int(uid))] = {
+    row: dict = {
         "lead_id": int(lead_id),
         "header": comment_header,
     }
+    if deal_id is not None:
+        row["deal_id"] = int(deal_id)
+    st.setdefault("bitrix_uid_meta", {})[str(int(uid))] = row
     save_state()
 
 

@@ -1,4 +1,4 @@
-"""Bitrix24: создание лида и обновление комментария с перепиской Telegram."""
+"""Bitrix24: создание лида/сделки, обновление комментариев и автоматизация стадий."""
 from __future__ import annotations
 
 import asyncio
@@ -14,6 +14,18 @@ from .state_store import get_bitrix_lead_link, get_history, get_uid_account
 log = logging.getLogger(__name__)
 
 _MAX_COMMENTS = 63000
+
+
+def _env_json(name: str) -> dict[str, Any]:
+    raw = (os.environ.get(name) or "").strip()
+    if not raw:
+        return {}
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        log.warning("%s: invalid JSON", name)
+        return {}
+    return data if isinstance(data, dict) else {}
 
 
 def bitrix_lead_add_url() -> str:
@@ -189,6 +201,232 @@ async def crm_contact_update_comments(contact_id: int, comments: str) -> str | N
         return str(e)[:200]
 
 
+def _parse_deal_id_from_convert_result(result: Any) -> int | None:
+    """crm.lead.convert возвращает структуру с DEAL_ID (формат зависит от портала)."""
+    if result is None:
+        return None
+    if isinstance(result, int):
+        return result if result > 0 else None
+    if isinstance(result, dict):
+        for key in ("DEAL_ID", "dealId", "deal_id", "ID"):
+            raw = result.get(key)
+            if raw is None or raw == "" or raw == 0:
+                continue
+            try:
+                n = int(raw)
+                if n > 0:
+                    return n
+            except (TypeError, ValueError):
+                continue
+        nested = result.get("result")
+        if nested is not None and nested is not result:
+            return _parse_deal_id_from_convert_result(nested)
+    return None
+
+
+async def convert_lead_to_deal(lead_id: int) -> tuple[int | None, str | None]:
+    """
+    Конвертация лида в сделку (crm.lead.convert).
+    Вебхук должен иметь права CRM на этот метод; иначе вернётся ошибка.
+    """
+    j, err = await _crm_call_json(
+        "crm.lead.convert",
+        {
+            "fields": {"LEAD_ID": int(lead_id)},
+            "params": {"REGISTER_SONET_EVENT": "Y"},
+        },
+    )
+    if err or not j:
+        return None, err or "no_response"
+    deal_id = _parse_deal_id_from_convert_result(j.get("result"))
+    if deal_id:
+        log.info("Bitrix lead %s → deal %s (convert)", lead_id, deal_id)
+        return deal_id, None
+    return None, "convert_no_deal_id"
+
+
+async def create_deal_from_lead_fallback(
+    lead_id: int, title: str, comments: str
+) -> tuple[int | None, str | None]:
+    """
+    Если crm.lead.convert недоступен или не вернул ID — отдельная сделка с ссылкой на лид в COMMENTS.
+    """
+    body = f"Связанный лид CRM: {lead_id}\n\n{comments}"
+    if len(body) > _MAX_COMMENTS:
+        body = body[: _MAX_COMMENTS - 80] + "\n\n…"
+    j, err = await _crm_call_json(
+        "crm.deal.add",
+        {
+            "fields": {
+                "TITLE": (title or "Заявка с сайта Flex&Roll PRO")[:255],
+                "COMMENTS": body,
+                "SOURCE_DESCRIPTION": "Сайт flex-n-roll, форма (fallback после лида)",
+            },
+            "params": {"REGISTER_SONET_EVENT": "Y"},
+        },
+    )
+    if err or not j:
+        return None, err or "deal_add_failed"
+    raw = j.get("result")
+    try:
+        did = int(raw) if raw is not None else 0
+    except (TypeError, ValueError):
+        return None, "bad_deal_result"
+    if did <= 0:
+        return None, "empty_deal_id"
+    log.info("Bitrix deal created (fallback) %s для лида %s", did, lead_id)
+    return did, None
+
+
+async def crm_deal_get(deal_id: int) -> dict[str, Any] | None:
+    j, err = await _crm_call_json("crm.deal.get", {"id": int(deal_id)})
+    if err or not j:
+        return None
+    res = j.get("result")
+    return res if isinstance(res, dict) else None
+
+
+async def crm_deal_update_comments(deal_id: int, comments: str) -> str | None:
+    url = bitrix_method_url("crm.deal.update")
+    if not url:
+        return "no_webhook"
+    if len(comments) > _MAX_COMMENTS:
+        comments = comments[: _MAX_COMMENTS - 80] + "\n\n… (текст обрезан по лимиту CRM)"
+    payload: dict[str, Any] = {"id": int(deal_id), "fields": {"COMMENTS": comments}}
+    try:
+        timeout = aiohttp.ClientTimeout(total=20)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            ok, err = await _bitrix_post(session, url, payload)
+            if not ok:
+                log.warning("Bitrix crm.deal.update %s: %s", deal_id, err)
+                return err or "update_failed"
+            log.info("Bitrix deal %s: COMMENTS updated", deal_id)
+            return None
+    except asyncio.CancelledError:
+        raise
+    except Exception as e:
+        log.exception("Bitrix deal.update: %s", e)
+        return str(e)[:200]
+
+
+def bitrix_stage_for_event(event_name: str) -> str | None:
+    event_key = (event_name or "").strip().upper()
+    mapping = {
+        "WON": (os.environ.get("BITRIX_DEAL_STAGE_WON") or "").strip(),
+        "LOST": (os.environ.get("BITRIX_DEAL_STAGE_LOST") or "").strip(),
+    }
+    value = mapping.get(event_key) or ""
+    return value or None
+
+
+def bitrix_assigned_user_for_route(route_name: str) -> int | None:
+    route_key = (route_name or "").strip().lower()
+    mapping = _env_json("BITRIX_ROUTE_MAP")
+    raw = mapping.get(route_key)
+    if raw in (None, "", 0, "0"):
+        return None
+    try:
+        uid = int(raw)
+    except (TypeError, ValueError):
+        log.warning("BITRIX_ROUTE_MAP[%s] has invalid user id: %r", route_key, raw)
+        return None
+    return uid if uid > 0 else None
+
+
+async def crm_deal_update_stage(
+    deal_id: int,
+    stage_id: str | None = None,
+    assigned_by_id: int | None = None,
+) -> str | None:
+    fields: dict[str, Any] = {}
+    if stage_id:
+        fields["STAGE_ID"] = str(stage_id)
+    if assigned_by_id:
+        fields["ASSIGNED_BY_ID"] = int(assigned_by_id)
+    if not fields:
+        return None
+    url = bitrix_method_url("crm.deal.update")
+    if not url:
+        return "no_webhook"
+    payload: dict[str, Any] = {"id": int(deal_id), "fields": fields}
+    try:
+        timeout = aiohttp.ClientTimeout(total=20)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            ok, err = await _bitrix_post(session, url, payload)
+            if not ok:
+                log.warning("Bitrix crm.deal.update stage %s: %s", deal_id, err)
+                return err or "update_failed"
+            log.info(
+                "Bitrix deal %s updated: stage=%s assigned_by=%s",
+                deal_id,
+                stage_id,
+                assigned_by_id,
+            )
+            return None
+    except asyncio.CancelledError:
+        raise
+    except Exception as e:
+        log.exception("Bitrix deal stage update: %s", e)
+        return str(e)[:200]
+
+
+async def apply_deal_outcome(
+    uid: int,
+    event_name: str | None = None,
+    route_name: str | None = None,
+    note: str | None = None,
+) -> str | None:
+    meta = get_bitrix_lead_link(uid)
+    if not meta:
+        return "no_bitrix_meta"
+    raw_deal_id = meta.get("deal_id")
+    if raw_deal_id in (None, "", 0, "0"):
+        return "no_deal_id"
+    try:
+        deal_id = int(raw_deal_id)
+    except (TypeError, ValueError):
+        return "bad_deal_id"
+    stage_id = bitrix_stage_for_event(event_name or "")
+    assigned_by_id = bitrix_assigned_user_for_route(route_name or "")
+    err = await crm_deal_update_stage(deal_id, stage_id=stage_id, assigned_by_id=assigned_by_id)
+    if err:
+        return err
+    summary_parts = ["Автоматическое действие бота по сделке."]
+    if event_name:
+        summary_parts.append(f"Событие: {event_name.upper()}.")
+    if stage_id:
+        summary_parts.append(f"Стадия: {stage_id}.")
+    if route_name:
+        summary_parts.append(f"Маршрут: {route_name}.")
+    if assigned_by_id:
+        summary_parts.append(f"Ответственный Bitrix user id: {assigned_by_id}.")
+    if note:
+        summary_parts.append(f"Комментарий: {note}")
+    tl_err = await crm_timeline_comment_add_deal(deal_id, " ".join(summary_parts))
+    if tl_err:
+        log.debug("Bitrix timeline outcome deal=%s: %s", deal_id, tl_err)
+    return None
+
+
+async def crm_timeline_comment_add_deal(deal_id: int, comment: str) -> str | None:
+    if len(comment) > 6000:
+        comment = comment[:5900] + "\n…"
+    j, err = await _crm_call_json(
+        "crm.timeline.comment.add",
+        {
+            "fields": {
+                "ENTITY_ID": int(deal_id),
+                "ENTITY_TYPE": "deal",
+                "COMMENT": comment,
+            }
+        },
+    )
+    if err:
+        log.debug("crm.timeline.comment.add deal=%s: %s", deal_id, err)
+        return err
+    return None
+
+
 async def crm_lead_update_comments(lead_id: int, comments: str) -> str | None:
     """Обновляет COMMENTS у лида. Возвращает текст ошибки или None."""
     url = bitrix_method_url("crm.lead.update")
@@ -214,11 +452,12 @@ async def crm_lead_update_comments(lead_id: int, comments: str) -> str | None:
 
 
 async def sync_bitrix_chat_for_uid(uid: int) -> None:
-    """Лид COMMENTS + запись в ленту лида + COMMENTS контакта (если лид связан с контактом)."""
+    """Лид COMMENTS + запись в ленту лида + сделка (если есть) + COMMENTS контакта."""
     meta = get_bitrix_lead_link(uid)
     if not meta:
         return
     lead_id = meta.get("lead_id")
+    deal_id = meta.get("deal_id")
     header = (meta.get("header") or "").strip()
     if not lead_id:
         return
@@ -238,6 +477,21 @@ async def sync_bitrix_chat_for_uid(uid: int) -> None:
     if t_err:
         log.warning("Bitrix лента лида lead=%s: %s", lead_id, t_err)
 
+    if deal_id:
+        try:
+            did = int(deal_id)
+        except (TypeError, ValueError):
+            did = 0
+        if did > 0:
+            d_err = await crm_deal_update_comments(did, full)
+            if d_err:
+                log.warning("Bitrix COMMENTS сделки uid=%s deal=%s: %s", uid, did, d_err)
+            else:
+                log.info("Bitrix deal %s: переписка в COMMENTS (telegram uid=%s)", did, uid)
+            dt_err = await crm_timeline_comment_add_deal(did, tl)
+            if dt_err:
+                log.warning("Bitrix лента сделки deal=%s: %s", did, dt_err)
+
     ld = await crm_lead_get(int(lead_id))
     if ld:
         raw_cid = ld.get("CONTACT_ID")
@@ -251,6 +505,24 @@ async def sync_bitrix_chat_for_uid(uid: int) -> None:
             c_err = await crm_contact_update_comments(cid, full)
             if c_err:
                 log.warning("Bitrix COMMENTS контакта %s: %s", cid, c_err)
+
+    if deal_id:
+        try:
+            d_obj = await crm_deal_get(int(deal_id))
+        except Exception:
+            d_obj = None
+        if d_obj:
+            raw_cid_d = d_obj.get("CONTACT_ID")
+            cid_d: int | None = None
+            if raw_cid_d not in (None, "", "0", 0):
+                try:
+                    cid_d = int(raw_cid_d)
+                except (TypeError, ValueError):
+                    cid_d = None
+            if cid_d and cid_d > 0:
+                c2 = await crm_contact_update_comments(cid_d, full)
+                if c2:
+                    log.debug("Bitrix COMMENTS контакта (из сделки) %s: %s", cid_d, c2)
 
 
 async def bitrix_ping_crm() -> dict[str, Any]:

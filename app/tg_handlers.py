@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import re
 import tempfile
 from pathlib import Path
 
@@ -12,9 +13,9 @@ from telethon import TelegramClient, events
 from .comet_client import complete_dialog, complete_dialog_two_chunks
 from .comet_media import analyze_image_relevance, transcribe_audio_file
 from .media_utils import extract_audio_for_whisper
-from .bitrix import sync_bitrix_chat_for_uid
+from .bitrix import apply_deal_outcome, sync_bitrix_chat_for_uid
 from .manager_router import resolve_account_for_lead_dialog
-from .sales_sync import use_two_telegram_messages_for_replies
+from .sales_sync import handoff_rules_for_account, use_two_telegram_messages_for_replies
 from .state_store import append_history, get_history, is_tracked
 
 log = logging.getLogger(__name__)
@@ -35,6 +36,40 @@ STICKER_REPLY = (
 )
 
 TECH_FAIL = "Сейчас техническая заминка — напишите ещё раз через минуту или позвоните на номер с сайта."
+
+MARKER_RE = re.compile(r"\[\[\s*(FNR_EVENT|FNR_ROUTE)\s*:\s*([A-Za-z_]+)\s*\]\]", re.I)
+
+
+def _extract_service_markers(text: str) -> tuple[str, str | None, str | None]:
+    event_name: str | None = None
+    route_name: str | None = None
+
+    def _replace(match: re.Match[str]) -> str:
+        nonlocal event_name, route_name
+        kind = (match.group(1) or "").strip().upper()
+        value = (match.group(2) or "").strip()
+        if kind == "FNR_EVENT" and not event_name:
+            upper_value = value.upper()
+            if upper_value in {"WON", "LOST"}:
+                event_name = upper_value
+        elif kind == "FNR_ROUTE" and not route_name:
+            lower_value = value.lower()
+            if lower_value in {"seller", "manager", "tech", "economist", "dispatcher"}:
+                route_name = lower_value
+        return ""
+
+    cleaned = MARKER_RE.sub(_replace, text or "")
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned).strip()
+    return cleaned, event_name, route_name
+
+
+def _handoff_note(account_id: int, route_name: str | None) -> str | None:
+    if not route_name:
+        return None
+    rules = handoff_rules_for_account(account_id)
+    key = "lead" if route_name == "manager" else route_name
+    note = (rules.get(key) or "").strip()
+    return note or None
 
 
 async def _download_to_temp(client: TelegramClient, message, suffix: str) -> str | None:
@@ -65,7 +100,20 @@ async def _reply_boris(
             else:
                 reply = await asyncio.to_thread(complete_dialog, hist, account_id)
                 parts = [reply]
-        for i, part in enumerate(parts):
+        last_event: str | None = None
+        last_route: str | None = None
+        clean_parts: list[str] = []
+        for part in parts:
+            clean_part, event_name, route_name = _extract_service_markers(part)
+            if event_name:
+                last_event = event_name
+            if route_name:
+                last_route = route_name
+            if clean_part:
+                clean_parts.append(clean_part)
+        if not clean_parts:
+            clean_parts = ["Сейчас не смог сформулировать ответ — напишите, пожалуйста, ещё раз чуть короче."]
+        for i, part in enumerate(clean_parts):
             append_history(uid, "assistant", part, account_id=account_id)
             if i == 0:
                 await event.respond(part)
@@ -76,6 +124,26 @@ async def _reply_boris(
             await sync_bitrix_chat_for_uid(uid)
         except Exception as sync_e:
             log.debug("bitrix sync uid=%s: %s", uid, sync_e)
+        if last_event or last_route:
+            try:
+                note = _handoff_note(account_id, last_route)
+                outcome_err = await apply_deal_outcome(uid, last_event, last_route, note=note)
+                if outcome_err:
+                    log.warning(
+                        "apply_deal_outcome uid=%s event=%s route=%s: %s",
+                        uid,
+                        last_event,
+                        last_route,
+                        outcome_err,
+                    )
+            except Exception as outcome_e:
+                log.exception(
+                    "deal outcome uid=%s event=%s route=%s: %s",
+                    uid,
+                    last_event,
+                    last_route,
+                    outcome_e,
+                )
     except Exception as e:
         log.exception("comet: %s", e)
         await event.respond(TECH_FAIL)

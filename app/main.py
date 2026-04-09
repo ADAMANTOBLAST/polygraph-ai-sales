@@ -21,7 +21,13 @@ from accounts_registry import get_accounts
 from ai_messaging.channels.telethon_client import build_client
 
 from .admin_api import setup_admin_routes
-from .bitrix import create_lead_from_form, build_lead_comments_initial, sync_bitrix_chat_for_uid
+from .bitrix import (
+    build_lead_comments_initial,
+    convert_lead_to_deal,
+    create_deal_from_lead_fallback,
+    create_lead_from_form,
+    sync_bitrix_chat_for_uid,
+)
 from .manager_router import resolve_account_for_lead_dialog
 from .state_store import add_tracked, append_history, load_state, set_bitrix_lead_link
 from .telegram_profiles import first_and_second_greeting
@@ -134,6 +140,7 @@ async def _handle_lead(request: web.Request) -> web.Response:
             log.exception("Не удалось написать в Telegram %s: %s", telegram, e)
 
     bitrix_lead_id = None
+    bitrix_deal_id = None
     bitrix_error = None
     try:
         bitrix_lead_id, bitrix_error = await create_lead_from_form(data)
@@ -141,9 +148,35 @@ async def _handle_lead(request: web.Request) -> web.Response:
         log.exception("Bitrix: %s", e)
         bitrix_error = str(e)[:200]
 
+    lead_header = build_lead_comments_initial(data)
+    if bitrix_lead_id is not None:
+        conv_deal, conv_err = await convert_lead_to_deal(bitrix_lead_id)
+        if conv_deal:
+            bitrix_deal_id = conv_deal
+        elif conv_err:
+            log.warning(
+                "Bitrix crm.lead.convert для лида %s не дал сделку: %s — пробуем crm.deal.add",
+                bitrix_lead_id,
+                conv_err,
+            )
+            fb_deal, fb_err = await create_deal_from_lead_fallback(
+                bitrix_lead_id,
+                "Заявка с сайта Flex&Roll PRO",
+                lead_header,
+            )
+            if fb_deal:
+                bitrix_deal_id = fb_deal
+            elif fb_err:
+                log.warning("Bitrix fallback сделки для лида %s: %s", bitrix_lead_id, fb_err)
+
     if bitrix_lead_id is not None and uid is not None:
         try:
-            set_bitrix_lead_link(uid, bitrix_lead_id, build_lead_comments_initial(data))
+            set_bitrix_lead_link(
+                uid,
+                bitrix_lead_id,
+                lead_header,
+                deal_id=bitrix_deal_id,
+            )
             await sync_bitrix_chat_for_uid(uid)
         except Exception as e:
             log.exception("Bitrix sync link: %s", e)
@@ -155,6 +188,8 @@ async def _handle_lead(request: web.Request) -> web.Response:
     }
     if bitrix_lead_id is not None:
         body["bitrix_lead_id"] = bitrix_lead_id
+    if bitrix_deal_id is not None:
+        body["bitrix_deal_id"] = bitrix_deal_id
     if bitrix_error:
         body["bitrix_error"] = bitrix_error
     return web.json_response(body)

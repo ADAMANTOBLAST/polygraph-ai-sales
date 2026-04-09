@@ -138,3 +138,19 @@ def system_extra_for_account(account_id: int) -> str | None:
     b = account_blob(account_id)
     t = (b.get("system_extra") or "").strip()
     return t if t else None
+
+
+def handoff_rules_for_account(account_id: int) -> dict[str, str]:
+    b = account_blob(account_id)
+    agent = b.get("agent")
+    if not isinstance(agent, dict):
+        return {}
+    raw = agent.get("handoff")
+    if not isinstance(raw, dict):
+        return {}
+    out: dict[str, str] = {}
+    for key in ("seller", "lead", "tech", "economist", "dispatcher"):
+        value = (raw.get(key) or "").strip()
+        if value:
+            out[key] = value
+    return out
