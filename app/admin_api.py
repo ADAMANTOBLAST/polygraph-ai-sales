@@ -7,7 +7,7 @@ from typing import Any
 from aiohttp import web
 from telethon import TelegramClient
 
-from .sales_sync import write_sales_sync
+from .sales_sync import load_sales_sync, write_sales_sync
 from .state_store import append_history, get_history, load_state, save_state
 
 log = logging.getLogger(__name__)
@@ -104,6 +104,18 @@ async def handle_admin_send(request: web.Request) -> web.Response:
     return web.json_response({"ok": True})
 
 
+async def handle_admin_sales_sync_get(request: web.Request) -> web.Response:
+    """Текущие настройки с сервера (fnr_sales_sync.json) для подтягивания в админку."""
+    blob = load_sales_sync()
+    return web.json_response(
+        {
+            "ok": True,
+            "lead_active_account_ids": blob.get("lead_active_account_ids"),
+            "accounts": blob.get("accounts") if isinstance(blob.get("accounts"), dict) else {},
+        }
+    )
+
+
 async def handle_admin_sales_sync(request: web.Request) -> web.Response:
     """POST тело как в buildSalesSyncPayload(): lead_active_account_ids + accounts."""
     try:
@@ -113,7 +125,8 @@ async def handle_admin_sales_sync(request: web.Request) -> web.Response:
     if not isinstance(data, dict):
         return web.json_response({"ok": False, "error": "invalid_body"}, status=400)
     write_sales_sync(data)
-    log.info("sales-sync: %s активных аккаунтов", len(data.get("lead_active_account_ids") or []))
+    acc_n = len(data.get("accounts") or {})
+    log.info("sales-sync: lead_active=%s, accounts=%s", data.get("lead_active_account_ids"), acc_n)
     return web.json_response({"ok": True})
 
 
@@ -129,6 +142,7 @@ async def handle_admin_ai(request: web.Request) -> web.Response:
 
 
 def setup_admin_routes(app: web.Application) -> None:
+    app.router.add_get("/admin/sales-sync", handle_admin_sales_sync_get)
     app.router.add_post("/admin/sales-sync", handle_admin_sales_sync)
     app.router.add_get("/admin/chats", handle_admin_chats)
     app.router.add_get("/admin/chats/{uid}", handle_admin_chat_thread)

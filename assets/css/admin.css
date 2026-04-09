@@ -853,8 +853,51 @@ body.admin-body:has(.admin-shell) {
 
 .chat-composer__row {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: flex-end;
+}
+
+.chat-composer__attach {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ffffff 0%, #f3eeff 55%, #ebe4ff 100%);
+  color: var(--fnr-primary);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 2px 8px rgba(91, 33, 182, 0.12),
+    0 0 0 1px rgba(109, 40, 217, 0.14);
+  cursor: pointer;
+  transition: transform var(--fnr-transition), box-shadow var(--fnr-transition), color var(--fnr-transition);
+}
+
+.chat-composer__attach-icon {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.chat-composer__attach:hover:not(:disabled) {
+  color: var(--fnr-primary-hover);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) inset, 0 4px 14px rgba(91, 33, 182, 0.18),
+    0 0 0 1px rgba(109, 40, 217, 0.22);
+  transform: translateY(-1px);
+}
+
+.chat-composer__attach:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--fnr-primary-soft), 0 2px 8px rgba(91, 33, 182, 0.15);
+}
+
+.chat-composer__attach:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 0 0 1px rgba(109, 40, 217, 0.1);
 }
 
 .chat-input {
@@ -886,6 +929,11 @@ body.admin-body:has(.admin-shell) {
   font-size: 0.92rem;
   color: var(--fnr-text-secondary);
   line-height: 1.45;
+}
+
+.chat-composer-hint[hidden] {
+  display: none !important;
+  margin: 0;
 }
 
 /* Настройка ИИ-агента — горизонтальная листалка аккаунтов */
@@ -1984,6 +2032,19 @@ body.admin-body:has(.admin-shell) .chat-input:focus {
 
 body.admin-body:has(.admin-shell) .chat-composer-hint {
   color: rgba(186, 198, 214, 0.88);
+}
+
+body.admin-body:has(.admin-shell) .chat-composer__attach {
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.12) 0%, rgba(124, 58, 237, 0.18) 100%);
+  color: rgba(196, 181, 253, 0.98);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 4px 16px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(167, 139, 250, 0.28);
+}
+
+body.admin-body:has(.admin-shell) .chat-composer__attach:hover:not(:disabled) {
+  color: rgba(248, 250, 252, 0.98);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.12) inset, 0 6px 20px rgba(91, 33, 182, 0.35),
+    0 0 0 1px rgba(192, 132, 252, 0.45);
 }
 
 body.admin-body:has(.admin-shell) .chat-failed-card {

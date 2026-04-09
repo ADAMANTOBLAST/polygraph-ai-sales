@@ -27,6 +27,15 @@ sudo cp "$SCRIPT_DIR/privacy.html" "$FNR_WWW/privacy.html" 2>/dev/null || true
 sudo cp "$SCRIPT_DIR/logo.svg" "$FNR_WWW/" 2>/dev/null || true
 sudo rm -rf "$FNR_WWW/admin"
 sudo cp -r "$SCRIPT_DIR/admin" "$FNR_WWW/"
+
+GIT_SHORT="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+if sudo test -f "$FNR_WWW/admin/index.html"; then
+  sudo sed -i "s/DEPLOY_REV/${GIT_SHORT}/g" "$FNR_WWW/admin/index.html"
+  echo "=== admin/index.html: fnr-deploy-rev = $GIT_SHORT (проверьте в браузере: view-source или DevTools → meta fnr-deploy-rev) ==="
+else
+  echo "=== ВНИМАНИЕ: нет $FNR_WWW/admin/index.html после копирования ===" >&2
+fi
+
 sudo chown -R www-data:www-data "$FNR_WWW"
 
 echo "=== restart ==="

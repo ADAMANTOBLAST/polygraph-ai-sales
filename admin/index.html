@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- DEPLOY_REV подставляется deploy.sh из git rev-parse --short (проверка что выложилась свежая копия) -->
+  <meta name="fnr-deploy-rev" content="DEPLOY_REV">
   <title>Кабинет | Flex&Roll PRO</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,7 +18,7 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="../assets/css/admin.css">
+  <link rel="stylesheet" href="../assets/css/admin.css?v=4">
 </head>
 <body class="admin-body">
   <div class="admin-shell">
@@ -146,17 +148,17 @@
             <div id="chatMessages" class="chat-messages" role="log" aria-live="polite"></div>
             <div class="chat-composer">
               <label class="chat-composer__label" for="chatInput" id="chatComposerLabel">Сообщение</label>
-              <div class="chat-composer__attachments">
-                <input type="file" id="chatFileInput" class="chat-file-input" disabled multiple accept="image/*,audio/*,.pdf,.doc,.docx">
-                <button type="button" class="btn btn-ghost btn-sm" id="chatPickFileBtn" disabled title="Файл">Файл</button>
-                <button type="button" class="btn btn-ghost btn-sm" id="chatPickImageBtn" disabled title="Картинка">Фото</button>
-                <button type="button" class="btn btn-ghost btn-sm" id="chatPickVoiceBtn" disabled title="Голос">Голос</button>
-              </div>
+              <input type="file" id="chatFileInput" class="chat-file-input" disabled multiple accept="image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
               <div class="chat-composer__row">
+                <button type="button" class="chat-composer__attach" id="chatAttachBtn" disabled title="Файл или фото" aria-label="Прикрепить файл или фото">
+                  <svg class="chat-composer__attach-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 1 1-8.49-8.49l9.19-9.19a4 4 0 1 1 5.66 5.66l-9.2 9.19a2 2 0 1 1-2.83-2.83l8.49-8.48" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
                 <textarea id="chatInput" class="chat-input" rows="2" placeholder="Текст…" disabled></textarea>
                 <button type="button" class="btn btn-primary" id="chatSendBtn" disabled>Отправить</button>
               </div>
-              <p id="chatComposerHint" class="chat-composer-hint"></p>
+              <p id="chatComposerHint" class="chat-composer-hint" hidden></p>
             </div>
           </div>
           </div>
@@ -165,7 +167,7 @@
 
       <section class="admin-card admin-card-section module-section" id="agent-script">
         <h3>Настройка AI-агента</h3>
-        <p class="admin-placeholder">Отметьте один или несколько Telegram-аккаунтов. Ниже одна форма: при сохранении одинаковые настройки записываются во все отмеченные аккаунты. На сервер уходит только то, что вы нажмёте «Синхронизировать с сервером»: по заявкам с сайта первое пишут только сотрудники со статусом «Активен», с их текстами и знаниями из формы.</p>
+        <p class="admin-placeholder">Отметьте один или несколько Telegram-аккаунтов. Ниже одна форма: при сохранении одинаковые настройки записываются во все отмеченные аккаунты. Данные синхронизируются с сервером автоматически и по кнопке «Синхронизировать с сервером». По заявкам с сайта первое сообщение уходят только аккаунты со статусом «Активен».</p>
 
         <form id="agentConfigForm" class="module-form agent-config-form" novalidate>
           <div class="agent-fieldset">
@@ -194,7 +196,7 @@
             <h4 class="agent-fieldset__title">Условия передачи клиента специалистам</h4>
             <p class="agent-fieldset__hint">Если в переписке выполняется условие, модель выводит кодовое слово; бэкенд подменяет ответ на заготовку и передаёт лид специалисту.</p>
             <label class="field">
-              <span>→ Активный продавец (кодовое слово, напр. seller)</span>
+              <span>→ Активный продавец (seller)</span>
               <input type="text" id="handoffSeller" placeholder="Условие передачи">
             </label>
             <label class="field">
@@ -446,16 +448,12 @@
       function updateComposerHint(aiOff) {
         var hint = chatEl('chatComposerHint');
         if (!hint) return;
-        var p = selectedEmployee();
-        var who = p && p.name ? p.name : 'менеджера';
         if (aiOff) {
-          hint.textContent =
-            'ИИ отключён — пишите сами; в этом диалоге ответы шли от имени ' + who + '.';
+          hint.hidden = false;
+          hint.textContent = 'ИИ отключён — ответы пишете вы.';
         } else {
-          hint.textContent =
-            'Та же модель ИИ (Comet), имя в ответах — как в профиле аккаунта ' +
-            who +
-            '. Можете вмешаться сообщением ниже.';
+          hint.textContent = '';
+          hint.hidden = true;
         }
       }
 
@@ -530,18 +528,18 @@
         chatEl('chatSendBtn').disabled = true;
         var f = chatEl('chatFileInput');
         if (f) f.disabled = true;
-        var b1 = chatEl('chatPickFileBtn');
-        var b2 = chatEl('chatPickImageBtn');
-        var b3 = chatEl('chatPickVoiceBtn');
-        if (b1) b1.disabled = true;
-        if (b2) b2.disabled = true;
-        if (b3) b3.disabled = true;
+        var att = chatEl('chatAttachBtn');
+        if (att) att.disabled = true;
         var cb = chatEl('chatAiDisabled');
         if (cb) {
           cb.disabled = true;
           cb.checked = false;
         }
-        chatEl('chatComposerHint').textContent = '';
+        var ch = chatEl('chatComposerHint');
+        if (ch) {
+          ch.textContent = '';
+          ch.hidden = true;
+        }
       }
 
       function isTelegramAccountEmployee() {
@@ -763,18 +761,18 @@
         chatEl('chatSendBtn').disabled = true;
         var fIn = chatEl('chatFileInput');
         if (fIn) fIn.disabled = true;
-        var b1 = chatEl('chatPickFileBtn');
-        var b2 = chatEl('chatPickImageBtn');
-        var b3 = chatEl('chatPickVoiceBtn');
-        if (b1) b1.disabled = true;
-        if (b2) b2.disabled = true;
-        if (b3) b3.disabled = true;
+        var att = chatEl('chatAttachBtn');
+        if (att) att.disabled = true;
         var cb = chatEl('chatAiDisabled');
         if (cb) {
           cb.disabled = true;
           cb.checked = false;
         }
-        chatEl('chatComposerHint').textContent = 'Переписки в Telegram нет — обратитесь к лиду по телефону или другим контактам из заявки.';
+        var ch = chatEl('chatComposerHint');
+        if (ch) {
+          ch.hidden = false;
+          ch.textContent = 'Переписки в Telegram нет — обратитесь к лиду по телефону или другим контактам из заявки.';
+        }
         updateComposerLabel();
       }
 
@@ -860,12 +858,8 @@
             chatEl('chatSendBtn').disabled = false;
             var fIn = chatEl('chatFileInput');
             if (fIn) fIn.disabled = false;
-            var b1 = chatEl('chatPickFileBtn');
-            var b2 = chatEl('chatPickImageBtn');
-            var b3 = chatEl('chatPickVoiceBtn');
-            if (b1) b1.disabled = false;
-            if (b2) b2.disabled = false;
-            if (b3) b3.disabled = false;
+            var att = chatEl('chatAttachBtn');
+            if (att) att.disabled = false;
             updateComposerHint(aiOff);
           })
           .catch(function () {
@@ -956,35 +950,26 @@
       });
 
       function stubAttachment(kind) {
-        alert('Отправка ' + kind + ' с сервера — в разработке. Пока можно писать текстом.');
+        alert('Отправка ' + kind + ' из админки — в разработке. Пока можно писать текстом.');
       }
-      var pickFile = chatEl('chatPickFileBtn');
-      var pickImg = chatEl('chatPickImageBtn');
-      var pickVoice = chatEl('chatPickVoiceBtn');
+      var pickAttach = chatEl('chatAttachBtn');
       var fileIn = chatEl('chatFileInput');
-      if (pickFile && fileIn) {
-        pickFile.addEventListener('click', function () {
-          if (!fileIn.disabled) fileIn.click();
-        });
-      }
-      if (pickImg && fileIn) {
-        pickImg.addEventListener('click', function () {
+      if (pickAttach && fileIn) {
+        pickAttach.addEventListener('click', function () {
           if (!fileIn.disabled) {
             try {
-              fileIn.setAttribute('accept', 'image/*');
+              fileIn.setAttribute(
+                'accept',
+                'image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+              );
             } catch (e) {}
             fileIn.click();
           }
         });
       }
-      if (pickVoice && fileIn) {
-        pickVoice.addEventListener('click', function () {
-          stubAttachment('голосового');
-        });
-      }
       if (fileIn) {
         fileIn.addEventListener('change', function () {
-          if (fileIn.files && fileIn.files.length) stubAttachment('файла');
+          if (fileIn.files && fileIn.files.length) stubAttachment('вложения');
           fileIn.value = '';
         });
       }
@@ -1330,6 +1315,8 @@
     // --- Настройка AI-агента: отдельный конфиг на каждый Telegram-аккаунт (localStorage v3) ---
     const AGENT_CFG_KEY_V3 = 'fnr_agent_config_v3';
     const AGENT_CFG_KEY_V2 = 'fnr_agent_config_v2';
+    /** Пока false — не пишем пустую форму в store (иначе затирается merge с сервера и пресеты). */
+    var fnrAgentFormHydrated = false;
 
     function emptyAgentHandoff() {
       return { seller: '', lead: '', tech: '', economist: '', dispatcher: '' };
@@ -1343,6 +1330,159 @@
         dialogScript: '',
         handoff: emptyAgentHandoff(),
       };
+    }
+
+    function isAgentConfigEmpty(c) {
+      if (!c || typeof c !== 'object') return true;
+      var hm = c.handoff || {};
+      var ho =
+        (hm.seller || '').trim() ||
+        (hm.lead || '').trim() ||
+        (hm.tech || '').trim() ||
+        (hm.economist || '').trim() ||
+        (hm.dispatcher || '').trim();
+      return (
+        !(c.greeting1 || '').trim() &&
+        !(c.greeting2 || '').trim() &&
+        !(c.knowledge || '').trim() &&
+        !(c.dialogScript || '').trim() &&
+        !ho
+      );
+    }
+
+    function personalizeAgentTemplate(s, who) {
+      var w = (who || 'специалист').trim();
+      return String(s || '').replace(/\{who\}/g, w);
+    }
+
+    /** Пресеты по роли карточки Telegram-аккаунта: тон, база знаний и условия передачи по воронке. */
+    function buildDefaultAgentPresetForRole(role, displayName) {
+      var who = (displayName || '').trim() || 'специалист';
+      var r = (role || 'Технолог').trim();
+      var baseHandoff = {
+        seller:
+          'Клиент готов обсудить заказ, объём, тип продукции и следующий шаг к сделке (не только общий интерес).',
+        lead:
+          'Нужны скидка, нестандартные условия, претензия, конфликт или решение уровня руководителя.',
+        tech:
+          'Нужна проверка макета, материалов, норм печати, техническое ТЗ или согласование с производством.',
+        economist:
+          'Нужны точный расчёт, коммерческое предложение, счёт, договор или фиксация оплаты и отсрочки.',
+        dispatcher:
+          'Вопросы сроков производства, готовности заказа, отгрузки, логистики или статуса в работе.',
+      };
+      var out = emptyAgentConfigPayload();
+      if (r === 'Активный продавец') {
+        out.greeting1 = personalizeAgentTemplate(
+          'Здравствуйте! Я {who} из Flex&Roll — помогу подобрать решение под вашу задачу по этикетке и упаковке и проведу к следующему шагу без лишней бюрократии.',
+          who
+        );
+        out.greeting2 =
+          'Коротко опишите продукт и желаемые объёмы — предложу удобный формат: расчёт, образцы или короткий созвон.';
+        out.knowledge =
+          'Flex&Roll — производство этикеток и гибкой упаковки для FMCG и промышленности.\nОтвечаем в рабочее время; срочное заранее помечайте в сообщении.\nНе обещаем сроки и цену без согласования с производством и экономистом.';
+        out.dialogScript =
+          'Тон: уверенный, дружелюбный, без канцелярита. Задавайте по одному уточнению за сообщение. Не придумывайте цифры и дедлайны — переводите к специалисту по условиям передачи ниже.';
+        out.handoff = {
+          seller:
+            'Лид квалифицирован: есть продукт, ориентир по объёму, запрос на КП или готовность обсудить коммерческие условия.',
+          lead: baseHandoff.lead,
+          tech: 'Обсуждение ушло в чисто технические детали макета, материала или норм — нужен технолог.',
+          economist: 'Клиент просит цену, счёт, договор или сравнение вариантов по деньгам.',
+          dispatcher: 'Фокус переписки — когда сделают, отгрузка, статус заказа или логистика.',
+        };
+      } else if (r === 'Руководитель') {
+        out.greeting1 = personalizeAgentTemplate(
+          'Добрый день! {who}, Flex&Roll. Если вопрос стратегический, по условиям сделки или нужна фиксация решения — разберём и предложу понятный следующий шаг.',
+          who
+        );
+        out.greeting2 =
+          'Кратко: суть запроса, что критично по срокам и объёму — отвечу по существу и при необходимости подключу команду.';
+        out.knowledge =
+          'Вы на связи как представитель руководства: можно обсуждать рамки сделки, нестандарт и эскалации.\nИсполнительные детали макета и сроков производства передаются технологам и диспетчеру по правилам ниже.';
+        out.dialogScript =
+          'Тон: спокойный, деловой. Не обещайте скидки и особые условия без явной готовности компании. Фиксируйте договорённости коротко.';
+        out.handoff = {
+          seller: 'Нужна оперативная работа линии продаж: презентация, подбор SKU, ведение сделки до КП.',
+          lead:
+            'Тема уже на уровне руководителя: условия, претензия, крупный контракт или исключение из регламента.',
+          tech: baseHandoff.tech,
+          economist: baseHandoff.economist,
+          dispatcher: baseHandoff.dispatcher,
+        };
+      } else if (r === 'Экономист') {
+        out.greeting1 = personalizeAgentTemplate(
+          'Добрый день! {who}, по коммерческим вопросам Flex&Roll: расчёт, КП, счета и условия оплаты.',
+          who
+        );
+        out.greeting2 =
+          'Укажите объём, желаемые сроки и ориентир по бюджету — подготовлю цифры или запрошу недостающее для калькуляции.';
+        out.knowledge =
+          'Калькуляция и документы зависят от утверждённых параметров заказа.\nБез ТЗ и объёма даём только вилку или ориентир; финальные условия — после согласования с производством.';
+        out.dialogScript =
+          'Тон: чёткий, цифры и шаги. Не называйте финальную цену, если нет данных для калькуляции — запрашивайте их или передавайте по воронке.';
+        out.handoff = {
+          seller: 'Клиент готов к продаже и обсуждению условий поставки, но расчёт уже закрыт — ведёт менеджер.',
+          lead: 'Скидки, отсрочка и нестандартные платежи — только согласование с руководством.',
+          tech: 'Для точной калькуляции не хватает технических вводных по материалу или макету.',
+          economist:
+            'Запрос на КП, счёт, договор, сравнение вариантов по цене или условиям оплаты — ваша зона; закрепите расчёт.',
+          dispatcher: 'Вопрос цены связан со сроком выхода на производство или отгрузкой — нужен диспетчер.',
+        };
+      } else if (r === 'Диспетчер') {
+        out.greeting1 = personalizeAgentTemplate(
+          'Здравствуйте! {who}, по срокам и отгрузкам Flex&Roll. Напишите номер заказа или что ждёте — проверю статус.',
+          who
+        );
+        out.greeting2 =
+          'Если срочно — отметьте в сообщении; постараемся ответить в первую очередь в рамках производственного плана.';
+        out.knowledge =
+          'Сроки зависят от очереди и согласованных ТЗ; обещайте только то, что подтверждено производством.\nПри отсутствии номера заказа уточняйте компанию и продукт из переписки.';
+        out.dialogScript =
+          'Тон: коротко, по факту. Даты — только после сверки с производством. При споре о качестве — передача технологу или руководителю.';
+        out.handoff = {
+          seller: 'Клиент хочет новый заказ или изменение условий поставки — к активному продавцу.',
+          lead: 'Срыв сроков, серьёзная претензия по поставке — эскалация руководителю.',
+          tech: 'Задержка из‑за макета, материала или технического согласования.',
+          economist: 'Вопросы оплаты, счета или штрафов по срокам — к экономисту.',
+          dispatcher:
+            'Нужен статус по производству, готовность к отгрузке, логистика или уточнение даты — ваша зона.',
+        };
+      } else {
+        /* Технолог (по умолчанию) */
+        out.greeting1 = personalizeAgentTemplate(
+          'Здравствуйте! {who}, технолог Flex&Roll. Помогу с материалами, макетом и печатью — опишите задачу или приложите файл.',
+          who
+        );
+        out.greeting2 =
+          'Если есть макет, ТЗ или фото этикетки — отправьте вложением: так ответ будет точнее и быстрее.';
+        out.knowledge =
+          'Проверяем макеты на допечатку, подбираем материалы и адгезию под тару.\nНе подтверждаем готовность тиража без согласования с производством; нормы и ограничения — прозрачно для клиента.';
+        out.dialogScript =
+          'Тон: экспертный, спокойный. Объясняйте простыми словами. Не гарантируйте результат печати без просмотра макета.';
+        out.handoff = {
+          seller: 'Клиент определился с продуктом и хочет обсуждать заказ, цену и поставку — к активному продавцу.',
+          lead: 'Спорное качество, нетиповое решение на уровне компании — к руководителю.',
+          tech:
+            'Нужна углублённая техническая экспертиза, вторая пара глаз по макету или согласование с производством.',
+          economist: 'Переход к расчёту, КП и договору — к экономисту.',
+          dispatcher: 'Сроки запуска в производство и отгрузки — к диспетчеру.',
+        };
+      }
+      return out;
+    }
+
+    function ensureRolePresetsForAccounts(store, accounts) {
+      if (!store.byAccount || typeof store.byAccount !== 'object') store.byAccount = {};
+      var changed = false;
+      accounts.forEach(function (p) {
+        if (!p || !p.id) return;
+        var cur = store.byAccount[p.id];
+        if (!isAgentConfigEmpty(cur)) return;
+        store.byAccount[p.id] = buildDefaultAgentPresetForRole(p.role, p.name);
+        changed = true;
+      });
+      return changed;
     }
 
     function legacyFromV2Object(o) {
@@ -1548,12 +1688,15 @@
 
     function persistDraftToAccount(accountId) {
       if (!accountId) return;
+      if (!fnrAgentFormHydrated) return;
       var validIds = validAgentAccountIds();
       if (!agentAccountIdValid(accountId, validIds)) return;
       var st = loadAgentStore();
       if (!st.byAccount || typeof st.byAccount !== 'object') st.byAccount = {};
       var payload = collectAgentFormPayload();
       var key = String(accountId);
+      var prev = st.byAccount[key];
+      if (isAgentConfigEmpty(payload) && prev && !isAgentConfigEmpty(prev)) return;
       st.byAccount[key] = JSON.parse(JSON.stringify(payload));
       writeAgentStore(st);
     }
@@ -1606,6 +1749,7 @@
       var msgEl = document.getElementById('agentConfigMsg');
       if (!validIds.length) {
         applyAgentFormPayload(emptyAgentConfigPayload());
+        fnrAgentFormHydrated = true;
         return;
       }
       var st = loadAgentStore();
@@ -1613,6 +1757,7 @@
       if (!fid || !agentAccountIdValid(fid, validIds)) fid = validIds[0];
       if (msgEl && msgEl.textContent.indexOf('разные сохранённые') >= 0) msgEl.textContent = '';
       fillAgentFormForAccount(fid);
+      fnrAgentFormHydrated = true;
     }
 
     function renderAgentPickList() {
@@ -1630,6 +1775,11 @@
       if (spreadV2LegacyToAccounts(store, accounts)) {
         writeAgentStore(store);
         store = loadAgentStore();
+      }
+      if (ensureRolePresetsForAccounts(store, accounts)) {
+        writeAgentStore(store);
+        store = loadAgentStore();
+        fnrScheduleSalesSyncPush();
       }
       if (!accounts.length) {
         applyAgentFormPayload(emptyAgentConfigPayload());
@@ -1713,6 +1863,80 @@
       fillAgentFormForFocus();
     }
 
+    function normalizeAgentPayloadFromServer(raw) {
+      if (!raw || typeof raw !== 'object') return null;
+      var h = raw.handoff || {};
+      return {
+        greeting1: String(raw.greeting1 || ''),
+        greeting2: String(raw.greeting2 || ''),
+        knowledge: String(raw.knowledge || ''),
+        dialogScript: String(raw.dialogScript || ''),
+        handoff: {
+          seller: String(h.seller || ''),
+          lead: String(h.lead || ''),
+          tech: String(h.tech || ''),
+          economist: String(h.economist || ''),
+          dispatcher: String(h.dispatcher || ''),
+        },
+      };
+    }
+
+    /** Подтягивает полный agent с сервера в localStorage, если локальный конфиг пустой. */
+    function mergeServerAgentIntoStore(blob) {
+      if (!blob || !blob.accounts || typeof blob.accounts !== 'object') return false;
+      var people = getPeople();
+      var st = loadAgentStore();
+      if (!st.byAccount || typeof st.byAccount !== 'object') st.byAccount = {};
+      var changed = false;
+      people.forEach(function (p) {
+        if (!p || !p.id) return;
+        var m = /^fnr-acc-(\d+)$/.exec(String(p.id));
+        if (!m) return;
+        var numId = m[1];
+        var acc = blob.accounts[numId];
+        if (!acc || typeof acc !== 'object') acc = blob.accounts[String(parseInt(numId, 10))];
+        if (!acc || !acc.agent || typeof acc.agent !== 'object') return;
+        var norm = normalizeAgentPayloadFromServer(acc.agent);
+        if (!norm) return;
+        var cur = st.byAccount[p.id];
+        if (!isAgentConfigEmpty(cur)) return;
+        st.byAccount[p.id] = norm;
+        changed = true;
+      });
+      if (changed) writeAgentStore(st);
+      return changed;
+    }
+
+    var fnrSalesSyncPushTimer = null;
+    function fnrScheduleSalesSyncPush() {
+      if (fnrSalesSyncPushTimer) clearTimeout(fnrSalesSyncPushTimer);
+      fnrSalesSyncPushTimer = setTimeout(function () {
+        fnrSalesSyncPushTimer = null;
+        var payload = buildSalesSyncPayload();
+        fetch(fnrApiBaseUrl() + '/admin/sales-sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify(payload),
+        }).catch(function () {});
+      }, 500);
+    }
+
+    function fetchSalesSyncThenRenderAgentPick() {
+      fnrAgentFormHydrated = false;
+      fetch(fnrApiBaseUrl() + '/admin/sales-sync', { credentials: 'same-origin' })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          if (data && data.ok && data.accounts) mergeServerAgentIntoStore(data);
+        })
+        .catch(function () {})
+        .finally(function () {
+          renderAgentPickList();
+        });
+    }
+
     function buildSalesSyncPayload() {
       var people = getPeople();
       var agent = loadAgentStore();
@@ -1722,10 +1946,10 @@
         if (!p || !p.id) return;
         var m = /^fnr-acc-(\d+)$/.exec(String(p.id));
         if (!m) return;
-        if ((p.status || 'Активен') !== 'Активен') return;
         var numId = m[1];
         var aid = parseInt(numId, 10);
-        lead_active.push(aid);
+        var isActive = (p.status || 'Активен') === 'Активен';
+        if (isActive) lead_active.push(aid);
         var cfg =
           agent.byAccount &&
           (agent.byAccount[p.id] || agent.byAccount[numId] || agent.byAccount[String(aid)]);
@@ -1751,10 +1975,16 @@
             );
           }
         }
-        accounts[numId] = {
+        var entry = {
           first_message: first,
           system_extra: parts.join('\n\n'),
         };
+        if (cfg && typeof cfg === 'object') {
+          try {
+            entry.agent = JSON.parse(JSON.stringify(cfg));
+          } catch (e) {}
+        }
+        accounts[numId] = entry;
       });
       return { lead_active_account_ids: lead_active, accounts: accounts };
     }
@@ -1776,7 +2006,7 @@
         agentConfigForm.addEventListener('input', fnrScheduleDraftSave, true);
         agentConfigForm.addEventListener('change', fnrScheduleDraftSave, true);
       }
-      renderAgentPickList();
+      fetchSalesSyncThenRenderAgentPick();
       agentConfigForm.addEventListener('submit', function (e) {
         e.preventDefault();
         var validIds = validAgentAccountIds();
@@ -1786,6 +2016,7 @@
           return;
         }
         commitFormToSelectedAccounts();
+        fnrScheduleSalesSyncPush();
         var st = loadAgentStore();
         var sel = getAgentSelectedIds(st, validIds);
         var mass = sel.length;
@@ -1793,15 +2024,13 @@
         if (msg) {
           if (mass > 1) {
             msg.textContent =
-              'Сохранено для ' +
-              mass +
-              ' активных аккаунтов (зелёная группа). Подключение к промпту Comet — на сервере.';
+              'Сохранено для ' + mass + ' активных аккаунтов (зелёная группа). Отправка на сервер…';
           } else if (mass === 1) {
             msg.textContent =
-              'Сохранено для аккаунта в группе и для открытого в форме. Подключение к промпту Comet — на сервере.';
+              'Сохранено для аккаунта в группе и в форме. Данные отправляются на сервер…';
           } else {
             msg.textContent =
-              'Сохранено только для аккаунта в фокусе (массовая группа пуста или неактивные не в группе). Подключение к промпту Comet — на сервере.';
+              'Сохранено для аккаунта в фокусе. Данные отправляются на сервер…';
           }
         }
         fillAgentFormForFocus();
@@ -1851,7 +2080,7 @@
     }
 
     window.__fnrRefreshAgentPick = function () {
-      renderAgentPickList();
+      fetchSalesSyncThenRenderAgentPick();
     };
 
     // --- Модуль "Будилки / уведомления" (локальный CRUD) ---

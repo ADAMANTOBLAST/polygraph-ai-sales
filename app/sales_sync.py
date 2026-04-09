@@ -1,0 +1,79 @@
+"""Синхронизация с админки: кто отвечает на заявки и тексты (первое сообщение, доп. контекст для ИИ)."""
+from __future__ import annotations
+
+import json
+import logging
+from pathlib import Path
+from typing import Any
+
+log = logging.getLogger(__name__)
+
+_SYNC_PATH = Path(__file__).resolve().parents[1] / "data" / "fnr_sales_sync.json"
+
+
+def _default_blob() -> dict[str, Any]:
+    return {"lead_active_account_ids": None, "accounts": {}}
+
+
+def load_sales_sync() -> dict[str, Any]:
+    if not _SYNC_PATH.is_file():
+        return _default_blob()
+    try:
+        with open(_SYNC_PATH, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+        if not isinstance(raw, dict):
+            return _default_blob()
+        if "accounts" not in raw or not isinstance(raw["accounts"], dict):
+            raw["accounts"] = {}
+        return raw
+    except Exception as e:
+        log.warning("fnr_sales_sync load: %s", e)
+        return _default_blob()
+
+
+def write_sales_sync(data: dict[str, Any]) -> None:
+    _SYNC_PATH.parent.mkdir(parents=True, exist_ok=True)
+    tmp = _SYNC_PATH.with_suffix(".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    tmp.replace(_SYNC_PATH)
+
+
+def lead_eligible_account_ids(connected_ids: list[int]) -> list[int]:
+    """
+    Список аккаунтов для round-robin на /lead.
+    - lead_active_account_ids == null или отсутствует: все подключённые.
+    - непустой список: пересечение с подключёнными (только «активные» из админки).
+    - пустой список []: никто (заявки через TG не идут).
+    """
+    blob = load_sales_sync()
+    raw = blob.get("lead_active_account_ids")
+    conn = sorted(set(int(x) for x in connected_ids))
+    if raw is None:
+        return conn
+    if not isinstance(raw, list):
+        return conn
+    want = {int(x) for x in raw}
+    return [x for x in conn if x in want]
+
+
+def account_blob(account_id: int) -> dict[str, Any]:
+    blob = load_sales_sync()
+    acc = blob.get("accounts") or {}
+    key = str(int(account_id))
+    raw = acc.get(key) or acc.get(account_id)
+    if not isinstance(raw, dict):
+        return {}
+    return raw
+
+
+def first_message_for_account(account_id: int) -> str | None:
+    b = account_blob(account_id)
+    t = (b.get("first_message") or "").strip()
+    return t if t else None
+
+
+def system_extra_for_account(account_id: int) -> str | None:
+    b = account_blob(account_id)
+    t = (b.get("system_extra") or "").strip()
+    return t if t else None
