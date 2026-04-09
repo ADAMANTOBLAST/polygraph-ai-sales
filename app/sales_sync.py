@@ -10,6 +10,23 @@ log = logging.getLogger(__name__)
 
 _SYNC_PATH = Path(__file__).resolve().parents[1] / "data" / "fnr_sales_sync.json"
 
+ROLE_KEY_TO_LABEL = {
+    "seller": "Активный продавец",
+    "lead": "Руководитель",
+    "tech": "Технолог",
+    "economist": "Экономист",
+    "dispatcher": "Диспетчер",
+}
+ROLE_LABEL_TO_KEY = {
+    "активный продавец": "seller",
+    "руководитель": "lead",
+    "технолог": "tech",
+    "экономист": "economist",
+    "диспетчер": "dispatcher",
+    "менеджер отдела продаж": "seller",
+    "менеджер": "lead",
+}
+
 
 def _default_blob() -> dict[str, Any]:
     return {"lead_active_account_ids": None, "accounts": {}}
@@ -55,6 +72,83 @@ def _person_row_id(e: dict[str, Any]) -> str:
     if s.isdigit():
         return f"fnr-acc-{int(s)}"
     return s
+
+
+def normalize_role_key(role: str | None) -> str | None:
+    s = (role or "").strip().lower()
+    if not s:
+        return None
+    return ROLE_LABEL_TO_KEY.get(s) or (s if s in ROLE_KEY_TO_LABEL else None)
+
+
+def role_label(role_key: str | None) -> str:
+    key = normalize_role_key(role_key)
+    if not key:
+        return "Специалист"
+    return ROLE_KEY_TO_LABEL.get(key, "Специалист")
+
+
+def account_role_key(account_id: int) -> str | None:
+    pid = f"fnr-acc-{int(account_id)}"
+    for e in people_entries():
+        if not isinstance(e, dict):
+            continue
+        if _person_row_id(e) != pid:
+            continue
+        return normalize_role_key(str(e.get("role") or ""))
+    return None
+
+
+def people_for_role(role_key: str, active_only: bool = True) -> list[dict[str, Any]]:
+    want = normalize_role_key(role_key)
+    if not want:
+        return []
+    out: list[dict[str, Any]] = []
+    for e in people_entries():
+        if not isinstance(e, dict):
+            continue
+        if normalize_role_key(str(e.get("role") or "")) != want:
+            continue
+        if active_only and (e.get("status") or "Активен").strip() != "Активен":
+            continue
+        out.append(e)
+    return out
+
+
+def active_connected_account_ids_for_role(connected_ids: list[int], role_key: str) -> list[int]:
+    want = normalize_role_key(role_key)
+    if not want:
+        return []
+    connected = {int(x) for x in connected_ids}
+    out: list[int] = []
+    for e in people_for_role(want, active_only=True):
+        pid = _person_row_id(e)
+        if not pid.startswith("fnr-acc-"):
+            continue
+        try:
+            aid = int(pid.split("-")[-1])
+        except (TypeError, ValueError):
+            continue
+        if aid not in connected:
+            continue
+        out.append(aid)
+    return sorted(set(out))
+
+
+def bitrix_user_id_for_role(role_key: str) -> int | None:
+    for e in people_for_role(role_key, active_only=True):
+        raw = e.get("bitrix_user_id")
+        if raw in (None, ""):
+            raw = e.get("bitrixUserId")
+        if raw in (None, ""):
+            continue
+        try:
+            uid = int(raw)
+        except (TypeError, ValueError):
+            continue
+        if uid > 0:
+            return uid
+    return None
 
 
 def is_account_active(account_id: int) -> bool:
@@ -114,6 +208,29 @@ def account_blob(account_id: int) -> dict[str, Any]:
     if not isinstance(raw, dict):
         return {}
     return raw
+
+
+def agent_blob_for_account(account_id: int) -> dict[str, Any]:
+    b = account_blob(account_id)
+    raw = b.get("agent")
+    return raw if isinstance(raw, dict) else {}
+
+
+def handoff_rules_for_account(account_id: int) -> dict[str, str]:
+    agent = agent_blob_for_account(account_id)
+    raw = agent.get("handoff")
+    if not isinstance(raw, dict):
+        return {}
+    out: dict[str, str] = {}
+    for key in ROLE_KEY_TO_LABEL.keys():
+        val = (raw.get(key) or "").strip()
+        if val:
+            out[key] = val
+    # Совместимость со старым ключом lead -> manager.
+    legacy_lead = (raw.get("lead") or "").strip()
+    if legacy_lead:
+        out["lead"] = legacy_lead
+    return out
 
 
 def first_message_for_account(account_id: int) -> str | None:

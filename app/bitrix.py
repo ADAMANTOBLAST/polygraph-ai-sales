@@ -9,6 +9,7 @@ from typing import Any
 
 import aiohttp
 
+from .sales_sync import bitrix_user_id_for_role, role_label
 from .state_store import get_bitrix_lead_link, get_history, get_uid_account
 
 log = logging.getLogger(__name__)
@@ -189,14 +190,16 @@ async def crm_contact_update_comments(contact_id: int, comments: str) -> str | N
         return str(e)[:200]
 
 
-async def crm_lead_update_comments(lead_id: int, comments: str) -> str | None:
-    """Обновляет COMMENTS у лида. Возвращает текст ошибки или None."""
+async def crm_lead_update_fields(
+    lead_id: int, fields: dict[str, Any], register_sonet_event: bool = False
+) -> str | None:
+    """Обновляет произвольные поля лида. Возвращает текст ошибки или None."""
     url = bitrix_method_url("crm.lead.update")
     if not url:
         return "no_webhook"
-    if len(comments) > _MAX_COMMENTS:
-        comments = comments[: _MAX_COMMENTS - 80] + "\n\n… (текст обрезан по лимиту CRM)"
-    payload: dict[str, Any] = {"id": int(lead_id), "fields": {"COMMENTS": comments}}
+    payload: dict[str, Any] = {"id": int(lead_id), "fields": fields}
+    if register_sonet_event:
+        payload["params"] = {"REGISTER_SONET_EVENT": "Y"}
     try:
         timeout = aiohttp.ClientTimeout(total=20)
         async with aiohttp.ClientSession(timeout=timeout) as session:
@@ -204,13 +207,33 @@ async def crm_lead_update_comments(lead_id: int, comments: str) -> str | None:
             if not ok:
                 log.warning("Bitrix crm.lead.update %s: %s", lead_id, err)
                 return err or "update_failed"
-            log.info("Bitrix lead %s: COMMENTS updated", lead_id)
             return None
     except asyncio.CancelledError:
         raise
     except Exception as e:
-        log.exception("Bitrix lead.update: %s", e)
+        log.exception("Bitrix lead.update fields: %s", e)
         return str(e)[:200]
+
+
+async def crm_lead_update_comments(lead_id: int, comments: str) -> str | None:
+    """Обновляет COMMENTS у лида. Возвращает текст ошибки или None."""
+    if len(comments) > _MAX_COMMENTS:
+        comments = comments[: _MAX_COMMENTS - 80] + "\n\n… (текст обрезан по лимиту CRM)"
+    err = await crm_lead_update_fields(int(lead_id), {"COMMENTS": comments})
+    if not err:
+        log.info("Bitrix lead %s: COMMENTS updated", lead_id)
+    return err
+
+
+async def crm_lead_update_assigned_by(lead_id: int, bitrix_user_id: int) -> str | None:
+    err = await crm_lead_update_fields(
+        int(lead_id),
+        {"ASSIGNED_BY_ID": int(bitrix_user_id)},
+        register_sonet_event=True,
+    )
+    if not err:
+        log.info("Bitrix lead %s: ASSIGNED_BY_ID -> %s", lead_id, bitrix_user_id)
+    return err
 
 
 async def sync_bitrix_chat_for_uid(uid: int) -> None:
@@ -251,6 +274,40 @@ async def sync_bitrix_chat_for_uid(uid: int) -> None:
             c_err = await crm_contact_update_comments(cid, full)
             if c_err:
                 log.warning("Bitrix COMMENTS контакта %s: %s", cid, c_err)
+
+
+async def sync_bitrix_handoff_for_uid(
+    uid: int,
+    from_role_key: str | None,
+    to_role_key: str,
+    target_account_id: int | None = None,
+) -> None:
+    """Синхронизирует автопередачу лида в Bitrix: ответственный + комментарий в таймлайне."""
+    meta = get_bitrix_lead_link(uid)
+    if not meta:
+        return
+    lead_id = meta.get("lead_id")
+    if not lead_id:
+        return
+    assigned_err: str | None = None
+    bitrix_uid = bitrix_user_id_for_role(to_role_key)
+    if bitrix_uid:
+        assigned_err = await crm_lead_update_assigned_by(int(lead_id), int(bitrix_uid))
+    from_label = role_label(from_role_key)
+    to_label = role_label(to_role_key)
+    parts = [f"Автопередача лида из Telegram: {from_label} -> {to_label}."]
+    if target_account_id is not None:
+        parts.append(f"Telegram-аккаунт: fnr-acc-{int(target_account_id)}.")
+    if bitrix_uid:
+        parts.append(f"Bitrix ASSIGNED_BY_ID: {int(bitrix_uid)}.")
+    else:
+        parts.append("Bitrix ASSIGNED_BY_ID не обновлён: для роли не настроен Bitrix user id.")
+    if assigned_err:
+        parts.append(f"Ошибка смены ответственного: {assigned_err}.")
+    comment = " ".join(parts)
+    err = await crm_timeline_comment_add_lead(int(lead_id), comment)
+    if err:
+        log.warning("Bitrix handoff timeline lead=%s: %s", lead_id, err)
 
 
 async def bitrix_ping_crm() -> dict[str, Any]:
