@@ -12,7 +12,13 @@ DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "fnr_state.json"
 
 
 def _default() -> dict:
-    return {"tracked_user_ids": [], "histories": {}, "bitrix_uid_meta": {}}
+    return {
+        "tracked_user_ids": [],
+        "histories": {},
+        "bitrix_uid_meta": {},
+        "uid_account": {},
+        "lead_rr_idx": 0,
+    }
 
 
 def load_state() -> dict:
@@ -35,6 +41,10 @@ def load_state() -> dict:
             _STATE["histories"] = {}
         if "bitrix_uid_meta" not in _STATE:
             _STATE["bitrix_uid_meta"] = {}
+        if "uid_account" not in _STATE:
+            _STATE["uid_account"] = {}
+        if "lead_rr_idx" not in _STATE:
+            _STATE["lead_rr_idx"] = 0
         return _STATE
 
 
@@ -80,6 +90,24 @@ def get_bitrix_lead_link(uid: int) -> dict | None:
     st = load_state()
     raw = (st.get("bitrix_uid_meta") or {}).get(str(int(uid)))
     return raw if isinstance(raw, dict) else None
+
+
+def get_uid_account(uid: int) -> int | None:
+    """Закреплённый логический аккаунт fnr-acc-* для диалога с лидом."""
+    st = load_state()
+    raw = (st.get("uid_account") or {}).get(str(int(uid)))
+    if raw is None:
+        return None
+    try:
+        return int(raw)
+    except (TypeError, ValueError):
+        return None
+
+
+def set_uid_account(uid: int, account_id: int) -> None:
+    st = load_state()
+    st.setdefault("uid_account", {})[str(int(uid))] = int(account_id)
+    save_state()
 
 
 def append_history(uid: int, role: str, content: str, max_pairs: int = 12) -> None:

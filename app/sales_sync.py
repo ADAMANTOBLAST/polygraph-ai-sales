@@ -39,6 +39,31 @@ def write_sales_sync(data: dict[str, Any]) -> None:
     tmp.replace(_SYNC_PATH)
 
 
+def people_entries() -> list[dict[str, Any]]:
+    """Снимок команды с админки (синхронизация), только метаданные по fnr-acc-*."""
+    blob = load_sales_sync()
+    raw = blob.get("people")
+    return raw if isinstance(raw, list) else []
+
+
+def is_account_active(account_id: int) -> bool:
+    """Статус «Активен» в карточке сотрудника; без записи — считаем активным."""
+    pid = f"fnr-acc-{int(account_id)}"
+    for e in people_entries():
+        if str(e.get("id") or "") != pid:
+            continue
+        st = (e.get("status") or "Активен").strip()
+        return st == "Активен"
+    return True
+
+
+def eligible_active_account_ids(connected_ids: list[int]) -> list[int]:
+    """Как lead_eligible, но только аккаунты со статусом «Активен» в команде. Иначе fallback на lead_eligible."""
+    base = lead_eligible_account_ids(connected_ids)
+    active_only = [a for a in base if is_account_active(a)]
+    return active_only if active_only else base
+
+
 def lead_eligible_account_ids(connected_ids: list[int]) -> list[int]:
     """
     Список аккаунтов для round-robin на /lead.

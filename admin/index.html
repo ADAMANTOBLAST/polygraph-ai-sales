@@ -1989,7 +1989,22 @@
         }
         accounts[numId] = entry;
       });
-      return { lead_active_account_ids: lead_active, accounts: accounts };
+      var teamForSync = [];
+      people.forEach(function (p) {
+        if (!p || !p.id) return;
+        if (!/^fnr-acc-\d+$/.test(String(p.id))) return;
+        teamForSync.push({
+          id: p.id,
+          name: p.name || '',
+          role: p.role || '',
+          status: p.status || 'Активен',
+        });
+      });
+      return {
+        lead_active_account_ids: lead_active,
+        accounts: accounts,
+        people: teamForSync,
+      };
     }
 
     const agentConfigForm = document.getElementById('agentConfigForm');

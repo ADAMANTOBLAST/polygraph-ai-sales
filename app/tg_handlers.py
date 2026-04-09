@@ -13,9 +13,14 @@ from .comet_client import complete_dialog
 from .comet_media import analyze_image_relevance, transcribe_audio_file
 from .media_utils import extract_audio_for_whisper
 from .bitrix import sync_bitrix_chat_for_uid
+from .manager_router import resolve_account_for_lead_dialog
 from .state_store import append_history, get_history, is_tracked
 
 log = logging.getLogger(__name__)
+
+REASSIGN_NOTICE = (
+    "Сейчас вас консультирует другой специалист команды — продолжим по вашей задаче."
+)
 
 DOCUMENT_REPLY = "Передам нашим специалистам, спасибо за информацию 🤝"
 
@@ -43,7 +48,9 @@ async def _download_to_temp(client: TelegramClient, message, suffix: str) -> str
         return None
 
 
-async def _reply_boris(client: TelegramClient, event: events.NewMessage.Event, uid: int) -> None:
+async def _reply_boris(
+    client: TelegramClient, event: events.NewMessage.Event, uid: int, account_id: int
+) -> None:
     try:
         await client.send_read_acknowledge(event.chat_id, max_id=event.id)
     except Exception as e:
@@ -51,7 +58,7 @@ async def _reply_boris(client: TelegramClient, event: events.NewMessage.Event, u
     try:
         hist = get_history(uid)
         async with client.action(event.chat_id, "typing"):
-            reply = await asyncio.to_thread(complete_dialog, hist, 0)
+            reply = await asyncio.to_thread(complete_dialog, hist, account_id)
         append_history(uid, "assistant", reply)
         await event.respond(reply)
         try:
@@ -74,6 +81,13 @@ def register_private_handlers(client: TelegramClient) -> None:
         uid = int(sender.id)
         if not is_tracked(uid):
             return
+
+        account_id, reassigned = resolve_account_for_lead_dialog(uid)
+        if reassigned:
+            try:
+                await client.send_message(uid, REASSIGN_NOTICE)
+            except Exception as e:
+                log.debug("reassign notice uid=%s: %s", uid, e)
 
         msg = event.message
         caption = (event.raw_text or "").strip()
@@ -111,7 +125,7 @@ def register_private_handlers(client: TelegramClient) -> None:
                     append_history(uid, "user", line)
                 finally:
                     Path(path).unlink(missing_ok=True)
-                await _reply_boris(client, event, uid)
+                await _reply_boris(client, event, uid, account_id)
                 return
 
             # --- Голос / аудио / видео / кружок ---
@@ -161,7 +175,7 @@ def register_private_handlers(client: TelegramClient) -> None:
                     Path(path).unlink(missing_ok=True)
                     if extra_wav:
                         Path(extra_wav).unlink(missing_ok=True)
-                await _reply_boris(client, event, uid)
+                await _reply_boris(client, event, uid, account_id)
                 return
 
             # --- Файл (документ), не голос/видео ---
@@ -179,7 +193,7 @@ def register_private_handlers(client: TelegramClient) -> None:
                 return
 
             append_history(uid, "user", text)
-            await _reply_boris(client, event, uid)
+            await _reply_boris(client, event, uid, account_id)
 
         except Exception as e:
             log.exception("on_pm: %s", e)

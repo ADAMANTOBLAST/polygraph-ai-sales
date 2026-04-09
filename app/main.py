@@ -22,6 +22,7 @@ from ai_messaging.channels.telethon_client import build_client
 
 from .admin_api import setup_admin_routes
 from .bitrix import create_lead_from_form, build_lead_comments_initial, sync_bitrix_chat_for_uid
+from .manager_router import resolve_account_for_lead_dialog
 from .state_store import add_tracked, append_history, load_state, set_bitrix_lead_link
 from .telegram_profiles import first_and_second_greeting
 from .tg_handlers import register_private_handlers
@@ -105,7 +106,8 @@ async def _handle_lead(request: web.Request) -> web.Response:
             entity = await client.get_entity(telegram)
             uid = int(entity.id)
             add_tracked(uid)
-            first_greet, second_greet = first_and_second_greeting(0)
+            aid, _ = resolve_account_for_lead_dialog(uid)
+            first_greet, second_greet = first_and_second_greeting(aid)
             await client.send_message(entity, first_greet)
             append_history(uid, "assistant", first_greet)
             if second_greet:
