@@ -552,18 +552,44 @@
         return p && p.name ? p.name : 'аккаунт #' + aid;
       }
 
-      function chatBelongsToSelectedAccount() {
-        return true;
+      function isTelegramAccountEmployee() {
+        return /^fnr-acc-\d+$/.test(chatSelectedEmployeeId || '');
       }
 
-      function failedBelongsToSelectedAccount() {
-        return true;
+      function selectedTelegramAccountId() {
+        var m = /^fnr-acc-(\d+)$/.exec(chatSelectedEmployeeId || '');
+        return m ? parseInt(m[1], 10) : null;
+      }
+
+      function chatBelongsToSelectedAccount(c) {
+        var sel = selectedTelegramAccountId();
+        if (sel === null) return false;
+        var aid = c.account_id;
+        if (aid === undefined || aid === null) return false;
+        return Number(aid) === sel;
+      }
+
+      function failedBelongsToSelectedAccount(f) {
+        var sel = selectedTelegramAccountId();
+        if (sel === null) return false;
+        if (!f || (f.account_id === undefined || f.account_id === null)) return true;
+        return Number(f.account_id) === sel;
       }
 
       function renderChatList() {
         var body = chatEl('chatListBody');
         var q = (chatEl('chatListSearch') && chatEl('chatListSearch').value || '').trim().toLowerCase();
         if (!body) return;
+        if (!chatSelectedEmployeeId) {
+          body.innerHTML =
+            '<p class="chat-list-empty">Выберите аккаунт менеджера (чип <strong>fnr-acc-*</strong>) выше — список диалогов привязан к этому Telegram-аккаунту.</p>';
+          return;
+        }
+        if (!isTelegramAccountEmployee()) {
+          body.innerHTML =
+            '<p class="chat-list-empty">Для списка переписок выберите чип Telegram-аккаунта (не карточку сотрудника без fnr-acc).</p>';
+          return;
+        }
         var rows = [];
         chatListData.forEach(function (c) {
           if (!chatBelongsToSelectedAccount(c)) return;
@@ -595,7 +621,7 @@
         });
         if (!rows.length) {
           body.innerHTML =
-            '<p class="chat-list-empty">Пока нет отслеживаемых диалогов в Telegram. Появятся после заявки с сайта с контактом Telegram или после /lead.</p>';
+            '<p class="chat-list-empty">Нет диалогов для выбранного аккаунта. Если лид закреплён за другим fnr-acc — переключите чип. Новые лиды появятся после заявки с сайта.</p>';
           return;
         }
         body.innerHTML = rows

@@ -9,7 +9,7 @@ from pathlib import Path
 
 from telethon import TelegramClient, events
 
-from .comet_client import complete_dialog
+from .comet_client import complete_dialog, complete_dialog_two_chunks
 from .comet_media import analyze_image_relevance, transcribe_audio_file
 from .media_utils import extract_audio_for_whisper
 from .bitrix import sync_bitrix_chat_for_uid
@@ -36,29 +36,6 @@ STICKER_REPLY = (
 
 TECH_FAIL = "Сейчас техническая заминка — напишите ещё раз через минуту или позвоните на номер с сайта."
 
-# Маркер из промпта (два сообщения в TG); запасной разделитель — \n\n
-_FNR_SPLIT = "<<<FNR2>>>"
-
-
-def _assistant_reply_parts(text: str, two_messages: bool) -> list[str]:
-    """Два TG-сообщения по настройке: сначала маркер из инструкции, иначе \\n\\n."""
-    t = (text or "").strip()
-    if not t:
-        return []
-    if not two_messages:
-        return [t]
-    if _FNR_SPLIT in t:
-        a, b = t.split(_FNR_SPLIT, 1)
-        a, b = a.strip(), b.strip()
-        if a and b:
-            return [a, b]
-    if "\n\n" in t:
-        a, b = t.split("\n\n", 1)
-        a, b = a.strip(), b.strip()
-        if a and b:
-            return [a, b]
-    return [t]
-
 
 async def _download_to_temp(client: TelegramClient, message, suffix: str) -> str | None:
     fd, path = tempfile.mkstemp(suffix=suffix)
@@ -82,9 +59,12 @@ async def _reply_boris(
     try:
         hist = get_history(uid)
         async with client.action(event.chat_id, "typing"):
-            reply = await asyncio.to_thread(complete_dialog, hist, account_id)
-        two = use_two_telegram_messages_for_replies(account_id)
-        parts = _assistant_reply_parts(reply, two)
+            if use_two_telegram_messages_for_replies(account_id):
+                part1, part2 = await asyncio.to_thread(complete_dialog_two_chunks, hist, account_id)
+                parts = [part1, part2]
+            else:
+                reply = await asyncio.to_thread(complete_dialog, hist, account_id)
+                parts = [reply]
         for i, part in enumerate(parts):
             append_history(uid, "assistant", part)
             if i == 0:

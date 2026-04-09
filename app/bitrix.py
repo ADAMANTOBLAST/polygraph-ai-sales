@@ -227,14 +227,16 @@ async def sync_bitrix_chat_for_uid(uid: int) -> None:
     full = f"{header}\n\n--- Переписка Telegram ---\n{chat_block}"
     err = await crm_lead_update_comments(int(lead_id), full)
     if err:
-        log.debug("Bitrix sync uid=%s lead=%s: %s", uid, lead_id, err)
+        log.warning("Bitrix COMMENTS не обновлён uid=%s lead=%s: %s", uid, lead_id, err)
+    else:
+        log.info("Bitrix lead %s: переписка в COMMENTS обновлена (telegram uid=%s)", lead_id, uid)
 
     tl = f"Переписка Telegram:\n{chat_block}"
     if len(tl) > 5800:
         tl = tl[:5700] + "\n…"
     t_err = await crm_timeline_comment_add_lead(int(lead_id), tl)
     if t_err:
-        log.debug("Bitrix timeline lead=%s: %s", lead_id, t_err)
+        log.warning("Bitrix лента лида lead=%s: %s", lead_id, t_err)
 
     ld = await crm_lead_get(int(lead_id))
     if ld:
@@ -248,7 +250,17 @@ async def sync_bitrix_chat_for_uid(uid: int) -> None:
         if cid and cid > 0:
             c_err = await crm_contact_update_comments(cid, full)
             if c_err:
-                log.debug("Bitrix contact %s: %s", cid, c_err)
+                log.warning("Bitrix COMMENTS контакта %s: %s", cid, c_err)
+
+
+async def bitrix_ping_crm() -> dict[str, Any]:
+    """Проверка вебхука: crm.lead.fields (нужны права CRM; иначе увидите error)."""
+    j, err = await _crm_call_json("crm.lead.fields", {})
+    if err:
+        return {"ok": False, "error": err, "hint": "Создайте входящий вебхук с правами crm (не только crm.lead.add)."}
+    res = j.get("result") if j else None
+    n = len(res) if isinstance(res, dict) else 0
+    return {"ok": True, "lead_fields_count": n}
 
 
 async def create_lead_from_form(data: dict[str, Any]) -> tuple[int | None, str | None]:

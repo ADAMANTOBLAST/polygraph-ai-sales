@@ -7,7 +7,7 @@ from typing import Any
 from aiohttp import web
 from telethon import TelegramClient
 
-from .bitrix import sync_bitrix_chat_for_uid
+from .bitrix import bitrix_ping_crm, sync_bitrix_chat_for_uid
 from .sales_sync import load_sales_sync, write_sales_sync
 from .state_store import append_history, get_history, get_uid_account, load_state, save_state
 from .tg_pool import get_telegram_client
@@ -155,6 +155,12 @@ async def handle_admin_sales_sync(request: web.Request) -> web.Response:
     return web.json_response({"ok": True})
 
 
+async def handle_admin_bitrix_ping(request: web.Request) -> web.Response:
+    """GET: проверка Bitrix вебхука (crm.lead.fields)."""
+    payload = await bitrix_ping_crm()
+    return web.json_response(payload)
+
+
 async def handle_admin_bitrix_resync_all(request: web.Request) -> web.Response:
     """POST без тела: для всех Telegram uid с привязкой к лиду — заново отправить переписку в Bitrix."""
     st = load_state()
@@ -186,6 +192,7 @@ async def handle_admin_ai(request: web.Request) -> web.Response:
 def setup_admin_routes(app: web.Application) -> None:
     app.router.add_get("/admin/sales-sync", handle_admin_sales_sync_get)
     app.router.add_post("/admin/sales-sync", handle_admin_sales_sync)
+    app.router.add_get("/admin/bitrix-ping", handle_admin_bitrix_ping)
     app.router.add_post("/admin/bitrix-resync-chats", handle_admin_bitrix_resync_all)
     app.router.add_get("/admin/chats", handle_admin_chats)
     app.router.add_get("/admin/chats/{uid}", handle_admin_chat_thread)
