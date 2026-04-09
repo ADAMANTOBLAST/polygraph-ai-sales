@@ -21,18 +21,8 @@ from accounts_registry import get_accounts
 from ai_messaging.channels.telethon_client import build_client
 
 from .admin_api import setup_admin_routes
-<<<<<<< HEAD
-from .bitrix import (
-    build_lead_comments_initial,
-    convert_lead_to_deal,
-    create_deal_from_lead_fallback,
-    create_lead_from_form,
-    sync_bitrix_chat_for_uid,
-)
-=======
 from .voximplant_webhook import setup_voximplant_routes
 from .bitrix import create_lead_from_form, build_lead_comments_initial, sync_bitrix_chat_for_uid
->>>>>>> 832b91a108ae318194cc6938235662437251afb3
 from .manager_router import resolve_account_for_lead_dialog
 from .state_store import add_tracked, append_history, load_state, set_bitrix_lead_link
 from .telegram_profiles import first_and_second_greeting
