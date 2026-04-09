@@ -7,6 +7,8 @@ from typing import Any
 from aiohttp import web
 from telethon import TelegramClient
 
+from accounts_registry import list_accounts_for_admin
+
 from .bitrix import bitrix_ping_crm, sync_bitrix_chat_for_uid
 from .sales_sync import load_sales_sync, write_sales_sync
 from .state_store import append_history, get_history, get_uid_account, load_state, save_state
@@ -34,6 +36,11 @@ def _set_ai_disabled(uid: int, disabled: bool) -> None:
         lst = [x for x in lst if x != uid]
     st["ai_disabled_uids"] = lst
     save_state()
+
+
+async def handle_team_accounts(_request: web.Request) -> web.Response:
+    """Список Telegram-аккаунтов с сервера — чипы fnr-acc-* в переписках у всех браузеров."""
+    return web.json_response({"ok": True, "accounts": list_accounts_for_admin()})
 
 
 async def handle_admin_chats(request: web.Request) -> web.Response:
@@ -192,6 +199,7 @@ async def handle_admin_ai(request: web.Request) -> web.Response:
 
 
 def setup_admin_routes(app: web.Application) -> None:
+    app.router.add_get("/team-accounts", handle_team_accounts)
     app.router.add_get("/admin/sales-sync", handle_admin_sales_sync_get)
     app.router.add_post("/admin/sales-sync", handle_admin_sales_sync)
     app.router.add_get("/admin/bitrix-ping", handle_admin_bitrix_ping)

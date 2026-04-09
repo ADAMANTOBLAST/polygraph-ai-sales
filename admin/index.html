@@ -1393,6 +1393,7 @@
     function mergeTeamAccountsFromServer() {
       fetch(fnrApiBaseUrl() + '/team-accounts', { credentials: 'same-origin' })
         .then(function (r) {
+          if (!r.ok) return Promise.reject(new Error('HTTP ' + r.status));
           return r.json();
         })
         .then(function (data) {
@@ -1432,6 +1433,12 @@
           if (changed) {
             savePeople(items);
             renderPeople();
+          }
+          if (typeof window.__fnrRefreshChatsFromPeople === 'function') {
+            window.__fnrRefreshChatsFromPeople();
+          }
+          if (typeof window.__fnrRefreshAgentPick === 'function') {
+            window.__fnrRefreshAgentPick();
           }
         })
         .catch(function () {});
