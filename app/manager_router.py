@@ -12,6 +12,7 @@ import logging
 from accounts_registry import get_accounts
 
 from .sales_sync import (
+    active_connected_account_ids_for_role,
     eligible_active_account_ids,
     is_account_active,
     lead_eligible_account_ids,
@@ -55,6 +56,46 @@ def _pick_replacement(old_id: int, conn: list[int]) -> int:
         if int(a) != int(old_id):
             return int(a)
     return int(ids[0])
+
+
+def pick_account_for_role(role_key: str) -> int | None:
+    """Round-robin среди активных Telegram-аккаунтов нужной роли."""
+    conn = _connected_sorted()
+    if not conn:
+        return None
+    ids = active_connected_account_ids_for_role(conn, role_key)
+    if not ids:
+        return None
+    st = load_state()
+    rr = st.get("role_rr_idx")
+    if not isinstance(rr, dict):
+        rr = {}
+        st["role_rr_idx"] = rr
+    idx = int(rr.get(role_key) or 0) % len(ids)
+    aid = int(ids[idx])
+    rr[role_key] = idx + 1
+    save_state()
+    return aid
+
+
+def force_assign_uid_to_account(uid: int, account_id: int) -> bool:
+    current = get_uid_account(uid)
+    if current is not None and int(current) == int(account_id):
+        return False
+    if current is not None:
+        copy_history_on_reassign(uid, int(current), int(account_id))
+    set_uid_account(uid, int(account_id))
+    return True
+
+
+def force_assign_uid_to_role(uid: int, role_key: str) -> tuple[int | None, bool]:
+    aid = pick_account_for_role(role_key)
+    if aid is None:
+        return None, False
+    changed = force_assign_uid_to_account(uid, int(aid))
+    if changed:
+        log.info("uid=%s переназначен вручную по роли %s -> %s", uid, role_key, aid)
+    return int(aid), changed
 
 
 def resolve_account_for_lead_dialog(uid: int) -> tuple[int, bool]:

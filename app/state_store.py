@@ -18,6 +18,7 @@ def _default() -> dict:
         "bitrix_uid_meta": {},
         "uid_account": {},
         "lead_rr_idx": 0,
+        "role_rr_idx": {},
     }
 
 
@@ -45,6 +46,8 @@ def load_state() -> dict:
             _STATE["uid_account"] = {}
         if "lead_rr_idx" not in _STATE:
             _STATE["lead_rr_idx"] = 0
+        if "role_rr_idx" not in _STATE:
+            _STATE["role_rr_idx"] = {}
         return _STATE
 
 

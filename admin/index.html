@@ -91,6 +91,10 @@
               <span>Контакт</span>
               <input type="text" id="personContact" placeholder="+375..., @telegram, email">
             </label>
+            <label class="field">
+              <span>Bitrix user id</span>
+              <input type="number" id="personBitrixUserId" placeholder="Напр. 14" min="1" step="1">
+            </label>
           </div>
           <label class="field" style="margin-top:10px;">
             <span>Зона ответственности / примечание</span>
@@ -195,26 +199,26 @@
           </label>
           <div class="agent-fieldset">
             <h4 class="agent-fieldset__title">Условия передачи клиента специалистам</h4>
-            <p class="agent-fieldset__hint">Если в переписке выполняется условие, модель выводит кодовое слово; бэкенд подменяет ответ на заготовку и передаёт лид специалисту.</p>
+            <p class="agent-fieldset__hint">Пишите одно чёткое условие на русском для каждой роли. ИИ читает весь диалог и <strong>последнее сообщение клиента</strong>: при <strong>явном</strong> совпадении с условием чат передаётся этому специалисту (в Bitrix — ответственный), клиенту уходит короткое уведомление о передаче. При сомнениях передачи нет — отвечает текущий аккаунт. Это не «магические слова» в чате от сотрудника: триггер — смысл реплик <strong>клиента</strong> (в т.ч. после распознавания голоса).</p>
             <label class="field">
-              <span>→ Активный продавец (seller)</span>
-              <input type="text" id="handoffSeller" placeholder="Условие передачи">
+              <span>→ Активный продавец (код SELLER)</span>
+              <input type="text" id="handoffSeller" placeholder="Клиент просит продажи: оформить заказ, КП, цену за тираж, срок изготовления как у менеджера; вернуться к «продавцу» после тех. вопросов" title="Пример: вернуться к обсуждению заказа, объёма и условий поставки">
             </label>
             <label class="field">
-              <span>→ Руководитель (manager)</span>
-              <input type="text" id="handoffLead" placeholder="Условие передачи">
+              <span>→ Руководитель (код MANAGER)</span>
+              <input type="text" id="handoffLead" placeholder="Клиент просит руководителя / директора / «повыше», жалоба, спор, нестандартный договор, партнёрство" title="Пример: эскалация, особые условия сотрудничества">
             </label>
             <label class="field">
-              <span>→ Технолог (tech)</span>
-              <input type="text" id="handoffTech" placeholder="Условие передачи">
+              <span>→ Технолог (код TECH)</span>
+              <input type="text" id="handoffTech" placeholder="Вопросы по макету, цвету, материалу этикетки, клею, ножу, вылетам, допускам печати, цветопробе, совместимости с оборудованием" title="Только то, что относится к производству/качеству печати">
             </label>
             <label class="field">
-              <span>→ Экономист (economist)</span>
-              <input type="text" id="handoffEco" placeholder="Условие передачи">
+              <span>→ Экономист (код ECONOMIST)</span>
+              <input type="text" id="handoffEco" placeholder="Детальный расчёт, смета по позициям, скидка от объёма, условия оплаты и отсрочки, разбивка стоимости" title="Финансы и калькуляция, не общая 'сколько стоит' без детализации">
             </label>
             <label class="field">
-              <span>→ Диспетчер (dispatcher)</span>
-              <input type="text" id="handoffDisp" placeholder="Условие передачи">
+              <span>→ Диспетчер (код DISPATCHER)</span>
+              <input type="text" id="handoffDisp" placeholder="Статус заказа, готовность, отгрузка, доставка, когда привезут/отдадут, документы к отгрузке" title="Логистика и статусы, не новый расчёт заказа">
             </label>
           </div>
           <label class="field">
@@ -1278,6 +1282,7 @@
     const personNameInput = document.getElementById('personName');
     const personRoleInput = document.getElementById('personRole');
     const personContactInput = document.getElementById('personContact');
+    const personBitrixUserIdInput = document.getElementById('personBitrixUserId');
     const personStatusInput = document.getElementById('personStatus');
     const personScopeInput = document.getElementById('personScope');
     const peopleFormMsg = document.getElementById('peopleFormMsg');
@@ -1333,6 +1338,7 @@
       personIdInput.value = '';
       peopleForm.reset();
       personRoleInput.value = 'Технолог';
+      if (personBitrixUserIdInput) personBitrixUserIdInput.value = '';
       if (personStatusInput) personStatusInput.value = 'Активен';
       personSubmitBtn.textContent = 'Добавить';
       peopleFormMsg.textContent = '';
@@ -1440,6 +1446,7 @@
         '<span class="module-badge person-status-badge">' + escapeHtml(st) + '</span>' +
         '</div></div>' +
         '<p><b>Контакт:</b> ' + escapeHtml(item.contact || '—') + '</p>' +
+        '<p><b>Bitrix user id:</b> ' + escapeHtml(item.bitrix_user_id || '—') + '</p>' +
         '<p><b>Зона ответственности:</b> ' + escapeHtml(item.scope || '—') + '</p>' +
         '<div class="module-actions">' +
         '<button type="button" class="btn btn-ghost" data-action="edit" data-id="' + item.id + '">Редактировать</button>' +
@@ -1491,6 +1498,7 @@
       const role = personRoleInput.value.trim();
       const status = (personStatusInput && personStatusInput.value) || 'Активен';
       const contact = personContactInput.value.trim();
+      const bitrixUserId = ((personBitrixUserIdInput && personBitrixUserIdInput.value) || '').trim();
       const scope = personScopeInput.value.trim();
 
       if (!name) {
@@ -1512,6 +1520,7 @@
             role: role,
             status: status,
             contact: contact,
+            bitrix_user_id: bitrixUserId,
             scope: scope,
             accountRegistryId: prev.accountRegistryId,
           };
@@ -1524,6 +1533,7 @@
           role: role,
           status: status,
           contact: contact,
+          bitrix_user_id: bitrixUserId,
           scope: scope,
         });
         formMessage = 'Сотрудник добавлен.';
@@ -1556,6 +1566,7 @@
         personRoleInput.value = person.role || 'Технолог';
         if (personStatusInput) personStatusInput.value = person.status || 'Активен';
         personContactInput.value = person.contact || '';
+        if (personBitrixUserIdInput) personBitrixUserIdInput.value = person.bitrix_user_id || '';
         personScopeInput.value = person.scope || '';
         personSubmitBtn.textContent = 'Сохранить';
         peopleFormMsg.textContent = 'Режим редактирования.';
@@ -2204,6 +2215,11 @@
           items[idx].name = String(sp.name).trim();
           changed = true;
         }
+        var bid = sp.bitrix_user_id != null ? String(sp.bitrix_user_id).trim() : '';
+        if ((items[idx].bitrix_user_id || '') !== bid) {
+          items[idx].bitrix_user_id = bid;
+          changed = true;
+        }
       });
       if (changed) {
         savePeople(items);
@@ -2290,6 +2306,7 @@
           name: p.name || '',
           role: p.role || '',
           status: p.status || 'Активен',
+          bitrix_user_id: p.bitrix_user_id || '',
         });
       });
       return {
