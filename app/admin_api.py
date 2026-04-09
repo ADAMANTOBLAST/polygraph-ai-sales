@@ -7,6 +7,7 @@ from typing import Any
 from aiohttp import web
 from telethon import TelegramClient
 
+from .sales_sync import write_sales_sync
 from .state_store import append_history, get_history, load_state, save_state
 
 log = logging.getLogger(__name__)
@@ -103,6 +104,19 @@ async def handle_admin_send(request: web.Request) -> web.Response:
     return web.json_response({"ok": True})
 
 
+async def handle_admin_sales_sync(request: web.Request) -> web.Response:
+    """POST тело как в buildSalesSyncPayload(): lead_active_account_ids + accounts."""
+    try:
+        data: dict[str, Any] = await request.json()
+    except Exception:
+        return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
+    if not isinstance(data, dict):
+        return web.json_response({"ok": False, "error": "invalid_body"}, status=400)
+    write_sales_sync(data)
+    log.info("sales-sync: %s активных аккаунтов", len(data.get("lead_active_account_ids") or []))
+    return web.json_response({"ok": True})
+
+
 async def handle_admin_ai(request: web.Request) -> web.Response:
     uid = int(request.match_info["uid"])
     try:
@@ -115,6 +129,7 @@ async def handle_admin_ai(request: web.Request) -> web.Response:
 
 
 def setup_admin_routes(app: web.Application) -> None:
+    app.router.add_post("/admin/sales-sync", handle_admin_sales_sync)
     app.router.add_get("/admin/chats", handle_admin_chats)
     app.router.add_get("/admin/chats/{uid}", handle_admin_chat_thread)
     app.router.add_post("/admin/chats/{uid}/send", handle_admin_send)

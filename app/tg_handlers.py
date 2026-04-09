@@ -50,7 +50,7 @@ async def _reply_boris(client: TelegramClient, event: events.NewMessage.Event, u
     try:
         hist = get_history(uid)
         async with client.action(event.chat_id, "typing"):
-            reply = await asyncio.to_thread(complete_dialog, hist)
+            reply = await asyncio.to_thread(complete_dialog, hist, 0)
         append_history(uid, "assistant", reply)
         await event.respond(reply)
     except Exception as e:

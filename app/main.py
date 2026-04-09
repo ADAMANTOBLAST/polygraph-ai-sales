@@ -21,6 +21,7 @@ from ai_messaging.channels.telethon_client import build_client
 
 from .admin_api import setup_admin_routes
 from .state_store import add_tracked, append_history, load_state
+from .telegram_profiles import greeting_for_account
 from .tg_handlers import register_private_handlers
 
 logging.basicConfig(
@@ -28,12 +29,6 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 log = logging.getLogger(__name__)
-
-# Одно сообщение для всех — без подстановки имени из анкеты
-GREETING = (
-    "Приветствую! Меня зовут Борис, я руководитель отдела по работе с клиентами. "
-    "С каким вопросом пришли?"
-)
 
 USER_RE = re.compile(r"^@[A-Za-z][A-Za-z0-9_]{3,31}$")
 
@@ -107,8 +102,9 @@ async def _handle_lead(request: web.Request) -> web.Response:
             entity = await client.get_entity(telegram)
             uid = int(entity.id)
             add_tracked(uid)
-            await client.send_message(entity, GREETING)
-            append_history(uid, "assistant", GREETING)
+            greet = greeting_for_account(0)
+            await client.send_message(entity, greet)
+            append_history(uid, "assistant", greet)
             sent = True
             log.info("Первое сообщение отправлено %s (id=%s)", telegram, uid)
         except Exception as e:

@@ -7,6 +7,8 @@ from typing import Any
 
 from openai import OpenAI
 
+from .sales_sync import system_extra_for_account
+
 log = logging.getLogger(__name__)
 
 BASE_URL = "https://api.cometapi.com/v1"
@@ -50,10 +52,14 @@ def get_client() -> OpenAI:
     return OpenAI(base_url=BASE_URL, api_key=key)
 
 
-def complete_dialog(messages: list[dict[str, Any]]) -> str:
-    """messages: роли user/assistant/system — последние реплики диалога."""
+def complete_dialog(messages: list[dict[str, Any]], account_id: int = 0) -> str:
+    """messages: роли user/assistant — последние реплики диалога. account_id — Telegram-аккаунт (0 по умолчанию)."""
     client = get_client()
-    full = [{"role": "system", "content": SYSTEM_PROMPT}]
+    extra = (system_extra_for_account(account_id) or "").strip()
+    system_text = SYSTEM_PROMPT
+    if extra:
+        system_text = SYSTEM_PROMPT + "\n\n【Настройки из админки】\n" + extra
+    full = [{"role": "system", "content": system_text}]
     for m in messages:
         role = m.get("role")
         content = (m.get("content") or "").strip()
