@@ -129,6 +129,11 @@ def second_message_for_account(account_id: int) -> str | None:
     return t if t else None
 
 
+def use_two_telegram_messages_for_replies(account_id: int) -> bool:
+    """Если в настройках аккаунта есть второе приветствие — ответы ИИ тоже в 2 TG-сообщения (разделитель \\n\\n)."""
+    return second_message_for_account(account_id) is not None
+
+
 def system_extra_for_account(account_id: int) -> str | None:
     b = account_blob(account_id)
     t = (b.get("system_extra") or "").strip()

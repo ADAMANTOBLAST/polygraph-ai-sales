@@ -542,15 +542,6 @@
         }
       }
 
-      function isTelegramAccountEmployee() {
-        return /^fnr-acc-\d+$/.test(chatSelectedEmployeeId || '');
-      }
-
-      function selectedTelegramAccountId() {
-        var m = /^fnr-acc-(\d+)$/.exec(chatSelectedEmployeeId || '');
-        return m ? parseInt(m[1], 10) : null;
-      }
-
       function employeeNameForAccountId(aid) {
         if (aid === undefined || aid === null) return '';
         var pid = 'fnr-acc-' + String(aid);
@@ -573,15 +564,6 @@
         var body = chatEl('chatListBody');
         var q = (chatEl('chatListSearch') && chatEl('chatListSearch').value || '').trim().toLowerCase();
         if (!body) return;
-        if (!chatSelectedEmployeeId) {
-          body.innerHTML = '<p class="chat-list-empty">Сначала выберите аккаунт менеджера в полосе сверху.</p>';
-          return;
-        }
-        if (!isTelegramAccountEmployee()) {
-          body.innerHTML =
-            '<p class="chat-list-empty">Диалоги в Telegram привязаны к аккаунту. Выберите чип аккаунта выше (не карточку сотрудника без Telegram).</p>';
-          return;
-        }
         var rows = [];
         chatListData.forEach(function (c) {
           if (!chatBelongsToSelectedAccount(c)) return;
