@@ -103,6 +103,8 @@ async def _handle_lead(request: web.Request) -> web.Response:
 
     if contact_method == "telegram" and telegram and USER_RE.match(telegram):
         try:
+            # uid узнаём с любого клиента; peer для send_message должен быть от того же клиента,
+            # что отправляет (иначе Telethon: invalid Peer).
             client_any: TelegramClient = request.app["telegram"]
             entity = await client_any.get_entity(telegram)
             uid = int(entity.id)
@@ -110,11 +112,15 @@ async def _handle_lead(request: web.Request) -> web.Response:
             aid, _ = resolve_account_for_lead_dialog(uid)
             client = get_telegram_client(request.app, aid)
             first_greet, second_greet = first_and_second_greeting(aid)
-            await client.send_message(entity, first_greet)
+            try:
+                peer = await client.get_entity(telegram)
+            except Exception:
+                peer = telegram
+            await client.send_message(peer, first_greet)
             append_history(uid, "assistant", first_greet)
             if second_greet:
                 await asyncio.sleep(0.35)
-                await client.send_message(entity, second_greet)
+                await client.send_message(peer, second_greet)
                 append_history(uid, "assistant", second_greet)
             sent = True
             log.info(

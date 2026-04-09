@@ -155,6 +155,23 @@ async def handle_admin_sales_sync(request: web.Request) -> web.Response:
     return web.json_response({"ok": True})
 
 
+async def handle_admin_bitrix_resync_all(request: web.Request) -> web.Response:
+    """POST без тела: для всех Telegram uid с привязкой к лиду — заново отправить переписку в Bitrix."""
+    st = load_state()
+    meta = st.get("bitrix_uid_meta") or {}
+    errors: list[str] = []
+    n = 0
+    for uid_str in meta.keys():
+        try:
+            uid = int(uid_str)
+            await sync_bitrix_chat_for_uid(uid)
+            n += 1
+        except Exception as e:
+            log.exception("bitrix resync uid=%s", uid_str)
+            errors.append(f"{uid_str}: {e!s}"[:160])
+    return web.json_response({"ok": True, "synced": n, "errors": errors[:30]})
+
+
 async def handle_admin_ai(request: web.Request) -> web.Response:
     uid = int(request.match_info["uid"])
     try:
@@ -169,6 +186,7 @@ async def handle_admin_ai(request: web.Request) -> web.Response:
 def setup_admin_routes(app: web.Application) -> None:
     app.router.add_get("/admin/sales-sync", handle_admin_sales_sync_get)
     app.router.add_post("/admin/sales-sync", handle_admin_sales_sync)
+    app.router.add_post("/admin/bitrix-resync-chats", handle_admin_bitrix_resync_all)
     app.router.add_get("/admin/chats", handle_admin_chats)
     app.router.add_get("/admin/chats/{uid}", handle_admin_chat_thread)
     app.router.add_post("/admin/chats/{uid}/send", handle_admin_send)
