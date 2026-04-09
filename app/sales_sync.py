@@ -58,7 +58,18 @@ def _person_row_id(e: dict[str, Any]) -> str:
 
 
 def is_account_active(account_id: int) -> bool:
-    """Статус «Активен» в карточке сотрудника; без записи — считаем активным."""
+    """
+    Доступен для ведения лида. Главный источник — lead_active_account_ids с админки
+    (туда попадают только со статусом «Активен» при синхронизации); не зависит от people[].
+    Если lead_active_account_ids == null (старые данные) — смотрим people, иначе считаем активным.
+    """
+    blob = load_sales_sync()
+    raw = blob.get("lead_active_account_ids")
+    if raw is not None and isinstance(raw, list):
+        if len(raw) == 0:
+            return False
+        return int(account_id) in {int(x) for x in raw}
+
     pid = f"fnr-acc-{int(account_id)}"
     for e in people_entries():
         if not isinstance(e, dict):

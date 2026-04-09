@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import re
 import tempfile
 from pathlib import Path
 
@@ -36,6 +37,32 @@ STICKER_REPLY = (
 TECH_FAIL = "Сейчас техническая заминка — напишите ещё раз через минуту или позвоните на номер с сайта."
 
 
+def _split_assistant_reply(text: str) -> list[str]:
+    """Два сообщения в Telegram: по пустой строке или по концу первого предложения."""
+    t = (text or "").strip()
+    if not t:
+        return []
+    if "\n\n" in t:
+        a, b = t.split("\n\n", 1)
+        a, b = a.strip(), b.strip()
+        if a and b and len(b) >= 8:
+            return [a, b]
+    m = re.search(r"[.!?…]\s+", t[35:])
+    if m:
+        cut = 35 + m.end()
+        a, b = t[:cut].strip(), t[cut:].strip()
+        if len(b) >= 12:
+            return [a, b]
+    if len(t) > 100:
+        mid = max(40, len(t) // 2)
+        sp = t.rfind(" ", 25, len(t) - 15)
+        if sp > 25:
+            a, b = t[:sp].strip(), t[sp + 1 :].strip()
+            if len(b) >= 12:
+                return [a, b]
+    return [t]
+
+
 async def _download_to_temp(client: TelegramClient, message, suffix: str) -> str | None:
     fd, path = tempfile.mkstemp(suffix=suffix)
     os.close(fd)
@@ -59,8 +86,14 @@ async def _reply_boris(
         hist = get_history(uid)
         async with client.action(event.chat_id, "typing"):
             reply = await asyncio.to_thread(complete_dialog, hist, account_id)
-        append_history(uid, "assistant", reply)
-        await event.respond(reply)
+        parts = _split_assistant_reply(reply)
+        for i, part in enumerate(parts):
+            append_history(uid, "assistant", part)
+            if i == 0:
+                await event.respond(part)
+            else:
+                await asyncio.sleep(0.35)
+                await client.send_message(uid, part)
         try:
             await sync_bitrix_chat_for_uid(uid)
         except Exception as sync_e:

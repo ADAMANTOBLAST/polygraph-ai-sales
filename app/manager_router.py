@@ -66,12 +66,14 @@ def resolve_account_for_lead_dialog(uid: int) -> tuple[int, bool]:
         return 0, False
 
     if not _warned_empty_people:
-        pe = load_sales_sync().get("people")
-        if not isinstance(pe, list) or len(pe) == 0:
+        blob = load_sales_sync()
+        pe = blob.get("people")
+        la = blob.get("lead_active_account_ids")
+        if la is None and (not isinstance(pe, list) or len(pe) == 0):
             _warned_empty_people = True
             log.warning(
-                "В data/fnr_sales_sync.json нет people[] — статусы отпуска не учитываются. "
-                "Откройте админку → конфиг агента → «Синхронизировать с сервером» после правок команды."
+                "В fnr_sales_sync нет lead_active_account_ids и people[] — отпуск не учитывается. "
+                "Синхронизируйте конфиг агента с сервером из админки."
             )
 
     current = get_uid_account(uid)

@@ -561,20 +561,12 @@
         return p && p.name ? p.name : 'аккаунт #' + aid;
       }
 
-      function chatBelongsToSelectedAccount(c) {
-        var sel = selectedTelegramAccountId();
-        if (sel === null) return true;
-        var aid = c.account_id;
-        if (aid === undefined || aid === null) return false;
-        return Number(aid) === sel;
+      function chatBelongsToSelectedAccount() {
+        return true;
       }
 
-      function failedBelongsToSelectedAccount(f) {
-        var sel = selectedTelegramAccountId();
-        if (sel === null) return true;
-        var aid = f.account_id;
-        if (aid === undefined || aid === null) return false;
-        return Number(aid) === sel;
+      function failedBelongsToSelectedAccount() {
+        return true;
       }
 
       function renderChatList() {
@@ -620,13 +612,8 @@
           return tf.toLowerCase().indexOf(q) >= 0;
         });
         if (!rows.length) {
-          var hint =
-            '<p class="chat-list-empty">Нет диалогов для <strong>выбранного</strong> аккаунта. Новые лиды появятся после заявки с сайта, когда очередь дойдёт до этого аккаунта.</p>';
-          if (chatListData.length > 0 && isTelegramAccountEmployee()) {
-            hint +=
-              '<p class="chat-list-empty chat-list-empty--sub">Если лида переназначили на другого менеджера (отпуск и т.п.), откройте чип того аккаунта, кому ушёл диалог — список фильтруется по выбранному Telegram-аккаунту.</p>';
-          }
-          body.innerHTML = hint;
+          body.innerHTML =
+            '<p class="chat-list-empty">Пока нет отслеживаемых диалогов в Telegram. Появятся после заявки с сайта с контактом Telegram или после /lead.</p>';
           return;
         }
         body.innerHTML = rows
