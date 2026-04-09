@@ -10,12 +10,18 @@ from pathlib import Path
 
 from telethon import TelegramClient, events
 
-from .comet_client import complete_dialog, complete_dialog_two_chunks
+from .comet_client import complete_dialog, complete_dialog_two_chunks, detect_handoff
 from .comet_media import analyze_image_relevance, transcribe_audio_file
 from .media_utils import extract_audio_for_whisper
+<<<<<<< HEAD
 from .bitrix import apply_deal_outcome, sync_bitrix_chat_for_uid
 from .manager_router import resolve_account_for_lead_dialog
 from .sales_sync import handoff_rules_for_account, use_two_telegram_messages_for_replies
+=======
+from .bitrix import sync_bitrix_chat_for_uid, sync_bitrix_handoff_for_uid
+from .manager_router import force_assign_uid_to_role, resolve_account_for_lead_dialog
+from .sales_sync import account_role_key, role_label, use_two_telegram_messages_for_replies
+>>>>>>> 8abf3219149f2d408d79895c83c21ad809d174be
 from .state_store import append_history, get_history, is_tracked
 
 log = logging.getLogger(__name__)
@@ -72,6 +78,10 @@ def _handoff_note(account_id: int, route_name: str | None) -> str | None:
     return note or None
 
 
+def _handoff_notice(role_key: str) -> str:
+    return f"Передаю ваш запрос специалисту роли «{role_label(role_key)}». Он продолжит диалог следующим сообщением."
+
+
 async def _download_to_temp(client: TelegramClient, message, suffix: str) -> str | None:
     fd, path = tempfile.mkstemp(suffix=suffix)
     os.close(fd)
@@ -93,6 +103,30 @@ async def _reply_boris(
         log.debug("read_ack: %s", e)
     try:
         hist = get_history(uid, account_id)
+        handoff_role = await asyncio.to_thread(detect_handoff, hist, account_id)
+        if handoff_role:
+            prev_role = account_role_key(account_id)
+            target_account_id, changed = force_assign_uid_to_role(uid, handoff_role)
+            if target_account_id and (changed or handoff_role != prev_role):
+                notice = _handoff_notice(handoff_role)
+                append_history(uid, "assistant", notice, account_id=target_account_id)
+                await event.respond(notice)
+                try:
+                    await sync_bitrix_handoff_for_uid(
+                        uid,
+                        from_role_key=prev_role,
+                        to_role_key=handoff_role,
+                        target_account_id=target_account_id,
+                    )
+                    await sync_bitrix_chat_for_uid(uid)
+                except Exception as sync_e:
+                    log.debug("bitrix handoff uid=%s: %s", uid, sync_e)
+                return
+            log.warning(
+                "handoff uid=%s role=%s не выполнен: нет активного аккаунта или роль уже текущая",
+                uid,
+                handoff_role,
+            )
         async with client.action(event.chat_id, "typing"):
             if use_two_telegram_messages_for_replies(account_id):
                 part1, part2 = await asyncio.to_thread(complete_dialog_two_chunks, hist, account_id)

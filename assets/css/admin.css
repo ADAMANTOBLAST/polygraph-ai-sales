@@ -2148,3 +2148,203 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
     grid-template-columns: 1fr;
   }
 }
+
+/* ——— Справка REST API Bitrix24 (admin/index.html) ——— */
+.admin-bitrix-mini-guide,
+.admin-bitrix-details-full {
+  margin: 0 0 14px;
+  border: 1px solid var(--fnr-border);
+  border-radius: var(--fnr-radius-sm);
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.admin-bitrix-mini-guide__summary,
+.admin-bitrix-details-full__summary {
+  padding: 12px 14px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.98em;
+  color: var(--fnr-text);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+.admin-bitrix-mini-guide__summary::-webkit-details-marker,
+.admin-bitrix-details-full__summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-bitrix-mini-guide__summary::before,
+.admin-bitrix-details-full__summary::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 6px solid var(--fnr-muted);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  flex-shrink: 0;
+  transition: transform var(--fnr-transition);
+}
+
+details[open] > .admin-bitrix-mini-guide__summary::before,
+details[open] > .admin-bitrix-details-full__summary::before {
+  transform: rotate(90deg);
+}
+
+.admin-bitrix-mini-guide__body,
+.admin-bitrix-details-full__body {
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--fnr-border);
+}
+
+.admin-bitrix-mini-guide__steps {
+  margin: 12px 0 0;
+  padding-left: 1.35em;
+}
+
+.admin-bitrix-mini-guide__steps li {
+  margin: 0.5em 0;
+}
+
+.admin-bitrix-ping-row {
+  margin-top: 4px;
+}
+
+.admin-bitrix-ping-msg {
+  margin-top: 8px;
+  min-height: 1.35em;
+}
+
+.admin-bitrix-details-full__body {
+  padding-top: 10px;
+}
+
+.admin-bitrix-doc {
+  margin-top: 8px;
+  font-size: 0.95em;
+  line-height: 1.6;
+  max-width: 100%;
+}
+
+.admin-bitrix-doc p {
+  margin: 0.65em 0;
+}
+
+.admin-doc-h4 {
+  margin: 1.35em 0 0.5em;
+  font-size: 1.05em;
+  font-weight: 600;
+  color: var(--fnr-text);
+}
+
+.admin-doc-h4:first-of-type {
+  margin-top: 0.5em;
+}
+
+.admin-doc-h5 {
+  margin: 1.15em 0 0.45em;
+  font-size: 0.98em;
+  font-weight: 600;
+  color: var(--fnr-text-secondary);
+}
+
+.admin-doc-ol,
+.admin-doc-ul {
+  margin: 0.4em 0 0.6em;
+  padding-left: 1.35em;
+}
+
+.admin-doc-ul li {
+  margin: 0.25em 0;
+}
+
+.admin-doc-muted {
+  margin: 0.35em 0 0.2em;
+  font-size: 0.92em;
+  color: var(--fnr-muted);
+}
+
+.admin-code-inline {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.88em;
+  padding: 0.12em 0.38em;
+  border-radius: 6px;
+  background: var(--fnr-primary-soft);
+  color: var(--fnr-text);
+  word-break: break-all;
+}
+
+.admin-doc-pre {
+  margin: 0.5em 0 0.85em;
+  padding: 12px 14px;
+  border-radius: var(--fnr-radius-sm);
+  border: 1px solid var(--fnr-border);
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--fnr-text-secondary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-x: auto;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.admin-doc-callout {
+  margin: 0.75em 0;
+  padding: 12px 14px;
+  border-radius: var(--fnr-radius-sm);
+  border: 1px solid var(--fnr-border-strong);
+  background: var(--fnr-primary-soft);
+  font-size: 0.94em;
+}
+
+.admin-doc-callout--warn {
+  border-color: rgba(245, 158, 11, 0.45);
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.admin-doc-table-wrap {
+  margin: 0.75em 0 1em;
+  overflow-x: auto;
+  border-radius: var(--fnr-radius-sm);
+  border: 1px solid var(--fnr-border);
+}
+
+.admin-doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92em;
+}
+
+.admin-doc-table th,
+.admin-doc-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--fnr-border);
+  vertical-align: top;
+}
+
+.admin-doc-table th {
+  font-weight: 600;
+  color: var(--fnr-text);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.admin-doc-table tr:last-child td {
+  border-bottom: none;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
