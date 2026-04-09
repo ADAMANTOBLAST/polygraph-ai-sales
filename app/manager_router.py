@@ -1,7 +1,9 @@
 """
-Распределение диалогов по аккаунтам менеджеров (fnr-acc-*): round-robin для новых лидов,
-переназначение на активного, если закреплённый в отпуске / не на связи.
-Сообщения идут с одной сессии Telethon — меняется логический account_id для промпта ИИ и метки в админке.
+Закрепление лида (Telegram uid) за аккаунтом fnr-acc-*:
+- если uid уже в uid_account — пишем с того же аккаунта (очередь не трогаем);
+- иначе — следующий аккаунт из round-robin среди допущенных к лидам и активных;
+- при отпуске — переназначение + перенос истории на новый ключ account_id:uid.
+История Comet хранится отдельно по паре (аккаунт, uid).
 """
 from __future__ import annotations
 
@@ -15,7 +17,7 @@ from .sales_sync import (
     lead_eligible_account_ids,
     load_sales_sync,
 )
-from .state_store import get_uid_account, load_state, save_state, set_uid_account
+from .state_store import copy_history_on_reassign, get_uid_account, load_state, save_state, set_uid_account
 
 log = logging.getLogger(__name__)
 _warned_empty_people = False
@@ -88,6 +90,7 @@ def resolve_account_for_lead_dialog(uid: int) -> tuple[int, bool]:
         return cur, False
 
     new_id = _pick_replacement(cur, conn)
+    copy_history_on_reassign(uid, cur, new_id)
     set_uid_account(uid, new_id)
     log.info("uid=%s переназначен: %s → %s (ответственный не активен)", uid, cur, new_id)
     return new_id, True

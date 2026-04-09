@@ -70,10 +70,28 @@ def add_tracked(uid: int) -> None:
         save_state()
 
 
-def get_history(uid: int) -> list[dict]:
+def _history_key(account_id: int, uid: int) -> str:
+    """Переписка привязана к паре (аккаунт менеджера, Telegram uid лида)."""
+    return f"{int(account_id)}:{int(uid)}"
+
+
+def get_history(uid: int, account_id: int | None = None) -> list[dict]:
     st = load_state()
-    key = str(uid)
-    return list(st["histories"].get(key, []))
+    aid = account_id if account_id is not None else get_uid_account(uid)
+    if aid is not None:
+        k = _history_key(int(aid), uid)
+        h = st["histories"].get(k)
+        if h:
+            return list(h)
+        # миграция со старого формата (только uid)
+        leg = st["histories"].get(str(uid))
+        if leg:
+            st["histories"][k] = list(leg)
+            save_state()
+            return list(leg)
+        return []
+    leg = st["histories"].get(str(uid))
+    return list(leg or [])
 
 
 def set_bitrix_lead_link(uid: int, lead_id: int, comment_header: str) -> None:
@@ -110,13 +128,35 @@ def set_uid_account(uid: int, account_id: int) -> None:
     save_state()
 
 
-def append_history(uid: int, role: str, content: str, max_pairs: int = 12) -> None:
+def append_history(
+    uid: int, role: str, content: str, account_id: int | None = None, max_pairs: int = 12
+) -> None:
     st = load_state()
-    key = str(uid)
+    aid = account_id if account_id is not None else get_uid_account(uid)
+    if aid is None:
+        aid = 0
+    key = _history_key(int(aid), uid)
     h = st["histories"].setdefault(key, [])
     h.append({"role": role, "content": content})
-    # держим последние max_pairs * 2 сообщения (пары user/assistant)
     max_len = max_pairs * 2
     if len(h) > max_len:
         st["histories"][key] = h[-max_len:]
+    save_state()
+
+
+def copy_history_on_reassign(uid: int, old_account_id: int, new_account_id: int) -> None:
+    """При переназначении лида на другого менеджера переносим историю в новый ключ."""
+    if int(old_account_id) == int(new_account_id):
+        return
+    st = load_state()
+    ok = _history_key(int(old_account_id), uid)
+    nk = _history_key(int(new_account_id), uid)
+    if st["histories"].get(nk):
+        return
+    src = st["histories"].get(ok)
+    if not src:
+        src = st["histories"].get(str(uid))
+    if not src:
+        return
+    st["histories"][nk] = list(src)
     save_state()

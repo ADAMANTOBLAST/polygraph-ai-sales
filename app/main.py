@@ -117,11 +117,11 @@ async def _handle_lead(request: web.Request) -> web.Response:
             except Exception:
                 peer = telegram
             await client.send_message(peer, first_greet)
-            append_history(uid, "assistant", first_greet)
+            append_history(uid, "assistant", first_greet, account_id=aid)
             if second_greet:
                 await asyncio.sleep(0.35)
                 await client.send_message(peer, second_greet)
-                append_history(uid, "assistant", second_greet)
+                append_history(uid, "assistant", second_greet, account_id=aid)
             sent = True
             log.info(
                 "Приветствие отправлено %s (id=%s), второе сообщение: %s",
@@ -170,7 +170,7 @@ async def _init_app(app: web.Application) -> None:
         try:
             c = build_client(aid)
             await c.start()
-            register_private_handlers(c)
+            register_private_handlers(c, int(aid))
             clients[int(aid)] = c
             log.info("Telethon аккаунт id=%s подключён", aid)
         except Exception as e:

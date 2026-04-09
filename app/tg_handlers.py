@@ -57,7 +57,7 @@ async def _reply_boris(
     except Exception as e:
         log.debug("read_ack: %s", e)
     try:
-        hist = get_history(uid)
+        hist = get_history(uid, account_id)
         async with client.action(event.chat_id, "typing"):
             if use_two_telegram_messages_for_replies(account_id):
                 part1, part2 = await asyncio.to_thread(complete_dialog_two_chunks, hist, account_id)
@@ -66,7 +66,7 @@ async def _reply_boris(
                 reply = await asyncio.to_thread(complete_dialog, hist, account_id)
                 parts = [reply]
         for i, part in enumerate(parts):
-            append_history(uid, "assistant", part)
+            append_history(uid, "assistant", part, account_id=account_id)
             if i == 0:
                 await event.respond(part)
             else:
@@ -81,7 +81,7 @@ async def _reply_boris(
         await event.respond(TECH_FAIL)
 
 
-def register_private_handlers(client: TelegramClient) -> None:
+def register_private_handlers(client: TelegramClient, session_account_id: int) -> None:
     @client.on(events.NewMessage(incoming=True))
     async def on_pm(event: events.NewMessage.Event) -> None:
         if not event.is_private:
@@ -94,6 +94,13 @@ def register_private_handlers(client: TelegramClient) -> None:
             return
 
         account_id, reassigned = resolve_account_for_lead_dialog(uid)
+        if int(account_id) != int(session_account_id):
+            log.warning(
+                "uid=%s закреплён за fnr-acc-%s, входящее на сессии %s (ответ с той сессии, история по закреплению)",
+                uid,
+                account_id,
+                session_account_id,
+            )
         if reassigned:
             try:
                 await client.send_message(uid, REASSIGN_NOTICE)
@@ -133,7 +140,7 @@ def register_private_handlers(client: TelegramClient) -> None:
                     line = f"[Фото: {summary}]"
                     if caption:
                         line += f"\nПодпись: {caption}"
-                    append_history(uid, "user", line)
+                    append_history(uid, "user", line, account_id=account_id)
                 finally:
                     Path(path).unlink(missing_ok=True)
                 await _reply_boris(client, event, uid, account_id)
@@ -181,7 +188,7 @@ def register_private_handlers(client: TelegramClient) -> None:
                     user_line = f"[Голосовое сообщение]: {text_try}"
                     if caption:
                         user_line += f"\nПодпись: {caption}"
-                    append_history(uid, "user", user_line)
+                    append_history(uid, "user", user_line, account_id=account_id)
                 finally:
                     Path(path).unlink(missing_ok=True)
                     if extra_wav:
@@ -203,7 +210,7 @@ def register_private_handlers(client: TelegramClient) -> None:
             if not text:
                 return
 
-            append_history(uid, "user", text)
+            append_history(uid, "user", text, account_id=account_id)
             await _reply_boris(client, event, uid, account_id)
 
         except Exception as e:

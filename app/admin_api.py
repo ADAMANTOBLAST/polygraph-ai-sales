@@ -41,7 +41,7 @@ async def handle_admin_chats(request: web.Request) -> web.Response:
     chats: list[dict[str, Any]] = []
     for uid in st.get("tracked_user_ids") or []:
         uid = int(uid)
-        hist = get_history(uid)
+        hist = get_history(uid, aid_ent)
         preview = ""
         if hist:
             preview = (hist[-1].get("content") or "")[:160]
@@ -86,7 +86,8 @@ async def handle_admin_chats(request: web.Request) -> web.Response:
 
 async def handle_admin_chat_thread(request: web.Request) -> web.Response:
     uid = int(request.match_info["uid"])
-    messages = get_history(uid)
+    aid = get_uid_account(uid)
+    messages = get_history(uid, aid)
     return web.json_response(
         {"ok": True, "messages": messages, "ai_disabled": _ai_disabled(uid)}
     )
@@ -110,7 +111,8 @@ async def handle_admin_send(request: web.Request) -> web.Response:
     except Exception as e:
         log.exception("admin send %s: %s", uid, e)
         return web.json_response({"ok": False, "error": str(e)[:200]}, status=500)
-    append_history(uid, "assistant", text)
+    aid = get_uid_account(uid)
+    append_history(uid, "assistant", text, account_id=aid)
     try:
         await sync_bitrix_chat_for_uid(uid)
     except Exception as e:

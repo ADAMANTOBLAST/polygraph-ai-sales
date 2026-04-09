@@ -9,7 +9,7 @@ from typing import Any
 
 import aiohttp
 
-from .state_store import get_bitrix_lead_link, get_history
+from .state_store import get_bitrix_lead_link, get_history, get_uid_account
 
 log = logging.getLogger(__name__)
 
@@ -222,7 +222,7 @@ async def sync_bitrix_chat_for_uid(uid: int) -> None:
     header = (meta.get("header") or "").strip()
     if not lead_id:
         return
-    hist = get_history(uid)
+    hist = get_history(uid, get_uid_account(uid))
     chat_block = format_chat_for_bitrix(hist)
     full = f"{header}\n\n--- Переписка Telegram ---\n{chat_block}"
     err = await crm_lead_update_comments(int(lead_id), full)
