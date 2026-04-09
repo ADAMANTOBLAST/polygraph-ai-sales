@@ -41,18 +41,18 @@ async def handle_admin_chats(request: web.Request) -> web.Response:
     chats: list[dict[str, Any]] = []
     for uid in st.get("tracked_user_ids") or []:
         uid = int(uid)
-        hist = get_history(uid, aid_ent)
-        preview = ""
-        if hist:
-            preview = (hist[-1].get("content") or "")[:160]
-        title = str(uid)
-        username = ""
         ua = st.get("uid_account") or {}
         aid_raw = ua.get(str(uid), 0)
         try:
             aid_ent = int(aid_raw)
         except (TypeError, ValueError):
             aid_ent = 0
+        hist = get_history(uid, aid_ent)
+        preview = ""
+        if hist:
+            preview = (hist[-1].get("content") or "")[:160]
+        title = str(uid)
+        username = ""
         client: TelegramClient = get_telegram_client(request.app, aid_ent)
         try:
             ent = await client.get_entity(uid)
