@@ -73,6 +73,13 @@ def first_message_for_account(account_id: int) -> str | None:
     return t if t else None
 
 
+def second_message_for_account(account_id: int) -> str | None:
+    """Второе приветствие — отдельное сообщение в Telegram после первого."""
+    b = account_blob(account_id)
+    t = (b.get("second_message") or "").strip()
+    return t if t else None
+
+
 def system_extra_for_account(account_id: int) -> str | None:
     b = account_blob(account_id)
     t = (b.get("system_extra") or "").strip()

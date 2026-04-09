@@ -4,6 +4,7 @@ Telethon: входящие в личку от отслеживаемых — rea
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 import re
@@ -22,7 +23,7 @@ from ai_messaging.channels.telethon_client import build_client
 from .admin_api import setup_admin_routes
 from .bitrix import create_lead_from_form, build_lead_comments_initial, sync_bitrix_chat_for_uid
 from .state_store import add_tracked, append_history, load_state, set_bitrix_lead_link
-from .telegram_profiles import greeting_for_account
+from .telegram_profiles import first_and_second_greeting
 from .tg_handlers import register_private_handlers
 
 logging.basicConfig(
@@ -104,11 +105,20 @@ async def _handle_lead(request: web.Request) -> web.Response:
             entity = await client.get_entity(telegram)
             uid = int(entity.id)
             add_tracked(uid)
-            greet = greeting_for_account(0)
-            await client.send_message(entity, greet)
-            append_history(uid, "assistant", greet)
+            first_greet, second_greet = first_and_second_greeting(0)
+            await client.send_message(entity, first_greet)
+            append_history(uid, "assistant", first_greet)
+            if second_greet:
+                await asyncio.sleep(0.35)
+                await client.send_message(entity, second_greet)
+                append_history(uid, "assistant", second_greet)
             sent = True
-            log.info("Первое сообщение отправлено %s (id=%s)", telegram, uid)
+            log.info(
+                "Приветствие отправлено %s (id=%s), второе сообщение: %s",
+                telegram,
+                uid,
+                bool(second_greet),
+            )
         except Exception as e:
             err = _format_telegram_error(e)
             log.exception("Не удалось написать в Telegram %s: %s", telegram, e)

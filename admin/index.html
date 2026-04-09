@@ -185,8 +185,8 @@
             <textarea id="agentGreeting1" rows="2" placeholder="Текст первого сообщения в чате"></textarea>
           </label>
           <label class="field">
-            <span>Второе приветствие (опционально, логически вторая часть)</span>
-            <textarea id="agentGreeting2" rows="2" placeholder="Дополнительный абзац приветствия"></textarea>
+            <span>Второе приветствие (опционально)</span>
+            <textarea id="agentGreeting2" rows="2" placeholder="Уходит вторым отдельным сообщением в Telegram после синхронизации с сервером"></textarea>
           </label>
           <label class="field">
             <span>База знаний — что бот обязан знать</span>
@@ -1975,8 +1975,11 @@
             );
           }
         }
+        var second =
+          cfg && cfg.greeting2 ? String(cfg.greeting2).trim() : '';
         var entry = {
           first_message: first,
+          second_message: second,
           system_extra: parts.join('\n\n'),
         };
         if (cfg && typeof cfg === 'object') {

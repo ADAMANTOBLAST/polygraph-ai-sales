@@ -54,16 +54,24 @@ def all_profiles() -> dict[int, str]:
 
 
 def greeting_for_account(account_id: int) -> str:
-    from .sales_sync import first_message_for_account
+    first, _ = first_and_second_greeting(account_id)
+    return first
 
-    custom = first_message_for_account(account_id)
-    if custom:
-        return custom
+
+def first_and_second_greeting(account_id: int) -> tuple[str, str | None]:
+    """Первое и второе сообщения для /lead; второе — опционально (отдельное TG-сообщение)."""
+    from .sales_sync import first_message_for_account, second_message_for_account
+
+    custom_first = first_message_for_account(account_id)
+    second = second_message_for_account(account_id)
+    if custom_first:
+        return custom_first, second
     n = get_display_name(account_id)
-    return (
+    first = (
         f"Приветствую! Меня зовут {n}, я активный продавец Flex&Roll. "
         "С каким вопросом пришли?"
     )
+    return first, second
 
 
 def system_prompt_for_seller(display_name: str) -> str:
