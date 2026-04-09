@@ -837,6 +837,42 @@
         return Number(f.account_id) === sel;
       }
 
+      /** Если с выбранным чипом нет ни одной строки, а с сервера пришли диалоги — переключаемся на аккаунт первого диалога (у коллег чип по умолчанию мог не совпадать с fnr-acc лидов). */
+      function ensureChatChipForData() {
+        var chats = chatListData || [];
+        var failed = chatFailedData || [];
+        function visibleCount() {
+          var n = 0;
+          chats.forEach(function (c) {
+            if (chatBelongsToSelectedAccount(c)) n++;
+          });
+          failed.forEach(function (f) {
+            if (failedBelongsToSelectedAccount(f)) n++;
+          });
+          return n;
+        }
+        if (!chats.length && !failed.length) return;
+        if (visibleCount() > 0) return;
+        var aid = null;
+        if (chats.length) {
+          var c0 = chats[0];
+          if (c0 && c0.account_id !== undefined && c0.account_id !== null) aid = Number(c0.account_id);
+        }
+        if ((aid === null || isNaN(aid)) && failed.length) {
+          var f0 = failed[0];
+          if (f0 && f0.account_id !== undefined && f0.account_id !== null) aid = Number(f0.account_id);
+        }
+        if (aid === null || isNaN(aid)) return;
+        var pid = 'fnr-acc-' + aid;
+        var people = typeof window.__fnrGetPeople === 'function' ? window.__fnrGetPeople() : [];
+        var hasChip = people.some(function (p) {
+          return p && p.id === pid;
+        });
+        if (!hasChip) return;
+        chatSelectedEmployeeId = pid;
+        renderChatEmployees();
+      }
+
       function renderChatList() {
         var body = chatEl('chatListBody');
         var q = (chatEl('chatListSearch') && chatEl('chatListSearch').value || '').trim().toLowerCase();
@@ -1047,6 +1083,7 @@
             if (!data || !data.ok) throw new Error((data && data.error) || 'Ошибка');
             chatListData = data.chats || [];
             chatFailedData = data.failed_leads || [];
+            ensureChatChipForData();
             setChatStatus('');
             if (chatSelectedUid) {
               var cur = chatListData.find(function (c) {
@@ -1198,8 +1235,7 @@
         chatPollTimer = setInterval(function () {
           var h = (window.location.hash || '').replace(/^#/, '');
           if (h !== 'chats') return;
-          if (chatSelectedUid) loadChatThread(chatSelectedUid, true);
-          else loadChatList();
+          loadChatList();
         }, 10000);
       };
 
