@@ -13,15 +13,14 @@ from telethon import TelegramClient, events
 from .comet_client import complete_dialog, complete_dialog_two_chunks, detect_handoff
 from .comet_media import analyze_image_relevance, transcribe_audio_file
 from .media_utils import extract_audio_for_whisper
-<<<<<<< HEAD
-from .bitrix import apply_deal_outcome, sync_bitrix_chat_for_uid
-from .manager_router import resolve_account_for_lead_dialog
-from .sales_sync import handoff_rules_for_account, use_two_telegram_messages_for_replies
-=======
-from .bitrix import sync_bitrix_chat_for_uid, sync_bitrix_handoff_for_uid
+from .bitrix import apply_deal_outcome, sync_bitrix_chat_for_uid, sync_bitrix_handoff_for_uid
 from .manager_router import force_assign_uid_to_role, resolve_account_for_lead_dialog
-from .sales_sync import account_role_key, role_label, use_two_telegram_messages_for_replies
->>>>>>> 8abf3219149f2d408d79895c83c21ad809d174be
+from .sales_sync import (
+    account_role_key,
+    handoff_rules_for_account,
+    role_label,
+    use_two_telegram_messages_for_replies,
+)
 from .state_store import append_history, get_history, is_tracked
 
 log = logging.getLogger(__name__)

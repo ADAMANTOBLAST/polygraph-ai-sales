@@ -202,7 +202,6 @@ async def crm_contact_update_comments(contact_id: int, comments: str) -> str | N
         return str(e)[:200]
 
 
-<<<<<<< HEAD
 def _parse_deal_id_from_convert_result(result: Any) -> int | None:
     """crm.lead.convert возвращает структуру с DEAL_ID (формат зависит от портала)."""
     if result is None:
@@ -429,14 +428,10 @@ async def crm_timeline_comment_add_deal(deal_id: int, comment: str) -> str | Non
     return None
 
 
-async def crm_lead_update_comments(lead_id: int, comments: str) -> str | None:
-    """Обновляет COMMENTS у лида. Возвращает текст ошибки или None."""
-=======
 async def crm_lead_update_fields(
     lead_id: int, fields: dict[str, Any], register_sonet_event: bool = False
 ) -> str | None:
     """Обновляет произвольные поля лида. Возвращает текст ошибки или None."""
->>>>>>> 8abf3219149f2d408d79895c83c21ad809d174be
     url = bitrix_method_url("crm.lead.update")
     if not url:
         return "no_webhook"
