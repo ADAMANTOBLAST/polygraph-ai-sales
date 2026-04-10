@@ -2311,6 +2311,53 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
 
 /* Планшет и телефон: сайдбар в выезжающей панели + бургер */
 @media (max-width: 900px) {
+  /*
+   * Шапка фиксируется к viewport; отступ сверху у контента задаётся --admin-mobile-header-offset (JS).
+   * При прокрутке вниз — html.admin-header--collapsed, шапка уезжает вверх с transition.
+   */
+  .admin-app-header {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    z-index: 195;
+    transform: translateY(0);
+    transition: transform 0.34s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.28s ease;
+    will-change: transform;
+  }
+
+  html.admin-header--collapsed .admin-app-header {
+    transform: translateY(calc(-100% - 2px));
+    box-shadow: none;
+  }
+
+  html.admin-nav-is-open .admin-app-header {
+    transform: translateY(0) !important;
+  }
+
+  .admin-main {
+    padding-top: var(--admin-mobile-header-offset, calc(env(safe-area-inset-top, 0px) + 58px));
+    transition: padding-top 0.34s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  html.admin-header--collapsed .admin-main {
+    padding-top: max(6px, env(safe-area-inset-top, 0px));
+  }
+
+  html.admin-nav-is-open .admin-main {
+    padding-top: var(--admin-mobile-header-offset, calc(env(safe-area-inset-top, 0px) + 58px)) !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .admin-app-header,
+    .admin-main {
+      transition-duration: 0.01ms !important;
+    }
+  }
+
   /* Десктоп держит скролл в .admin-main; на узком экране — скролл всей страницы (иначе overflow:hidden на body блокирует прокрутку). */
   html:has(.admin-shell) {
     height: auto;
@@ -2340,11 +2387,9 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
     flex: 1 1 auto;
     min-width: 0;
     width: 100%;
-    padding: 0 max(24px, env(safe-area-inset-right, 0px)) max(56px, calc(24px + env(safe-area-inset-bottom, 0px))) max(24px, env(safe-area-inset-left, 0px));
-  }
-
-  .admin-app-header {
-    margin: 0 -24px 16px -24px;
+    padding-right: max(24px, env(safe-area-inset-right, 0px));
+    padding-bottom: max(56px, calc(24px + env(safe-area-inset-bottom, 0px)));
+    padding-left: max(24px, env(safe-area-inset-left, 0px));
   }
 
   .admin-app-header__row {
@@ -2447,11 +2492,9 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
     min-height: 0;
     overflow-x: hidden;
     overflow-y: visible;
-    padding: 0 max(16px, env(safe-area-inset-right, 0px)) max(40px, calc(16px + env(safe-area-inset-bottom, 0px))) max(16px, env(safe-area-inset-left, 0px));
-  }
-
-  .admin-app-header {
-    margin: 0 -16px 14px -16px;
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-bottom: max(40px, calc(16px + env(safe-area-inset-bottom, 0px)));
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
   }
 
   .admin-app-header__row {
@@ -2527,10 +2570,6 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
     padding: 0 0 28px;
   }
 
-  .admin-app-header {
-    z-index: 50;
-  }
-
   .admin-app-header__brand {
     font-size: 0.98rem;
   }
@@ -2565,17 +2604,22 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
 
   .module-actions,
   .vip-form-actions {
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column;
+    flex-wrap: nowrap;
     align-items: stretch;
-    gap: 8px;
+    gap: 18px;
   }
 
   .module-actions .btn,
   .vip-form-actions .btn {
-    flex: 1 1 160px;
-    width: auto;
+    flex: 0 0 auto;
+    width: 100%;
     min-width: 0;
+  }
+
+  .person-card__actions.module-actions {
+    gap: 20px !important;
+    margin-top: 14px !important;
   }
 
   .admin-card {
@@ -2774,7 +2818,7 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
   }
 
   .chat-thread-panel {
-    min-height: min(48dvh, 520px);
+    min-height: min(42dvh, 440px);
   }
 
   .chat-list-body {
@@ -2854,11 +2898,9 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
 
 @media (max-width: 480px) {
   .admin-main {
-    padding: 0 max(12px, env(safe-area-inset-right, 0px)) max(32px, calc(12px + env(safe-area-inset-bottom, 0px))) max(12px, env(safe-area-inset-left, 0px));
-  }
-
-  .admin-app-header {
-    margin: 0 -12px 12px -12px;
+    padding-right: max(12px, env(safe-area-inset-right, 0px));
+    padding-bottom: max(32px, calc(12px + env(safe-area-inset-bottom, 0px)));
+    padding-left: max(12px, env(safe-area-inset-left, 0px));
   }
 
   .admin-app-header__row {

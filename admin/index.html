@@ -18,7 +18,7 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="../assets/css/admin.css?v=18">
+  <link rel="stylesheet" href="../assets/css/admin.css?v=20">
 </head>
 <body class="admin-body">
   <div class="admin-shell">
@@ -3196,7 +3196,54 @@
       var toggle = document.getElementById('adminNavToggle');
       var backdrop = document.getElementById('adminSidebarBackdrop');
       var sidebar = document.getElementById('adminSidebar');
+      var headerEl = document.querySelector('.admin-app-header');
       var scrollLockY = 0;
+      var lastScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      var scrollTicking = false;
+      var scrollTolerance = 12;
+
+      function syncMobileHeaderOffset() {
+        if (!headerEl || !mq.matches) {
+          document.documentElement.style.removeProperty('--admin-mobile-header-offset');
+          return;
+        }
+        var h = Math.ceil(headerEl.getBoundingClientRect().height);
+        if (h > 0) {
+          document.documentElement.style.setProperty('--admin-mobile-header-offset', h + 'px');
+        }
+      }
+
+      function onScrollHeaderHide() {
+        if (!mq.matches) {
+          document.documentElement.classList.remove('admin-header--collapsed');
+          return;
+        }
+        if (document.documentElement.classList.contains('admin-nav-is-open')) {
+          document.documentElement.classList.remove('admin-header--collapsed');
+          lastScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+          return;
+        }
+        var y = window.scrollY || document.documentElement.scrollTop || 0;
+        var dy = y - lastScrollY;
+        if (y < 20) {
+          document.documentElement.classList.remove('admin-header--collapsed');
+        } else if (dy > scrollTolerance) {
+          document.documentElement.classList.add('admin-header--collapsed');
+        } else if (dy < -scrollTolerance) {
+          document.documentElement.classList.remove('admin-header--collapsed');
+        }
+        lastScrollY = y;
+      }
+
+      function onScrollHeaderHideRaf() {
+        if (scrollTicking) return;
+        scrollTicking = true;
+        window.requestAnimationFrame(function () {
+          scrollTicking = false;
+          onScrollHeaderHide();
+        });
+      }
+
       function clearScrollLock() {
         if (document.body.style.position === 'fixed') {
           document.body.style.position = '';
@@ -3227,10 +3274,13 @@
         if (sidebar && mq.matches) sidebar.setAttribute('aria-hidden', 'true');
         else if (sidebar) sidebar.removeAttribute('aria-hidden');
         clearScrollLock();
+        window.setTimeout(syncMobileHeaderOffset, 0);
+        lastScrollY = window.scrollY || document.documentElement.scrollTop || 0;
         if (wasOpen && toggle && mq.matches) toggle.focus();
       }
       function openNav() {
         document.documentElement.classList.add('admin-nav-is-open');
+        document.documentElement.classList.remove('admin-header--collapsed');
         if (toggle) toggle.setAttribute('aria-expanded', 'true');
         if (backdrop) {
           backdrop.hidden = false;
@@ -3238,6 +3288,7 @@
         }
         if (sidebar && mq.matches) sidebar.setAttribute('aria-hidden', 'false');
         applyScrollLock();
+        window.setTimeout(syncMobileHeaderOffset, 0);
         var first = sidebar && sidebar.querySelector('.admin-nav a[href]');
         if (first && mq.matches) {
           window.setTimeout(function () {
@@ -3266,12 +3317,15 @@
         if (!mq.matches) {
           clearScrollLock();
           closeNav();
+          document.documentElement.classList.remove('admin-header--collapsed');
+          syncMobileHeaderOffset();
           if (sidebar) sidebar.removeAttribute('aria-hidden');
           return;
         }
         if (sidebar && !document.documentElement.classList.contains('admin-nav-is-open')) {
           sidebar.setAttribute('aria-hidden', 'true');
         }
+        syncMobileHeaderOffset();
       }
       if (typeof mq.addEventListener === 'function') {
         mq.addEventListener('change', onNavLayoutModeChange);
@@ -3279,6 +3333,14 @@
         mq.addListener(onNavLayoutModeChange);
       }
       if (mq.matches && sidebar) sidebar.setAttribute('aria-hidden', 'true');
+
+      window.addEventListener('scroll', onScrollHeaderHideRaf, { passive: true });
+      window.addEventListener('resize', syncMobileHeaderOffset);
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', syncMobileHeaderOffset);
+      } else {
+        syncMobileHeaderOffset();
+      }
     })();
   </script>
   <script src="../assets/js/admin-select.js"></script>
