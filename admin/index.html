@@ -18,7 +18,7 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="../assets/css/admin.css?v=10">
+  <link rel="stylesheet" href="../assets/css/admin.css?v=14">
 </head>
 <body class="admin-body">
   <div class="admin-shell">
@@ -35,8 +35,10 @@
       <div class="admin-sidebar__nav-wrap">
       <ul class="admin-nav">
         <li><a href="#people" class="active" data-section="people"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Команда</span></a></li>
+        <li><a href="#analytics" data-section="analytics"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Аналитика</span></a></li>
         <li><a href="#chats" data-section="chats"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Чаты</span></a></li>
         <li><a href="#voice-calls" data-section="voice-calls"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Звонки</span></a></li>
+        <li><a href="#reports" data-section="reports"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Отчёты</span></a></li>
         <li><a href="#agent-script" data-section="agent-script"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">AI-агент</span></a></li>
         <li><a href="#vip-clients" data-section="vip-clients"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">VIP-клиенты</span></a></li>
         <li><a href="#alerts" data-section="alerts"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Уведомления</span></a></li>
@@ -70,7 +72,7 @@
       <div class="admin-page-intro" id="overview">
         <p class="admin-topbar__eyebrow">Рабочий стол</p>
         <h2 class="admin-topbar__title">Обзор</h2>
-        <p class="admin-topbar__desc">Команда, чаты и настройки агента.</p>
+        <p class="admin-topbar__desc">Команда, аналитика (демо), чаты, звонки и настройки агента.</p>
       </div>
 
       <section class="admin-card admin-card-section module-section" id="people">
@@ -186,9 +188,120 @@
         </div>
       </section>
 
+      <section class="admin-card admin-card-section module-section admin-analytics-section" id="analytics" aria-label="Аналитика, демонстрационные данные">
+        <div class="admin-analytics-head">
+          <h3>Аналитика</h3>
+          <span class="admin-analytics-demo-pill">Демо</span>
+        </div>
+        <p class="admin-analytics-sub">
+          Здесь — <strong>метрики и аналитика сотрудников</strong> (нагрузка, SLA, ответы): сейчас это <strong>демо-данные</strong> для согласования интерфейса.
+          Реальная агрегация из Telegram и Bitrix подключится позже. Журнал голосовых звонков (реальные POST с Voximplant) — во вкладке «Звонки».
+        </p>
+
+        <div class="admin-analytics-kpis" role="list">
+          <article class="admin-analytics-kpi" role="listitem">
+            <span class="admin-analytics-kpi__label">Ответов за 7 дней</span>
+            <strong class="admin-analytics-kpi__value">842</strong>
+            <span class="admin-analytics-kpi__delta admin-analytics-kpi__delta--up">+12% к прошлой неделе</span>
+          </article>
+          <article class="admin-analytics-kpi" role="listitem">
+            <span class="admin-analytics-kpi__label">Среднее время первого ответа</span>
+            <strong class="admin-analytics-kpi__value">4.2&nbsp;мин</strong>
+            <span class="admin-analytics-kpi__delta admin-analytics-kpi__delta--down">−0.8 мин</span>
+          </article>
+          <article class="admin-analytics-kpi" role="listitem">
+            <span class="admin-analytics-kpi__label">Диалоги с ответом &lt; 15 мин</span>
+            <strong class="admin-analytics-kpi__value">68%</strong>
+            <span class="admin-analytics-kpi__delta">цель 75%</span>
+          </article>
+          <article class="admin-analytics-kpi" role="listitem">
+            <span class="admin-analytics-kpi__label">Оценка качества (опрос)</span>
+            <strong class="admin-analytics-kpi__value">4.6</strong>
+            <span class="admin-analytics-kpi__delta">из 5 · 96 оценок</span>
+          </article>
+        </div>
+
+        <div class="admin-analytics-grid2">
+          <div class="admin-analytics-chart-card">
+            <h4 class="admin-analytics-chart-card__title">Сообщения по дням (все аккаунты)</h4>
+            <div class="admin-analytics-bars" role="img" aria-label="Столбчатая диаграмма, демо">
+              <div class="admin-analytics-bar" style="--h:32%"><span>Пн</span></div>
+              <div class="admin-analytics-bar" style="--h:55%"><span>Вт</span></div>
+              <div class="admin-analytics-bar" style="--h:48%"><span>Ср</span></div>
+              <div class="admin-analytics-bar" style="--h:72%"><span>Чт</span></div>
+              <div class="admin-analytics-bar" style="--h:61%"><span>Пт</span></div>
+              <div class="admin-analytics-bar" style="--h:38%"><span>Сб</span></div>
+              <div class="admin-analytics-bar" style="--h:44%"><span>Вс</span></div>
+            </div>
+          </div>
+          <div class="admin-analytics-chart-card">
+            <h4 class="admin-analytics-chart-card__title">Динамика ответов</h4>
+            <div class="admin-analytics-spark-wrap" role="img" aria-label="Линейный график, демо">
+              <svg class="admin-analytics-spark" viewBox="0 0 320 120" preserveAspectRatio="none" aria-hidden="true">
+                <defs>
+                  <linearGradient id="fnrSparkFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="rgba(167, 139, 250, 0.45)"/>
+                    <stop offset="100%" stop-color="rgba(109, 40, 217, 0)"/>
+                  </linearGradient>
+                  <linearGradient id="fnrSparkLine" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#a78bfa"/>
+                    <stop offset="100%" stop-color="#6d28d9"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,90 L40,72 L80,88 L120,48 L160,62 L200,38 L240,55 L280,28 L320,40 L320,120 L0,120 Z" fill="url(#fnrSparkFill)"/>
+                <path d="M0,90 L40,72 L80,88 L120,48 L160,62 L200,38 L240,55 L280,28 L320,40" fill="none" stroke="url(#fnrSparkLine)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="admin-analytics-spark-legend">
+                <span class="admin-analytics-dot"></span> ответы менеджеров · демо
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-analytics-chart-card admin-analytics-chart-card--table">
+          <h4 class="admin-analytics-chart-card__title">Менеджеры · нагрузка (демо)</h4>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Менеджер</th>
+                  <th>Диалоги</th>
+                  <th>Исходящих</th>
+                  <th>Ср. время ответа</th>
+                  <th>SLA &lt;15 мин</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Алексей · продажи</td><td>124</td><td>118</td><td>3.1 мин</td><td><span class="admin-analytics-pill-ok">82%</span></td></tr>
+                <tr><td>Марина · руководитель</td><td>86</td><td>79</td><td>5.4 мин</td><td><span class="admin-analytics-pill-warn">71%</span></td></tr>
+                <tr><td>Дмитрий · технолог</td><td>64</td><td>61</td><td>6.2 мин</td><td><span class="admin-analytics-pill-warn">68%</span></td></tr>
+                <tr><td>Екатерина · экономист</td><td>52</td><td>50</td><td>4.0 мин</td><td><span class="admin-analytics-pill-ok">77%</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <section class="admin-card admin-card-section module-section" id="voice-calls">
         <h3>Звонки (голос)</h3>
-        <p class="admin-placeholder">Список пополняется, когда сценарий Voximplant отправляет POST на вебхук <code class="admin-code-inline">/fnr-api/voximplant/webhook</code> с данными после звонка (саммари, транскрипт, session id и т.д.). Подключение — в <code class="admin-code-inline">voximplant/VOICE_CALLS_WEBHOOK.md</code>.</p>
+        <div class="admin-voice-elevenlabs">
+          <div class="admin-voice-elevenlabs__text">
+            <h4 class="admin-voice-elevenlabs__title">Отчёты и разговоры в ElevenLabs</h4>
+            <p>Полные <strong>транскрипты</strong>, записи, метрики агента и удобный <strong>экспорт</strong> — в консоли ElevenLabs: там уже всё для голосовых Agents. Эта панель хранит только <strong>краткий журнал</strong>, который приходит с Voximplant на наш вебхук (саммари, длительность, session id).</p>
+            <p class="admin-voice-elevenlabs__hint">Дублировать «как в ElevenLabs» в нашем приложении не планируем — логичнее открывать их отчёты там, где настроен агент.</p>
+            <div class="admin-voice-elevenlabs__actions">
+              <a class="btn btn-primary" href="https://elevenlabs.io/app" target="_blank" rel="noopener noreferrer">Открыть ElevenLabs</a>
+              <a class="btn btn-ghost" href="https://elevenlabs.io/app/agents" target="_blank" rel="noopener noreferrer">Agents</a>
+              <a class="btn btn-ghost" href="https://elevenlabs.io/docs" target="_blank" rel="noopener noreferrer">Документация</a>
+            </div>
+          </div>
+        </div>
+        <div class="admin-voice-journal-note">
+          <p><strong>Это не заглушка:</strong> таблица ниже — это <strong>реальные записи</strong>, которые сервер сохраняет из каждого POST на вебхук.</p>
+          <p>Строки вроде <code class="admin-code-inline">source: curl</code> или короткие тестовые звонки — это ручные проверки; боевые звонки приходят из сценария Voximplant после публикации. Колонка «Саммари» пустая (—), если в JSON не было поля <code class="admin-code-inline">summary</code> (так бывает при тесте).</p>
+          <p class="admin-voice-journal-note__link">Сводные метрики по менеджерам (пока демо) — во вкладке <a href="#analytics" class="admin-inline-link">«Аналитика»</a>.</p>
+          <p class="cell-muted admin-voice-journal-note__doc">Подключение сценария и поля: <code class="admin-code-inline">voximplant/VOICE_CALLS_WEBHOOK.md</code></p>
+        </div>
         <div class="module-actions" style="margin-bottom:12px;">
           <button type="button" class="btn btn-ghost" id="voiceCallsRefreshBtn">Обновить</button>
           <span id="voiceCallsStatus" class="admin-form-msg" style="display:inline;margin-left:8px;"></span>
@@ -208,10 +321,53 @@
             </tbody>
           </table>
         </div>
-        <details class="admin-details-voice" style="margin-top:16px;">
+        <details class="admin-details-voice admin-details-voice--meta" style="margin-top:12px;">
+          <summary>Какие поля подтягиваются с вебхука</summary>
+          <p class="admin-voice-meta-p">Таблица показывает кратко; <strong>вся строка</strong> (саммари, транскрипт, ссылки, event, ElevenLabs id и т.д.) — в блоке «Полная запись» после клика по строке. В POST можно передать и вложенный объект <code class="admin-code-inline">call: { … }</code> — поля подтянутся.</p>
+          <ul class="admin-voice-fields-list">
+            <li><code>caller_id</code> / <code>callerId</code> — номер или id абонента</li>
+            <li><code>session_id</code> / <code>sessionId</code> — сессия Voximplant</li>
+            <li><code>duration_sec</code> / <code>duration</code> — длительность</li>
+            <li><code>summary</code> / <code>shortSummary</code> — краткое саммари</li>
+            <li><code>transcript</code> — текст разговора (в таблице в превью попадает в колонку «Саммари», если саммари пустое)</li>
+            <li><code>destination</code> — куда звонили</li>
+            <li><code>recording_url</code> — ссылка на запись</li>
+            <li><code>elevenlabs_conversation_id</code> — id разговора в ElevenLabs</li>
+            <li><code>caller_name</code>, <code>hangup_reason</code>, <code>event</code>, <code>source</code>, <code>transferred_to_specialist</code> — по необходимости</li>
+          </ul>
+          <p class="cell-muted admin-voice-meta-foot">Расширить список полей на сервере можно в <code class="admin-code-inline">app/state_store.py</code> (<code class="admin-code-inline">_VOICE_CALL_KEYS</code>) и при необходимости в <code class="admin-code-inline">voximplant_webhook.py</code>.</p>
+        </details>
+        <details class="admin-details-voice" style="margin-top:12px;">
           <summary>Полная запись (JSON)</summary>
           <pre id="voiceCallsDetail" class="admin-voice-detail-pre">Выберите строку в таблице.</pre>
         </details>
+      </section>
+
+      <section class="admin-card admin-card-section module-section" id="reports">
+        <div class="admin-reports-hero">
+          <h3>Отчёты</h3>
+          <span class="admin-reports-badge" title="Данные подключим позже">Скоро</span>
+        </div>
+        <p class="admin-placeholder admin-reports-lead">
+          Здесь будет единая витрина цифр: без ручной выгрузки из CRM и таблиц — всё, что нужно руководителю и отделу продаж, в одном экране.
+        </p>
+        <div class="admin-reports-grid">
+          <div class="admin-reports-tile">
+            <h4 class="admin-reports-tile__title">Воронка и лиды</h4>
+            <p class="admin-reports-tile__text">Конверсии по этапам, источники заявок, время ответа первой линии. Срезы по периодам и менеджерам.</p>
+          </div>
+          <div class="admin-reports-tile">
+            <h4 class="admin-reports-tile__title">Голос и каналы</h4>
+            <p class="admin-reports-tile__text">Сводка по звонкам и голосовому боту: длительность, темы из саммари, передачи на специалиста.</p>
+          </div>
+          <div class="admin-reports-tile">
+            <h4 class="admin-reports-tile__title">Команда</h4>
+            <p class="admin-reports-tile__text">Нагрузка по ролям, SLA по перепискам, обратная связь по качеству ответов ИИ.</p>
+          </div>
+        </div>
+        <p class="admin-reports-footnote cell-muted">
+          Раздел пока без данных: логика и API не подключены — интерфейс заготовлен под будущую аналитику. Ничего не отправляется на сервер.
+        </p>
       </section>
 
       <section class="admin-card admin-card-section module-section" id="agent-script">

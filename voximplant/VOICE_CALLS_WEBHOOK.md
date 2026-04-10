@@ -1,5 +1,15 @@
 # Журнал звонков в админке (fnr-api)
 
+## Какой сценарий куда (напоминание)
+
+| Задача | Файл сценария в репозитории |
+|--------|----------------------------|
+| Входящий звонок: ElevenLabs (Екатерина) + **перевод на специалиста** по tool `transfer_to_specialist`, исходящая нога на PSTN | **`scenario_elevenlabs_handoff_by.js`** |
+| Входящий: сценарий «Борис» (ElevenLabs без handoff из этого файла) | `scenario_elevenlabs_inbound_boris.js` |
+| Проверка POST на вебхук | `scenario_inbound_test.js` |
+
+Исходящий звонок на номер специалиста **внутри** сценария handoff — это не отдельный «прозвон по базе», а шаг после client tool в **`scenario_elevenlabs_handoff_by.js`**. Детали ключей и Caller ID — `SETUP_HANDOFF_RU.txt`.
+
 ## Автоматически из Voximplant
 
 В сценариях `scenario_elevenlabs_inbound_boris.js` и `scenario_elevenlabs_handoff_by.js` при **завершении звонка** отправляется POST с полями `call_ended`, `caller_id`, `duration_sec`, `session_id` и т.д.  
