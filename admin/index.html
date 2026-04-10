@@ -18,7 +18,7 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="../assets/css/admin.css?v=14">
+  <link rel="stylesheet" href="../assets/css/admin.css?v=15">
 </head>
 <body class="admin-body">
   <div class="admin-shell">
@@ -73,6 +73,14 @@
         <p class="admin-topbar__eyebrow">Рабочий стол</p>
         <h2 class="admin-topbar__title">Обзор</h2>
         <p class="admin-topbar__desc">Команда, аналитика (демо), чаты, звонки и настройки агента.</p>
+        <nav class="admin-overview-quick" aria-label="Быстрый переход по разделам">
+          <a href="#people" data-section="people" class="admin-overview-quick__link">Команда</a>
+          <a href="#analytics" data-section="analytics" class="admin-overview-quick__link admin-overview-quick__link--accent"><span class="admin-overview-quick__badge">Демо</span> Аналитика</a>
+          <a href="#chats" data-section="chats" class="admin-overview-quick__link">Чаты</a>
+          <a href="#voice-calls" data-section="voice-calls" class="admin-overview-quick__link">Звонки</a>
+          <a href="#reports" data-section="reports" class="admin-overview-quick__link">Отчёты</a>
+          <a href="#agent-script" data-section="agent-script" class="admin-overview-quick__link">AI-агент</a>
+        </nav>
       </div>
 
       <section class="admin-card admin-card-section module-section" id="people">
@@ -219,6 +227,24 @@
             <strong class="admin-analytics-kpi__value">4.6</strong>
             <span class="admin-analytics-kpi__delta">из 5 · 96 оценок</span>
           </article>
+        </div>
+
+        <div class="admin-analytics-donuts" aria-label="Кольцевые диаграммы, тестовые доли">
+          <div class="admin-analytics-donut-card">
+            <div class="admin-analytics-donut" style="--p:72" role="img" aria-label="72 процента"></div>
+            <span class="admin-analytics-donut-card__label">SLA &lt;15 мин</span>
+            <span class="admin-analytics-donut-card__val">72%</span>
+          </div>
+          <div class="admin-analytics-donut-card">
+            <div class="admin-analytics-donut admin-analytics-donut--teal" style="--p:54" role="img" aria-label="54 процента"></div>
+            <span class="admin-analytics-donut-card__label">Первый ответ &lt;5 мин</span>
+            <span class="admin-analytics-donut-card__val">54%</span>
+          </div>
+          <div class="admin-analytics-donut-card">
+            <div class="admin-analytics-donut admin-analytics-donut--amber" style="--p:88" role="img" aria-label="88 процента"></div>
+            <span class="admin-analytics-donut-card__label">Диалоги с ответом</span>
+            <span class="admin-analytics-donut-card__val">88%</span>
+          </div>
         </div>
 
         <div class="admin-analytics-grid2">
@@ -552,7 +578,9 @@
     });
 
     // --- Навигация: показываем только один блок секции ---
-    const navLinks = Array.from(document.querySelectorAll('.admin-nav a[data-section]'));
+    const navLinks = Array.from(
+      document.querySelectorAll('.admin-nav a[data-section], .admin-overview-quick a[data-section]')
+    );
     const moduleSections = Array.from(document.querySelectorAll('.module-section'));
 
     function showSection(sectionId) {
