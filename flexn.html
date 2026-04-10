@@ -6,7 +6,7 @@
     (function () {
       var p = window.location.pathname;
       var m = p.match(/^(.*\/)([^/]+\.html)$/);
-      if (m) document.write('<base href="' + m[1] + '">');
+      if (m) document.write('<base href="' + p + '">');
     })();
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -830,9 +830,14 @@
 
     @media (max-width: 640px) {
       html { font-size: 100%; }
+      :root {
+        --mobile-screen-pad-left: max(16px, calc(env(safe-area-inset-left) + 16px));
+        --mobile-screen-pad-right: max(16px, calc(env(safe-area-inset-right) + 16px));
+        --mobile-slider-edge: 4px;
+      }
       .container {
-        padding-left: max(16px, calc(env(safe-area-inset-left) + 16px));
-        padding-right: max(16px, calc(env(safe-area-inset-right) + 16px));
+        padding-left: var(--mobile-screen-pad-left);
+        padding-right: var(--mobile-screen-pad-right);
       }
       .site-header-inner { min-height: 64px; padding: 8px 0; gap: 10px; }
       .brand {
@@ -864,27 +869,39 @@
       .hero-copy h1 { font-size: clamp(1.55rem,7.5vw,2.1rem); }
       .hero-lead { font-size: .97rem; }
       .strip { padding: 18px 0 24px; }
-      .strip-row {
+      .strip-row,
+      .metrics-grid {
         display: flex;
         flex-wrap: nowrap;
         grid-template-columns: none;
         gap: 12px;
         overflow-x: auto;
         overflow-y: hidden;
-        padding: 6px 4px 10px;
-        margin: 0;
         scroll-snap-type: x mandatory;
-        scroll-padding-inline: 4px;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
       }
+      .strip-row {
+        padding-top: 6px;
+        padding-right: calc(var(--mobile-screen-pad-right) + var(--mobile-slider-edge));
+        padding-bottom: 10px;
+        padding-left: calc(var(--mobile-screen-pad-left) + var(--mobile-slider-edge));
+        scroll-padding-inline: calc(var(--mobile-screen-pad-left) + var(--mobile-slider-edge));
+        margin: 0;
+      }
+      .metrics-grid {
+        padding: 6px var(--mobile-slider-edge) 10px;
+        scroll-padding-inline: var(--mobile-slider-edge);
+        margin: 0;
+      }
       .strip-row::-webkit-scrollbar { display: none; }
+      .metrics-grid::-webkit-scrollbar { display: none; }
       .strip-card {
-        flex: 0 0 min(84vw, 290px);
-        width: min(84vw, 290px);
-        min-width: min(84vw, 290px);
+        flex: 0 0 min(84vw, 280px);
+        width: min(84vw, 280px);
+        min-width: min(84vw, 280px);
         min-height: 88px;
-        padding: 16px;
+        padding: 22px 18px 20px;
         font-size: .84rem;
         line-height: 1.3;
         scroll-snap-align: start;
@@ -900,21 +917,6 @@
       }
       .section-contact { padding: 20px 0 52px; }
       .contact-stack { gap: 24px; }
-      .metrics-grid {
-        display: flex;
-        flex-wrap: nowrap;
-        grid-template-columns: none;
-        gap: 12px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        padding: 6px 4px 10px;
-        margin: 0;
-        scroll-snap-type: x mandatory;
-        scroll-padding-inline: 4px;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-      }
-      .metrics-grid::-webkit-scrollbar { display: none; }
       .metric-card {
         flex: 0 0 min(84vw, 280px);
         width: min(84vw, 280px);
@@ -922,6 +924,19 @@
         min-height: 188px;
         padding: 22px 18px 20px;
         scroll-snap-align: start;
+      }
+      .animate-up,
+      .animate-up.is-visible {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+      .animate-up:nth-child(2),
+      .animate-up:nth-child(3),
+      .animate-up:nth-child(4),
+      .animate-up:nth-child(5),
+      .animate-up:nth-child(6) {
+        transition-delay: 0s;
       }
       .metric-value { font-size: clamp(1.8rem, 9vw, 2.3rem); }
       .metric-label { font-size: .78rem; }
@@ -1149,11 +1164,38 @@
   (function () {
     var nav = document.getElementById('siteNav');
     var btn = document.getElementById('navToggle');
-    if (!nav || !btn) return;
+    var header = document.querySelector('.site-header');
     function closeNav() {
+      if (!nav || !btn) return;
       nav.classList.remove('is-open');
       btn.setAttribute('aria-expanded', 'false');
     }
+    function scrollToTarget(target, targetSelector) {
+      var headerOffset = header ? header.offsetHeight + 8 : 88;
+      var top = target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+      window.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' });
+      try {
+        if (history && typeof history.replaceState === 'function') {
+          history.replaceState(null, '', targetSelector);
+          return;
+        }
+      } catch (e) {
+      }
+      window.location.hash = targetSelector;
+    }
+    function handleAnchorClick(a, e) {
+      var href = a.getAttribute('href') || '';
+      var targetSelector = a.getAttribute('data-target') || href;
+      if (!targetSelector || targetSelector.charAt(0) !== '#') return;
+      var target = document.querySelector(targetSelector);
+      if (!target) return;
+      e.preventDefault();
+      closeNav();
+      requestAnimationFrame(function () {
+        scrollToTarget(target, targetSelector);
+      });
+    }
+    if (!nav || !btn) return;
     btn.addEventListener('click', function () {
       var open = !nav.classList.contains('is-open');
       nav.classList.toggle('is-open', open);
@@ -1167,28 +1209,9 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') closeNav();
     });
-    nav.querySelectorAll('a').forEach(function (a) {
+    document.querySelectorAll('a[href^="#"]').forEach(function (a) {
       a.addEventListener('click', function (e) {
-        var href = a.getAttribute('href') || '';
-        var targetSelector = a.getAttribute('data-target') || href;
-        if (href.charAt(0) !== '#') {
-          closeNav();
-          return;
-        }
-        var target = document.querySelector(targetSelector);
-        if (!target) {
-          closeNav();
-          return;
-        }
-        e.preventDefault();
-        closeNav();
-        requestAnimationFrame(function () {
-          if (window.location.hash !== targetSelector) {
-            window.location.hash = targetSelector;
-            return;
-          }
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
+        handleAnchorClick(a, e);
       });
     });
     window.addEventListener('resize', function () {
