@@ -13,7 +13,7 @@ from .comet_client import MODEL, get_client
 log = logging.getLogger(__name__)
 
 WHISPER_MODEL = os.environ.get("COMET_WHISPER_MODEL", "whisper-1")
-# Тот же Grok 4.1 Fast без reasoning, что и диалог Бориса — поддерживает image в chat/completions
+# Тот же Grok 4.1 Fast без reasoning, что и диалог Comet в Telegram — поддерживает image в chat/completions
 VISION_MODEL = os.environ.get("COMET_VISION_MODEL", MODEL)
 
 VISION_CLASSIFIER_PROMPT = """Ты модератор для B2B-чата компании по этикеткам и упаковке (Флекс-н-Ролл ПРО).

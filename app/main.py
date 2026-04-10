@@ -25,7 +25,7 @@ from .voximplant_webhook import setup_voximplant_routes
 from .bitrix import create_lead_from_form, build_lead_comments_initial, sync_bitrix_chat_for_uid
 from .manager_router import resolve_account_for_lead_dialog
 from .state_store import add_tracked, append_history, load_state, set_bitrix_lead_link
-from .telegram_profiles import first_and_second_greeting
+from .telegram_profiles import first_and_second_greeting, load_persisted
 from .tg_handlers import register_private_handlers
 from .tg_pool import get_telegram_client
 
@@ -209,6 +209,7 @@ async def _init_app(app: web.Application) -> None:
         raise RuntimeError("Ни одна Telegram-сессия не авторизована (sessions/*.session)")
     app["telegram_clients"] = clients
     app["telegram"] = clients.get(0) or next(iter(clients.values()))
+    load_persisted()
     load_state()
     log.info("Telethon: пул из %s сессий (лиды и ответы — с аккаунта ответственного)", len(clients))
 

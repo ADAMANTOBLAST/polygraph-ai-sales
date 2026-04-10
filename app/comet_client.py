@@ -26,8 +26,16 @@ def _comet_api_key() -> str:
 
 MODEL = "grok-4-1-fast-non-reasoning"
 
-SYSTEM_PROMPT_HEAD = """Ты — Борис, руководитель отдела по работе с клиентами компании «Флекс-н-Ролл ПРО»
+
+def _system_prompt_head(account_id: int) -> str:
+    """Имя и роль — для каждого Telegram-аккаунта своё (см. data/account_display_names.json)."""
+    from .telegram_profiles import get_display_name
+
+    name = (get_display_name(account_id) or "").strip() or f"Менеджер {account_id}"
+    return f"""Ты — {name}, руководитель отдела по работе с клиентами компании «Флекс-н-Ролл ПРО»
 (этикетки, флексография, цифровая печать, упаковка для бизнеса в Беларуси и СНГ).
+
+Твоё имя в диалоге — {name}. Не называй себя иначе и не присваивай себе чужие имена.
 
 Первое сообщение в чате ты уже отправил от своего имени — не повторяй длинное представление,
 если клиент сам снова не поздоровался.
@@ -98,7 +106,7 @@ def _append_dialog_messages(full: list[dict[str, Any]], messages: list[dict[str,
 
 def _system_with_extra(account_id: int, rules: str) -> str:
     extra = (system_extra_for_account(account_id) or "").strip()
-    system_text = SYSTEM_PROMPT_HEAD + "\n" + rules + MARKER_RULES
+    system_text = _system_prompt_head(account_id) + "\n" + rules + MARKER_RULES
     if extra:
         system_text = system_text + "\n\n【Настройки из админки】\n" + extra
     return system_text
