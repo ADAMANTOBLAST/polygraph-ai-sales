@@ -3463,13 +3463,6 @@ details[open] > .admin-bitrix-details-full__summary::before {
   color: var(--fnr-text-secondary);
 }
 
-.admin-voice-server-h4 {
-  margin: 28px 0 12px;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--fnr-text);
-}
-
 .admin-voice-el11 {
   border-radius: var(--fnr-radius-lg);
   border: 1px solid var(--fnr-card-border, rgba(167, 139, 250, 0.22));
@@ -4039,45 +4032,6 @@ details[open] > .admin-bitrix-details-full__summary::before {
 
 .admin-voice-webhook-note {
   margin-bottom: 16px !important;
-}
-
-.admin-voice-journal-note {
-  margin: 0 0 20px;
-  padding: 16px 18px;
-  border-radius: var(--fnr-radius-sm);
-  background: rgba(124, 58, 237, 0.1);
-  border: 1px solid rgba(167, 139, 250, 0.28);
-  font-size: 0.95rem;
-  line-height: 1.55;
-  color: var(--fnr-text-secondary);
-}
-
-.admin-voice-journal-note p {
-  margin: 0 0 10px;
-}
-
-.admin-voice-journal-note p:last-child {
-  margin-bottom: 0;
-}
-
-.admin-voice-journal-note__link {
-  margin-top: 4px !important;
-}
-
-.admin-voice-journal-note__doc {
-  margin-top: 12px !important;
-  font-size: 0.88rem !important;
-}
-
-a.admin-inline-link {
-  color: #c4b5fd;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-a.admin-inline-link:hover {
-  color: #e9d5ff;
 }
 
 .admin-voice-meta-p {
