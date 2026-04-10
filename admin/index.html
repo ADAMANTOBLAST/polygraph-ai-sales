@@ -18,7 +18,7 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="../assets/css/admin.css?v=15">
+  <link rel="stylesheet" href="../assets/css/admin.css?v=16">
 </head>
 <body class="admin-body">
   <div class="admin-shell">
@@ -72,15 +72,7 @@
       <div class="admin-page-intro" id="overview">
         <p class="admin-topbar__eyebrow">Рабочий стол</p>
         <h2 class="admin-topbar__title">Обзор</h2>
-        <p class="admin-topbar__desc">Команда, аналитика (демо), чаты, звонки и настройки агента.</p>
-        <nav class="admin-overview-quick" aria-label="Быстрый переход по разделам">
-          <a href="#people" data-section="people" class="admin-overview-quick__link">Команда</a>
-          <a href="#analytics" data-section="analytics" class="admin-overview-quick__link admin-overview-quick__link--accent"><span class="admin-overview-quick__badge">Демо</span> Аналитика</a>
-          <a href="#chats" data-section="chats" class="admin-overview-quick__link">Чаты</a>
-          <a href="#voice-calls" data-section="voice-calls" class="admin-overview-quick__link">Звонки</a>
-          <a href="#reports" data-section="reports" class="admin-overview-quick__link">Отчёты</a>
-          <a href="#agent-script" data-section="agent-script" class="admin-overview-quick__link">AI-агент</a>
-        </nav>
+        <p class="admin-topbar__desc">Команда, аналитика (демо), чаты, звонки и настройки агента. Разделы — только в меню слева.</p>
       </div>
 
       <section class="admin-card admin-card-section module-section" id="people">
@@ -209,41 +201,41 @@
         <div class="admin-analytics-kpis" role="list">
           <article class="admin-analytics-kpi" role="listitem">
             <span class="admin-analytics-kpi__label">Ответов за 7 дней</span>
-            <strong class="admin-analytics-kpi__value">842</strong>
-            <span class="admin-analytics-kpi__delta admin-analytics-kpi__delta--up">+12% к прошлой неделе</span>
+            <strong class="admin-analytics-kpi__value">102</strong>
+            <span class="admin-analytics-kpi__delta">за неделю</span>
           </article>
           <article class="admin-analytics-kpi" role="listitem">
             <span class="admin-analytics-kpi__label">Среднее время первого ответа</span>
-            <strong class="admin-analytics-kpi__value">4.2&nbsp;мин</strong>
-            <span class="admin-analytics-kpi__delta admin-analytics-kpi__delta--down">−0.8 мин</span>
+            <strong class="admin-analytics-kpi__value">1.2&nbsp;мин</strong>
+            <span class="admin-analytics-kpi__delta">чуть больше минуты</span>
+          </article>
+          <article class="admin-analytics-kpi" role="listitem">
+            <span class="admin-analytics-kpi__label">Диалоги с ответом &lt; 5 мин</span>
+            <strong class="admin-analytics-kpi__value">100%</strong>
+            <span class="admin-analytics-kpi__delta admin-analytics-kpi__delta--up">SLA короткий</span>
           </article>
           <article class="admin-analytics-kpi" role="listitem">
             <span class="admin-analytics-kpi__label">Диалоги с ответом &lt; 15 мин</span>
-            <strong class="admin-analytics-kpi__value">68%</strong>
-            <span class="admin-analytics-kpi__delta">цель 75%</span>
-          </article>
-          <article class="admin-analytics-kpi" role="listitem">
-            <span class="admin-analytics-kpi__label">Оценка качества (опрос)</span>
-            <strong class="admin-analytics-kpi__value">4.6</strong>
-            <span class="admin-analytics-kpi__delta">из 5 · 96 оценок</span>
+            <strong class="admin-analytics-kpi__value">100%</strong>
+            <span class="admin-analytics-kpi__delta admin-analytics-kpi__delta--up">полное покрытие</span>
           </article>
         </div>
 
         <div class="admin-analytics-donuts" aria-label="Кольцевые диаграммы, тестовые доли">
           <div class="admin-analytics-donut-card">
-            <div class="admin-analytics-donut" style="--p:72" role="img" aria-label="72 процента"></div>
+            <div class="admin-analytics-donut" style="--p:100" role="img" aria-label="100 процентов"></div>
             <span class="admin-analytics-donut-card__label">SLA &lt;15 мин</span>
-            <span class="admin-analytics-donut-card__val">72%</span>
+            <span class="admin-analytics-donut-card__val">100%</span>
           </div>
           <div class="admin-analytics-donut-card">
-            <div class="admin-analytics-donut admin-analytics-donut--teal" style="--p:54" role="img" aria-label="54 процента"></div>
+            <div class="admin-analytics-donut admin-analytics-donut--teal" style="--p:100" role="img" aria-label="100 процентов"></div>
             <span class="admin-analytics-donut-card__label">Первый ответ &lt;5 мин</span>
-            <span class="admin-analytics-donut-card__val">54%</span>
+            <span class="admin-analytics-donut-card__val">100%</span>
           </div>
           <div class="admin-analytics-donut-card">
-            <div class="admin-analytics-donut admin-analytics-donut--amber" style="--p:88" role="img" aria-label="88 процента"></div>
+            <div class="admin-analytics-donut admin-analytics-donut--amber" style="--p:100" role="img" aria-label="100 процентов"></div>
             <span class="admin-analytics-donut-card__label">Диалоги с ответом</span>
-            <span class="admin-analytics-donut-card__val">88%</span>
+            <span class="admin-analytics-donut-card__val">100%</span>
           </div>
         </div>
 
@@ -251,13 +243,13 @@
           <div class="admin-analytics-chart-card">
             <h4 class="admin-analytics-chart-card__title">Сообщения по дням (все аккаунты)</h4>
             <div class="admin-analytics-bars" role="img" aria-label="Столбчатая диаграмма, демо">
-              <div class="admin-analytics-bar" style="--h:32%"><span>Пн</span></div>
-              <div class="admin-analytics-bar" style="--h:55%"><span>Вт</span></div>
-              <div class="admin-analytics-bar" style="--h:48%"><span>Ср</span></div>
-              <div class="admin-analytics-bar" style="--h:72%"><span>Чт</span></div>
-              <div class="admin-analytics-bar" style="--h:61%"><span>Пт</span></div>
-              <div class="admin-analytics-bar" style="--h:38%"><span>Сб</span></div>
-              <div class="admin-analytics-bar" style="--h:44%"><span>Вс</span></div>
+              <div class="admin-analytics-bar" style="--h:28%"><span>Пн</span></div>
+              <div class="admin-analytics-bar" style="--h:42%"><span>Вт</span></div>
+              <div class="admin-analytics-bar" style="--h:36%"><span>Ср</span></div>
+              <div class="admin-analytics-bar" style="--h:48%"><span>Чт</span></div>
+              <div class="admin-analytics-bar" style="--h:40%"><span>Пт</span></div>
+              <div class="admin-analytics-bar" style="--h:30%"><span>Сб</span></div>
+              <div class="admin-analytics-bar" style="--h:34%"><span>Вс</span></div>
             </div>
           </div>
           <div class="admin-analytics-chart-card">
@@ -298,10 +290,10 @@
                 </tr>
               </thead>
               <tbody>
-                <tr><td>Алексей · продажи</td><td>124</td><td>118</td><td>3.1 мин</td><td><span class="admin-analytics-pill-ok">82%</span></td></tr>
-                <tr><td>Марина · руководитель</td><td>86</td><td>79</td><td>5.4 мин</td><td><span class="admin-analytics-pill-warn">71%</span></td></tr>
-                <tr><td>Дмитрий · технолог</td><td>64</td><td>61</td><td>6.2 мин</td><td><span class="admin-analytics-pill-warn">68%</span></td></tr>
-                <tr><td>Екатерина · экономист</td><td>52</td><td>50</td><td>4.0 мин</td><td><span class="admin-analytics-pill-ok">77%</span></td></tr>
+                <tr><td>Алексей · продажи</td><td>28</td><td>26</td><td>1.1 мин</td><td><span class="admin-analytics-pill-ok">100%</span></td></tr>
+                <tr><td>Марина · руководитель</td><td>22</td><td>20</td><td>1.3 мин</td><td><span class="admin-analytics-pill-ok">100%</span></td></tr>
+                <tr><td>Дмитрий · технолог</td><td>18</td><td>17</td><td>1.2 мин</td><td><span class="admin-analytics-pill-ok">100%</span></td></tr>
+                <tr><td>Екатерина · экономист</td><td>14</td><td>13</td><td>1.2 мин</td><td><span class="admin-analytics-pill-ok">100%</span></td></tr>
               </tbody>
             </table>
           </div>
@@ -310,23 +302,97 @@
 
       <section class="admin-card admin-card-section module-section" id="voice-calls">
         <h3>Звонки (голос)</h3>
-        <div class="admin-voice-elevenlabs">
-          <div class="admin-voice-elevenlabs__text">
-            <h4 class="admin-voice-elevenlabs__title">Отчёты и разговоры в ElevenLabs</h4>
-            <p>Полные <strong>транскрипты</strong>, записи, метрики агента и удобный <strong>экспорт</strong> — в консоли ElevenLabs: там уже всё для голосовых Agents. Эта панель хранит только <strong>краткий журнал</strong>, который приходит с Voximplant на наш вебхук (саммари, длительность, session id).</p>
-            <p class="admin-voice-elevenlabs__hint">Дублировать «как в ElevenLabs» в нашем приложении не планируем — логичнее открывать их отчёты там, где настроен агент.</p>
-            <div class="admin-voice-elevenlabs__actions">
-              <a class="btn btn-primary" href="https://elevenlabs.io/app" target="_blank" rel="noopener noreferrer">Открыть ElevenLabs</a>
-              <a class="btn btn-ghost" href="https://elevenlabs.io/app/agents" target="_blank" rel="noopener noreferrer">Agents</a>
-              <a class="btn btn-ghost" href="https://elevenlabs.io/docs" target="_blank" rel="noopener noreferrer">Документация</a>
+        <p class="admin-voice-el11-lead">
+          Ниже — <strong>демо</strong> в духе ElevenLabs: список, плеер, «транскрипт» и метрики (без реального LLM/TTS — только интерфейс).
+          Аудио берётся из <code class="admin-code-inline">assets/audio/</code> — файлы с именами как у разговоров; при деплое можно заменить на свои записи.
+        </p>
+
+        <div class="admin-voice-el11" id="voiceEl11Root" aria-label="Демо ElevenLabs">
+          <div class="admin-el11-head">
+            <span class="admin-el11-head__badge">Демо</span>
+            <span class="admin-el11-head__title">Conversational AI</span>
+            <a class="admin-el11-head__link" href="https://elevenlabs.io/app" target="_blank" rel="noopener noreferrer">Открыть ElevenLabs ↗</a>
+          </div>
+
+          <div class="admin-el11-layout">
+            <div class="admin-el11-list-wrap">
+              <table class="admin-el11-calls-table">
+                <thead>
+                  <tr>
+                    <th>Дата и время</th>
+                    <th>Агент</th>
+                    <th class="admin-el11-num">Длит.</th>
+                    <th class="admin-el11-status-col">Статус</th>
+                  </tr>
+                </thead>
+                <tbody id="voiceEl11Tbody"></tbody>
+              </table>
+            </div>
+
+            <div class="admin-el11-detail" id="voiceEl11Detail" hidden>
+              <div class="admin-el11-detail-top">
+                <div class="admin-el11-detail-main">
+                  <div class="admin-el11-conv-title">
+                    <h4 class="admin-el11-conv-h">Разговор с агентом</h4>
+                    <code class="admin-el11-conv-id" id="voiceEl11ConvId"></code>
+                    <span class="admin-el11-pager" id="voiceEl11Pager">1 / 2</span>
+                  </div>
+
+                  <div class="admin-el11-player">
+                    <audio id="voiceEl11Audio" class="admin-el11-audio" controls preload="metadata"></audio>
+                    <div class="admin-el11-wave" id="voiceEl11Wave" aria-hidden="true"></div>
+                    <div class="admin-el11-player-meta">
+                      <span class="admin-el11-time" id="voiceEl11TimeLabel">0:00 / 0:00</span>
+                      <span class="admin-el11-chip">1.0×</span>
+                    </div>
+                  </div>
+
+                  <div class="admin-el11-tabs" role="tablist">
+                    <button type="button" class="admin-el11-tab is-active" data-el11-tab="overview" role="tab" aria-selected="true">Обзор</button>
+                    <button type="button" class="admin-el11-tab" data-el11-tab="transcript" role="tab" aria-selected="false">Транскрипт</button>
+                    <button type="button" class="admin-el11-tab" data-el11-tab="client" role="tab" aria-selected="false">Данные клиента</button>
+                  </div>
+
+                  <div class="admin-el11-panel" id="voiceEl11PanelOverview" data-el11-panel="overview">
+                    <div class="admin-el11-summary">
+                      <h5 class="admin-el11-h5">Краткое содержание</h5>
+                      <p class="admin-el11-summary-text" id="voiceEl11Summary"></p>
+                    </div>
+                    <dl class="admin-el11-dl">
+                      <div><dt>Статус звонка</dt><dd><span class="admin-el11-pill-ok" id="voiceEl11StatusBadge">Успешно</span></dd></div>
+                      <div><dt>Завершение</dt><dd id="voiceEl11EndReason">Агент завершил</dd></div>
+                      <div><dt>User ID</dt><dd id="voiceEl11UserId">Нет user ID</dd></div>
+                    </dl>
+                  </div>
+
+                  <div class="admin-el11-panel" id="voiceEl11PanelTranscript" data-el11-panel="transcript" hidden>
+                    <div class="admin-el11-thread" id="voiceEl11Thread"></div>
+                  </div>
+
+                  <div class="admin-el11-panel" id="voiceEl11PanelClient" data-el11-panel="client" hidden>
+                    <p class="admin-el11-muted">В демо полей нет — в ElevenLabs здесь были бы извлечённые сущности и заметки.</p>
+                  </div>
+                </div>
+
+                <aside class="admin-el11-sidebar" aria-label="Метаданные сессии">
+                  <div class="admin-el11-side-row"><span>Дата</span><strong id="voiceEl11SideDate">—</strong></div>
+                  <div class="admin-el11-side-row"><span>Окружение</span><span class="admin-el11-env">production</span></div>
+                  <div class="admin-el11-side-row"><span>Длительность</span><strong id="voiceEl11SideDur">—</strong></div>
+                  <div class="admin-el11-side-row"><span>Стоимость (кред.)</span><strong id="voiceEl11Credits">—</strong></div>
+                  <div class="admin-el11-side-row"><span>LLM (кред.)</span><strong id="voiceEl11Llm">—</strong></div>
+                  <div class="admin-el11-side-row"><span>Текстовый режим</span><span>Нет</span></div>
+                </aside>
+              </div>
             </div>
           </div>
+          <p class="admin-el11-footnote" id="voiceEl11Hint">Выберите строку в таблице, чтобы открыть плеер и транскрипт (заглушка).</p>
         </div>
+
+        <h4 class="admin-voice-server-h4">Журнал с сервера (вебхук Voximplant)</h4>
         <div class="admin-voice-journal-note">
-          <p><strong>Это не заглушка:</strong> таблица ниже — это <strong>реальные записи</strong>, которые сервер сохраняет из каждого POST на вебхук.</p>
-          <p>Строки вроде <code class="admin-code-inline">source: curl</code> или короткие тестовые звонки — это ручные проверки; боевые звонки приходят из сценария Voximplant после публикации. Колонка «Саммари» пустая (—), если в JSON не было поля <code class="admin-code-inline">summary</code> (так бывает при тесте).</p>
-          <p class="admin-voice-journal-note__link">Сводные метрики по менеджерам (пока демо) — во вкладке <a href="#analytics" class="admin-inline-link">«Аналитика»</a>.</p>
-          <p class="cell-muted admin-voice-journal-note__doc">Подключение сценария и поля: <code class="admin-code-inline">voximplant/VOICE_CALLS_WEBHOOK.md</code></p>
+          <p>Таблица ниже — <strong>реальные записи</strong> с POST на вебхук (если настроены). Демо ElevenLabs выше к API не привязано.</p>
+          <p class="admin-voice-journal-note__link">Сводные метрики (демо) — в разделе <a href="#analytics" class="admin-inline-link">«Аналитика»</a>.</p>
+          <p class="cell-muted admin-voice-journal-note__doc">Поля и сценарий: <code class="admin-code-inline">voximplant/VOICE_CALLS_WEBHOOK.md</code></p>
         </div>
         <div class="module-actions" style="margin-bottom:12px;">
           <button type="button" class="btn btn-ghost" id="voiceCallsRefreshBtn">Обновить</button>
@@ -578,9 +644,7 @@
     });
 
     // --- Навигация: показываем только один блок секции ---
-    const navLinks = Array.from(
-      document.querySelectorAll('.admin-nav a[data-section], .admin-overview-quick a[data-section]')
-    );
+    const navLinks = Array.from(document.querySelectorAll('.admin-nav a[data-section]'));
     const moduleSections = Array.from(document.querySelectorAll('.module-section'));
 
     function showSection(sectionId) {
@@ -1399,6 +1463,288 @@
           window.__fnrLoadVoiceCalls();
         });
       }
+
+      (function initVoiceEl11Demo() {
+        var demos = [
+          {
+            id: 'conv_7701knv3a2jhfewb11nhv5hqxc7p',
+            dateLabel: '10 апр. 2026, 6:40',
+            durationLabel: '0:53',
+            audio: '../assets/audio/conv_7701knv3a2jhfewb11nhv5hqxc7p.mp3',
+            pager: '1 / 2',
+            summary:
+              'Клиент запрашивает этикетки для бутылок. Уточнён формат — термоусадочные. Дальше логично подобрать материал и тираж.',
+            credits: '420',
+            llm: '45',
+            endReason: 'Агент завершил',
+            turns: [
+              {
+                role: 'agent',
+                ts: '0:00',
+                text: 'Good day, I am Ekaterina, Flex-n-Roll PRO company, how can I help you?',
+                lat: [
+                  { k: 'TTS', v: '116 ms' },
+                  { k: 'LLM', v: '2.0 s' },
+                ],
+              },
+              {
+                role: 'user',
+                ts: '0:06',
+                text: 'Hello, I need labels for my bottle.',
+                lat: [{ k: 'ASR', v: '112 ms' }],
+              },
+              {
+                role: 'agent',
+                ts: '0:13',
+                text:
+                  'Hello! Understood, you need labels for bottles. Could you please tell me what type of label you need — self-adhesive, heat-shrink, or something else?',
+                lat: [
+                  { k: 'TTS', v: '98 ms' },
+                  { k: 'LLM', v: '1.8 s' },
+                ],
+              },
+              {
+                role: 'user',
+                ts: '0:26',
+                text: 'Heat-shrink.',
+                lat: [{ k: 'ASR', v: '103 ms' }],
+              },
+              {
+                role: 'agent',
+                ts: '0:30',
+                text: 'Understood, heat-shrink labels. So that I can give you accurate options — what volume and bottle type are we talking about?',
+                lat: [
+                  { k: 'TTS', v: '101 ms' },
+                  { k: 'LLM', v: '2.1 s' },
+                ],
+              },
+            ],
+          },
+          {
+            id: 'conv_9601kntrj6ybfqm934h435rq13xv',
+            dateLabel: '10 апр. 2026, 6:56',
+            durationLabel: '1:36',
+            audio: '../assets/audio/conv_9601kntrj6ybfqm934h435rq13xv.mp3',
+            pager: '2 / 2',
+            summary:
+              'Клиент звонит по поводу печати этикеток для шампуня: обсуждены объём партии, сроки и передача запроса менеджеру для расчёта.',
+            credits: '1 069',
+            llm: '71',
+            endReason: 'Агент завершил',
+            turns: [
+              {
+                role: 'agent',
+                ts: '0:00',
+                text: 'Добрый день, Flex-n-Roll PRO, чем могу помочь?',
+                lat: [
+                  { k: 'TTS', v: '108 ms' },
+                  { k: 'LLM', v: '1.9 s' },
+                ],
+              },
+              {
+                role: 'user',
+                ts: '0:08',
+                text: 'Здравствуйте, нужны этикетки для бутылок, шампунь, тираж около десяти тысяч.',
+                lat: [{ k: 'ASR', v: '118 ms' }],
+              },
+              {
+                role: 'agent',
+                ts: '0:22',
+                text:
+                  'Принято. Уточните, пожалуйста, материал бутылки и нужен ли дизайн с нуля или есть макет?',
+                lat: [
+                  { k: 'TTS', v: '99 ms' },
+                  { k: 'LLM', v: '2.0 s' },
+                ],
+              },
+              {
+                role: 'user',
+                ts: '0:45',
+                text: 'Макет есть в PDF, бутылка PET 250 мл.',
+                lat: [{ k: 'ASR', v: '104 ms' }],
+              },
+              {
+                role: 'agent',
+                ts: '0:58',
+                text: 'Отлично, передаю менеджеру для расчёта стоимости и сроков. Спасибо за звонок!',
+                lat: [
+                  { k: 'TTS', v: '95 ms' },
+                  { k: 'LLM', v: '1.7 s' },
+                ],
+              },
+            ],
+          },
+        ];
+
+        function padTime(s) {
+          var m = Math.floor(s / 60);
+          var sec = Math.floor(s % 60);
+          return m + ':' + (sec < 10 ? '0' : '') + sec;
+        }
+
+        function renderWave(el, seed) {
+          if (!el) return;
+          el.innerHTML = '';
+          var n = 56;
+          for (var i = 0; i < n; i++) {
+            var h = 18 + ((seed * (i + 3)) % 74);
+            var span = document.createElement('span');
+            span.className = 'admin-el11-wave__bar';
+            span.style.height = h + '%';
+            el.appendChild(span);
+          }
+        }
+
+        function renderThread(container, turns) {
+          if (!container) return;
+          container.innerHTML = (turns || [])
+            .map(function (turn) {
+              var lat = (turn.lat || [])
+                .map(function (x) {
+                  return '<span class="admin-el11-lat-pill">' + escHtml(x.k + ' ' + x.v) + '</span>';
+                })
+                .join('');
+              var head =
+                turn.role === 'agent'
+                  ? '<div class="admin-el11-msg-head admin-el11-msg-head--agent"><span class="admin-el11-avatar" aria-hidden="true"></span><span class="admin-el11-agent-name">My Agent</span><span class="admin-el11-branch">Main</span><span class="admin-el11-ts">' +
+                    escHtml(turn.ts) +
+                    '</span></div>'
+                  : '<div class="admin-el11-msg-head admin-el11-msg-head--user"><span class="admin-el11-ts">' +
+                    escHtml(turn.ts) +
+                    '</span><span class="admin-el11-user-label">Гость</span></div>';
+              return (
+                '<div class="admin-el11-msg admin-el11-msg--' +
+                (turn.role === 'agent' ? 'agent' : 'user') +
+                '">' +
+                head +
+                '<div class="admin-el11-bubble admin-el11-bubble--' +
+                (turn.role === 'agent' ? 'agent' : 'user') +
+                '">' +
+                escHtml(turn.text) +
+                '</div><div class="admin-el11-lat-row">' +
+                lat +
+                '</div></div>'
+              );
+            })
+            .join('');
+        }
+
+        var tbody = document.getElementById('voiceEl11Tbody');
+        var detail = document.getElementById('voiceEl11Detail');
+        var hint = document.getElementById('voiceEl11Hint');
+        var audioEl = document.getElementById('voiceEl11Audio');
+        var waveEl = document.getElementById('voiceEl11Wave');
+        var timeLabel = document.getElementById('voiceEl11TimeLabel');
+
+        if (tbody) {
+          tbody.innerHTML = demos
+            .map(function (d, idx) {
+              return (
+                '<tr class="admin-el11-row" data-el11-idx="' +
+                idx +
+                '" tabindex="0" role="button">' +
+                '<td>' +
+                escHtml(d.dateLabel) +
+                '</td>' +
+                '<td><span class="admin-el11-agent-cell">My Agent</span> <span class="admin-el11-link-ico" aria-hidden="true">🔗</span> Main</td>' +
+                '<td class="admin-el11-num">' +
+                escHtml(d.durationLabel) +
+                '</td>' +
+                '<td class="admin-el11-status-col"><span class="admin-el11-status-pill">Успешно</span></td></tr>'
+              );
+            })
+            .join('');
+        }
+
+        function fillDetail(d) {
+          var cid = document.getElementById('voiceEl11ConvId');
+          var pager = document.getElementById('voiceEl11Pager');
+          var sum = document.getElementById('voiceEl11Summary');
+          var sideDate = document.getElementById('voiceEl11SideDate');
+          var sideDur = document.getElementById('voiceEl11SideDur');
+          var cred = document.getElementById('voiceEl11Credits');
+          var llm = document.getElementById('voiceEl11Llm');
+          var endR = document.getElementById('voiceEl11EndReason');
+          if (cid) cid.textContent = d.id;
+          if (pager) pager.textContent = d.pager;
+          if (sum) sum.textContent = d.summary;
+          if (sideDate) sideDate.textContent = d.dateLabel;
+          if (sideDur) sideDur.textContent = d.durationLabel;
+          if (cred) cred.textContent = d.credits;
+          if (llm) llm.textContent = d.llm;
+          if (endR) endR.textContent = d.endReason;
+          renderThread(document.getElementById('voiceEl11Thread'), d.turns);
+          renderWave(waveEl, d.id.split('').reduce(function (a, c) { return a + c.charCodeAt(0); }, 0));
+          if (audioEl) {
+            audioEl.src = d.audio;
+            audioEl.load();
+          }
+          if (timeLabel && audioEl) {
+            timeLabel.textContent = '0:00 / ' + d.durationLabel;
+            var onMeta = function once() {
+              if (timeLabel && audioEl.duration && !isNaN(audioEl.duration)) {
+                timeLabel.textContent = '0:00 / ' + padTime(audioEl.duration);
+              }
+            };
+            audioEl.addEventListener('loadedmetadata', onMeta, { once: true });
+          }
+        }
+
+        if (audioEl && timeLabel) {
+          audioEl.addEventListener('timeupdate', function () {
+            if (!audioEl.duration || isNaN(audioEl.duration)) return;
+            timeLabel.textContent = padTime(audioEl.currentTime) + ' / ' + padTime(audioEl.duration);
+          });
+        }
+
+        document.querySelectorAll('.admin-el11-tab').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var tab = btn.getAttribute('data-el11-tab');
+            document.querySelectorAll('.admin-el11-tab').forEach(function (b) {
+              b.classList.toggle('is-active', b === btn);
+              b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
+            });
+            document.querySelectorAll('[data-el11-panel]').forEach(function (p) {
+              p.hidden = p.getAttribute('data-el11-panel') !== tab;
+            });
+          });
+        });
+
+        function selectIdx(i) {
+          var d = demos[i];
+          if (!d) return;
+          if (detail) detail.hidden = false;
+          if (hint) hint.hidden = true;
+          fillDetail(d);
+          document.querySelectorAll('.admin-el11-row').forEach(function (tr) {
+            tr.classList.toggle('is-active', parseInt(tr.getAttribute('data-el11-idx'), 10) === i);
+          });
+          document.querySelectorAll('.admin-el11-tab').forEach(function (b) {
+            var on = b.getAttribute('data-el11-tab') === 'overview';
+            b.classList.toggle('is-active', on);
+            b.setAttribute('aria-selected', on ? 'true' : 'false');
+          });
+          document.querySelectorAll('[data-el11-panel]').forEach(function (p) {
+            p.hidden = p.getAttribute('data-el11-panel') !== 'overview';
+          });
+        }
+
+        if (tbody) {
+          tbody.querySelectorAll('.admin-el11-row').forEach(function (tr) {
+            tr.addEventListener('click', function () {
+              selectIdx(parseInt(tr.getAttribute('data-el11-idx'), 10));
+            });
+            tr.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                selectIdx(parseInt(tr.getAttribute('data-el11-idx'), 10));
+              }
+            });
+          });
+        }
+
+        selectIdx(0);
+      })();
     })();
 
     // --- Модуль "Команда и роли" (локальный CRUD) ---

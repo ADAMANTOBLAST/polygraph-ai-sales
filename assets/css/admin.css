@@ -468,64 +468,6 @@ html.admin-nav-is-open .admin-nav-toggle__bar:nth-child(3) {
   line-height: 1.5;
 }
 
-.admin-overview-quick {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.admin-overview-quick__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--fnr-text-secondary);
-  text-decoration: none;
-  border-radius: 999px;
-  border: 1px solid var(--fnr-border);
-  background: rgba(0, 0, 0, 0.18);
-  transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.admin-overview-quick__link:hover {
-  color: var(--fnr-text);
-  border-color: rgba(167, 139, 250, 0.45);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
-}
-
-.admin-overview-quick__link.active {
-  color: #f5f3ff;
-  border-color: rgba(167, 139, 250, 0.55);
-  background: linear-gradient(135deg, rgba(109, 40, 217, 0.35), rgba(167, 139, 250, 0.08));
-}
-
-.admin-overview-quick__link--accent {
-  border-color: rgba(244, 114, 182, 0.4);
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(109, 40, 217, 0.2));
-}
-
-.admin-overview-quick__link--accent:hover,
-.admin-overview-quick__link--accent.active {
-  border-color: rgba(244, 114, 182, 0.65);
-}
-
-.admin-overview-quick__badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 8px;
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #fce7f3;
-  background: rgba(236, 72, 153, 0.35);
-  border-radius: 6px;
-}
-
 .topbar-actions {
   display: flex;
   align-items: center;
@@ -3431,6 +3373,484 @@ details[open] > .admin-bitrix-details-full__summary::before {
 .admin-analytics-pill-warn {
   background: rgba(251, 191, 36, 0.12);
   color: #fcd34d;
+}
+
+/* ——— Звонки: демо ElevenLabs (светлая карточка) ——— */
+.admin-voice-el11-lead {
+  margin: 0 0 18px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--fnr-text-secondary);
+}
+
+.admin-voice-server-h4 {
+  margin: 28px 0 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--fnr-text);
+}
+
+.admin-voice-el11 {
+  border-radius: var(--fnr-radius);
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #111827;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.admin-el11-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 14px 18px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-el11-head__badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.admin-el11-head__title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.admin-el11-head__link {
+  margin-left: auto;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4f46e5;
+  text-decoration: none;
+}
+
+.admin-el11-head__link:hover {
+  text-decoration: underline;
+}
+
+.admin-el11-layout {
+  padding: 0;
+}
+
+.admin-el11-list-wrap {
+  padding: 0 18px 12px;
+  background: #fff;
+}
+
+.admin-el11-calls-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.admin-el11-calls-table th {
+  text-align: left;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 14px 12px 10px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.admin-el11-calls-table td {
+  padding: 16px 12px 16px 0;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+  color: #111827;
+}
+
+.admin-el11-row {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.admin-el11-row:hover {
+  background: #f9fafb;
+}
+
+.admin-el11-row.is-active {
+  background: #eef2ff;
+}
+
+.admin-el11-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: #374151;
+}
+
+.admin-el11-status-col {
+  text-align: right;
+}
+
+.admin-el11-status-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #dcfce7;
+  color: #166534;
+}
+
+.admin-el11-agent-cell {
+  font-weight: 600;
+}
+
+.admin-el11-link-ico {
+  opacity: 0.55;
+  font-size: 0.85em;
+}
+
+.admin-el11-footnote {
+  margin: 0;
+  padding: 10px 18px 14px;
+  font-size: 0.82rem;
+  color: #6b7280;
+  background: #fff;
+  border-top: 1px solid #f3f4f6;
+}
+
+.admin-el11-detail {
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.admin-el11-detail-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 0;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .admin-el11-detail-top {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-el11-detail-main {
+  padding: 18px 18px 22px;
+  border-right: 1px solid #f3f4f6;
+}
+
+@media (max-width: 900px) {
+  .admin-el11-detail-main {
+    border-right: none;
+  }
+}
+
+.admin-el11-conv-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  margin-bottom: 16px;
+}
+
+.admin-el11-conv-h {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.admin-el11-conv-id {
+  font-size: 0.75rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.admin-el11-pager {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.admin-el11-player {
+  margin-bottom: 16px;
+}
+
+.admin-el11-audio {
+  width: 100%;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+.admin-el11-wave {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2px;
+  height: 56px;
+  margin-bottom: 8px;
+  padding: 4px 0;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
+  border: 1px solid #f3f4f6;
+}
+
+.admin-el11-wave__bar {
+  flex: 1;
+  min-width: 2px;
+  max-width: 8px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #a5b4fc 0%, #6366f1 100%);
+  opacity: 0.85;
+}
+
+.admin-el11-player-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.admin-el11-chip {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #f3f4f6;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.admin-el11-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-el11-tab {
+  padding: 10px 14px;
+  margin-bottom: -1px;
+  border: none;
+  background: transparent;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  border-radius: 6px 6px 0 0;
+}
+
+.admin-el11-tab.is-active {
+  color: #111827;
+  border-bottom-color: #6366f1;
+}
+
+.admin-el11-h5 {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+}
+
+.admin-el11-summary-text {
+  margin: 0 0 18px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #374151;
+}
+
+.admin-el11-dl {
+  margin: 0;
+}
+
+.admin-el11-dl > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #f3f4f6;
+  font-size: 0.88rem;
+}
+
+.admin-el11-dl dt {
+  margin: 0;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.admin-el11-dl dd {
+  margin: 0;
+  color: #111827;
+  font-weight: 500;
+}
+
+.admin-el11-pill-ok {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #dcfce7;
+  color: #166534;
+}
+
+.admin-el11-sidebar {
+  padding: 18px 18px 22px;
+  background: #fafafa;
+  font-size: 0.86rem;
+}
+
+.admin-el11-side-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f3f4f6;
+  color: #4b5563;
+}
+
+.admin-el11-side-row:last-child {
+  border-bottom: none;
+}
+
+.admin-el11-side-row strong {
+  color: #111827;
+  font-weight: 600;
+}
+
+.admin-el11-env {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #e5e7eb;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-el11-muted {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.admin-el11-thread {
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.admin-el11-msg {
+  margin-bottom: 18px;
+}
+
+.admin-el11-msg-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.admin-el11-msg-head--user {
+  justify-content: flex-end;
+}
+
+.admin-el11-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #34d399, #059669);
+  flex-shrink: 0;
+}
+
+.admin-el11-agent-name {
+  font-weight: 700;
+  color: #111827;
+}
+
+.admin-el11-branch {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #f3f4f6;
+  font-size: 0.72rem;
+}
+
+.admin-el11-ts {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-el11-msg-head--user .admin-el11-ts {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.admin-el11-user-label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.admin-el11-bubble {
+  max-width: 92%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #111827;
+}
+
+.admin-el11-bubble--agent {
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.admin-el11-bubble--user {
+  margin-left: auto;
+  background: #f3f4f6;
+  border: 1px solid transparent;
+}
+
+.admin-el11-msg--user .admin-el11-bubble {
+  margin-left: auto;
+}
+
+.admin-el11-lat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.admin-el11-msg--agent .admin-el11-lat-row {
+  padding-left: 30px;
+}
+
+.admin-el11-msg--user .admin-el11-lat-row {
+  justify-content: flex-end;
+  padding-right: 0;
+}
+
+.admin-el11-lat-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #4b5563;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
 }
 
 /* ——— Звонки: блок ElevenLabs ——— */
