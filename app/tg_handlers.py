@@ -59,6 +59,8 @@ def _extract_service_markers(text: str) -> tuple[str, str | None, str | None]:
                 event_name = upper_value
         elif kind == "FNR_ROUTE" and not route_name:
             lower_value = value.lower()
+            if lower_value == "lead":
+                lower_value = "manager"
             if lower_value in {"seller", "manager", "tech", "economist", "dispatcher"}:
                 route_name = lower_value
         return ""

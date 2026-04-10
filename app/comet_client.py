@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from typing import Any
 
 from openai import OpenAI
@@ -59,11 +60,12 @@ RULES_ONE_MESSAGE = """Правила ответов:
 HANDOFF_CODE_TO_ROLE = {
     "SELLER": "seller",
     "MANAGER": "lead",
+    "LEAD": "lead",
     "TECH": "tech",
     "ECONOMIST": "economist",
     "DISPATCHER": "dispatcher",
 }
-ROLE_TO_HANDOFF_CODE = {v: k for k, v in HANDOFF_CODE_TO_ROLE.items()}
+ROLE_TO_HANDOFF_CODE = {v: k for k, v in HANDOFF_CODE_TO_ROLE.items() if k != "LEAD"}
 
 MARKER_RULES = """
 
@@ -71,7 +73,7 @@ MARKER_RULES = """
 - Если понимаешь, что клиент готов к успешному завершению сделки, добавь в САМОМ КОНЦЕ ответа отдельной строкой: [[FNR_EVENT:WON]]
 - Если понимаешь, что клиент отказался, сделка не состоится или ему неинтересно, добавь в САМОМ КОНЦЕ ответа отдельной строкой: [[FNR_EVENT:LOST]]
 - Если по условиям передачи из настроек нужно передать клиента сотруднику, добавь в конце отдельной строкой один маршрут:
-  [[FNR_ROUTE:seller]] или [[FNR_ROUTE:manager]] или [[FNR_ROUTE:tech]] или [[FNR_ROUTE:economist]] или [[FNR_ROUTE:dispatcher]]
+  [[FNR_ROUTE:seller]] или [[FNR_ROUTE:manager]] (или [[FNR_ROUTE:lead]] — то же, руководитель) или [[FNR_ROUTE:tech]] или [[FNR_ROUTE:economist]] или [[FNR_ROUTE:dispatcher]]
 - Маркеры нужны только для системы. Не поясняй их клиенту и не встраивай в обычный текст.
 - Если диалог ещё не дошёл до явного итога и передавать клиента рано — не добавляй маркеры.
 - Можно вернуть сразу два маркера, каждый на отдельной строке, например:
@@ -148,7 +150,15 @@ def detect_handoff(messages: list[dict[str, Any]], account_id: int = 0) -> str |
         max_tokens=20,
     )
     raw = (completion.choices[0].message.content or "").strip().upper()
-    token = raw.split()[0] if raw else ""
+    if not raw or raw == "NONE":
+        return None
+    # Одно слово или «код: SELLER» / обрамление пунктуацией
+    m = re.search(
+        r"\b(SELLER|MANAGER|LEAD|TECH|ECONOMIST|DISPATCHER|NONE)\b",
+        raw,
+        re.I,
+    )
+    token = (m.group(1) if m else "").upper()
     if not token or token == "NONE":
         return None
     return HANDOFF_CODE_TO_ROLE.get(token)
