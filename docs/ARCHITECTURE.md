@@ -13,7 +13,7 @@
 | `app/` | Код приложения: `main.py` (роуты, lifecycle), `admin_api.py`, `tg_handlers.py`, `state_store.py`, `bitrix.py`, `comet_client.py`, `manager_router.py`, `sales_sync.py` |
 | `admin/` | SPA админки (HTML + встроенный JS), без сборки |
 | `assets/` | Общие CSS/JS для админки и лендинга |
-| `data/` | `fnr_state.json` — треки, истории диалогов (на сервере, не в git) |
+| `data/` | `fnr_state.json` — треки, истории диалогов, журнал `voice_calls` (на сервере, не в git) |
 | `sessions/` | Файлы сессий Telethon (не в git) |
 | `voximplant/` | Примеры сценариев VoxEngine (копируются в панель Voximplant) |
 | `accounts_registry.json` | Реестр Telegram-аккаунтов (на сервере, не в git) |

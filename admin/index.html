@@ -18,7 +18,7 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="../assets/css/admin.css?v=9">
+  <link rel="stylesheet" href="../assets/css/admin.css?v=10">
 </head>
 <body class="admin-body">
   <div class="admin-shell">
@@ -36,6 +36,7 @@
       <ul class="admin-nav">
         <li><a href="#people" class="active" data-section="people"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Команда и роли</span></a></li>
         <li><a href="#chats" data-section="chats"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Переписки</span></a></li>
+        <li><a href="#voice-calls" data-section="voice-calls"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Звонки</span></a></li>
         <li><a href="#agent-script" data-section="agent-script"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Настройка AI-агента</span></a></li>
         <li><a href="#vip-clients" data-section="vip-clients"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">VIP-клиенты</span></a></li>
         <li><a href="#alerts" data-section="alerts"><span class="admin-nav__dot" aria-hidden="true"></span><span class="admin-nav__text">Уведомления</span></a></li>
@@ -184,6 +185,34 @@
           </div>
           </div>
         </div>
+      </section>
+
+      <section class="admin-card admin-card-section module-section" id="voice-calls">
+        <h3>Звонки (голос)</h3>
+        <p class="admin-placeholder">Список пополняется, когда сценарий Voximplant отправляет POST на вебхук <code class="admin-code-inline">/fnr-api/voximplant/webhook</code> с данными после звонка (саммари, транскрипт, session id и т.д.). Подключение — в <code class="admin-code-inline">voximplant/VOICE_CALLS_WEBHOOK.md</code>.</p>
+        <div class="module-actions" style="margin-bottom:12px;">
+          <button type="button" class="btn btn-ghost" id="voiceCallsRefreshBtn">Обновить</button>
+          <span id="voiceCallsStatus" class="admin-form-msg" style="display:inline;margin-left:8px;"></span>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table" aria-label="Журнал звонков">
+            <thead>
+              <tr>
+                <th>Время (UTC)</th>
+                <th>Абонент</th>
+                <th>Сек</th>
+                <th>Саммари</th>
+              </tr>
+            </thead>
+            <tbody id="voiceCallsTbody">
+              <tr><td colspan="4" class="cell-muted">Нет данных — придёт после первого POST на вебхук.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <details class="admin-details-voice" style="margin-top:16px;">
+          <summary>Полная запись (JSON)</summary>
+          <pre id="voiceCallsDetail" class="admin-voice-detail-pre">Выберите строку в таблице.</pre>
+        </details>
       </section>
 
       <section class="admin-card admin-card-section module-section" id="agent-script">
@@ -642,6 +671,9 @@
         window.__fnrLoadChats();
       } else if (typeof window.__fnrStopChatPoll === 'function') {
         window.__fnrStopChatPoll();
+      }
+      if (id === 'voice-calls' && typeof window.__fnrLoadVoiceCalls === 'function') {
+        window.__fnrLoadVoiceCalls();
       }
       if (id === 'agent-script' && typeof window.__fnrRefreshAgentPick === 'function') {
         window.__fnrRefreshAgentPick();
@@ -1306,6 +1338,95 @@
       }
       var aiCb = chatEl('chatAiDisabled');
       if (aiCb) aiCb.addEventListener('change', onAiToggle);
+
+      var voiceCallsLastRows = [];
+
+      window.__fnrLoadVoiceCalls = function () {
+        var statusEl = document.getElementById('voiceCallsStatus');
+        var tbody = document.getElementById('voiceCallsTbody');
+        var detail = document.getElementById('voiceCallsDetail');
+        if (statusEl) {
+          statusEl.textContent = 'Загрузка…';
+          statusEl.className = 'admin-form-msg';
+        }
+        fetch(fnrApiBase() + '/admin/voice-calls', { credentials: 'same-origin' })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (data) {
+            if (!data || !data.ok) throw new Error((data && data.error) || 'Ошибка');
+            voiceCallsLastRows = data.calls || [];
+            if (statusEl) statusEl.textContent = 'Записей: ' + voiceCallsLastRows.length;
+            if (!tbody) return;
+            if (!voiceCallsLastRows.length) {
+              tbody.innerHTML =
+                '<tr><td colspan="4" class="cell-muted">Пока нет записей. Настройте отправку JSON в вебхук после звонка.</td></tr>';
+              if (detail) detail.textContent = 'Нет данных.';
+              return;
+            }
+            tbody.innerHTML = voiceCallsLastRows
+              .map(function (row, idx) {
+                var t = row.received_at || '—';
+                var caller = escHtml(row.caller_id || row.caller_name || '—');
+                var dur =
+                  row.duration_sec != null && row.duration_sec !== ''
+                    ? String(row.duration_sec)
+                    : '—';
+                var sum = row.summary || row.transcript || '';
+                if (sum.length > 120) sum = sum.slice(0, 117) + '…';
+                sum = escHtml(sum || '—');
+                return (
+                  '<tr data-voice-idx="' +
+                  idx +
+                  '" class="voice-calls-row" style="cursor:pointer;">' +
+                  '<td>' +
+                  escHtml(t) +
+                  '</td>' +
+                  '<td>' +
+                  caller +
+                  '</td>' +
+                  '<td>' +
+                  escHtml(dur) +
+                  '</td>' +
+                  '<td>' +
+                  sum +
+                  '</td></tr>'
+                );
+              })
+              .join('');
+            tbody.querySelectorAll('tr[data-voice-idx]').forEach(function (tr) {
+              tr.addEventListener('click', function () {
+                var i = parseInt(tr.getAttribute('data-voice-idx'), 10);
+                var row = voiceCallsLastRows[i];
+                if (detail && row) {
+                  try {
+                    detail.textContent = JSON.stringify(row, null, 2);
+                  } catch (e) {
+                    detail.textContent = String(row);
+                  }
+                }
+                tbody.querySelectorAll('tr').forEach(function (r) {
+                  r.classList.remove('voice-calls-row--active');
+                });
+                tr.classList.add('voice-calls-row--active');
+              });
+            });
+          })
+          .catch(function (err) {
+            if (statusEl) {
+              statusEl.textContent =
+                'Ошибка: ' + (err && err.message ? err.message : 'сеть');
+              statusEl.className = 'admin-form-msg admin-form-msg--bad';
+            }
+          });
+      };
+
+      var vRefresh = document.getElementById('voiceCallsRefreshBtn');
+      if (vRefresh) {
+        vRefresh.addEventListener('click', function () {
+          window.__fnrLoadVoiceCalls();
+        });
+      }
     })();
 
     // --- Модуль "Команда и роли" (локальный CRUD) ---

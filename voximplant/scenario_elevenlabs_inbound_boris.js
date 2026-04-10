@@ -1,51 +1,71 @@
 /**
  * Входящий звонок → ElevenLabs Agents (Борис / Flex&Roll PRO).
+ * Секреты — константы ниже. Без Modules.Net: на части аккаунтов require(Modules.Net) даёт
+ * «empty module argument» и рвёт сценарий; официальный пример ElevenLabs тоже без Net.
  *
- * Требуется VoxEngine с модулем ElevenLabs (Voice AI): см.
  * https://docs.voximplant.ai/voice-ai-connectors/elevenlabs/inbound
- *
- * Настройка секретов (Control Panel → приложение → Application storage):
- *   ELEVENLABS_API_KEY   — ключ xi-api-key из https://elevenlabs.io/app/settings/api-keys
- *   ELEVENLABS_AGENT_ID  — например agent_2101kntbp4ekevcspn96s41jfhpz
- * Опционально:
- *   ELEVENLABS_BRANCH_ID — ветка агента, например agtbrch_4901kntbp6rjfy8t3f8ps25fs2jp
- *
- * Промпт и голос задаются в консоли ElevenLabs для этого agent_id, не в сценарии.
- *
- * Опционально: POST на ваш бэкенд (аналитика), как в старом DTMF-сценарии.
- * URL и секрет лучше держать в Application storage: WEBHOOK_URL, WEBHOOK_SECRET.
  */
 
 require(Modules.ElevenLabs);
-require(Modules.ApplicationStorage);
-require(Modules.Net);
 
-/** Значения по умолчанию, если ключи не заведены в Application storage (только agent/branch — не секреты). */
-var DEFAULT_AGENT_ID = "agent_2101kntbp4ekevcspn96s41jfhpz";
-var DEFAULT_BRANCH_ID = "agtbrch_4901kntbp6rjfy8t3f8ps25fs2jp";
+/** Журнал звонков в админке fnr-api */
+var FNR_VOICE_WEBHOOK_URL = "https://canwant.ru/fnr-api/voximplant/webhook";
+var FNR_VOICE_WEBHOOK_SECRET = "";
 
-function postWebhook(url, secret, obj) {
-  if (!url || !url.length) return;
-  var payload = JSON.stringify(obj);
-  var u = url;
-  if (secret && secret.length) {
-    u += (u.indexOf("?") >= 0 ? "&" : "?") + "token=" + encodeURIComponent(secret);
+var _fnrVoiceNetOk = false;
+try {
+  require(Modules.Net);
+  _fnrVoiceNetOk = true;
+} catch (_eNet) {
+  Logger.write("voice log: Modules.Net недоступен — журнал в админке отключён");
+}
+
+function fnrPostVoiceCall(payload) {
+  if (!_fnrVoiceNetOk) return;
+  var body = JSON.stringify(payload);
+  var url = FNR_VOICE_WEBHOOK_URL;
+  if (FNR_VOICE_WEBHOOK_SECRET && FNR_VOICE_WEBHOOK_SECRET.length) {
+    url += (url.indexOf("?") >= 0 ? "&" : "?") + "token=" + encodeURIComponent(FNR_VOICE_WEBHOOK_SECRET);
   }
-  Net.httpRequest(u, Net.HttpRequestMethod.POST, payload, function (res) {
-    Logger.write("webhook HTTP " + res.code);
+  Net.httpRequest(url, Net.HttpRequestMethod.POST, body, function (res) {
+    Logger.write("fnr voice log HTTP " + (res && res.code != null ? res.code : "?"));
   });
 }
 
-function storageVal(row, fallback) {
-  if (row && row.value && String(row.value).length) return String(row.value);
-  return fallback || "";
-}
+// ============ Подставьте свои значения ============
+/** xi-api-key из https://elevenlabs.io/app/settings/api-keys */
+var XI_API_KEY = "";
+
+/** ID агента в консоли ElevenLabs */
+var ELEVENLABS_AGENT_ID = "agent_2101kntbp4ekevcspn96s41jfhpz";
+
+/** Ветка агента (если не нужна — "" и убери блок branchId ниже) */
+var ELEVENLABS_BRANCH_ID = "agtbrch_4901kntbp6rjfy8t3f8ps25fs2jp";
+// ================================================
 
 VoxEngine.addEventListener(AppEvents.CallAlerting, async function (event) {
   var call = event.call;
   var voiceAIClient;
+  var voiceStartedAt = 0;
+
+  call.addEventListener(CallEvents.Connected, function () {
+    voiceStartedAt = Date.now();
+  });
 
   call.addEventListener(CallEvents.Disconnected, function () {
+    var dur = voiceStartedAt ? Math.max(0, Math.floor((Date.now() - voiceStartedAt) / 1000)) : 0;
+    var dest = "";
+    try {
+      dest = call.number() ? String(call.number()) : "";
+    } catch (_n) {}
+    fnrPostVoiceCall({
+      event: "call_ended",
+      source: "voximplant_elevenlabs_inbound",
+      session_id: String(call.id()),
+      caller_id: String(call.callerid()),
+      destination: dest,
+      duration_sec: dur,
+    });
     try {
       voiceAIClient && voiceAIClient.close();
     } catch (e1) {}
@@ -61,33 +81,15 @@ VoxEngine.addEventListener(AppEvents.CallAlerting, async function (event) {
   try {
     call.answer();
 
-    var apiKey = storageVal(await ApplicationStorage.get("ELEVENLABS_API_KEY"), "");
-    var agentId = storageVal(await ApplicationStorage.get("ELEVENLABS_AGENT_ID"), DEFAULT_AGENT_ID);
-    var branchId = storageVal(await ApplicationStorage.get("ELEVENLABS_BRANCH_ID"), DEFAULT_BRANCH_ID);
-    var webhookUrl = storageVal(await ApplicationStorage.get("WEBHOOK_URL"), "");
-    var webhookSecret = storageVal(await ApplicationStorage.get("WEBHOOK_SECRET"), "");
-
-    if (!apiKey.length) {
-      Logger.write("ELEVENLABS_API_KEY missing in Application storage");
+    if (!XI_API_KEY || !XI_API_KEY.length) {
+      Logger.write("XI_API_KEY пустой — вставьте ключ ElevenLabs в начале сценария");
       call.hangup();
       return;
     }
 
-    postWebhook(webhookUrl, webhookSecret, {
-      event: "CallStart",
-      source: "elevenlabs_agents",
-      callerId: call.callerid(),
-      destination: call.number(),
-      agentId: agentId,
-      branchId: branchId || undefined,
-    });
-
-    // Параметры см. https://voximplant.com/docs/references/voxengine/elevenlabs
-    // branch_id: если коннектор ругается на неизвестное поле — уберите блок branchId ниже
-    // и задайте ветку по умолчанию в консоли ElevenLabs для этого агента.
     var clientOpts = {
-      xiApiKey: apiKey,
-      agentId: agentId,
+      xiApiKey: XI_API_KEY,
+      agentId: ELEVENLABS_AGENT_ID,
       onWebSocketClose: function (wsEvent) {
         Logger.write("===ElevenLabs.WebSocket.Close===");
         if (wsEvent) Logger.write(JSON.stringify(wsEvent));
@@ -99,8 +101,8 @@ VoxEngine.addEventListener(AppEvents.CallAlerting, async function (event) {
       },
     };
 
-    if (branchId && branchId.length) {
-      clientOpts.branchId = branchId;
+    if (ELEVENLABS_BRANCH_ID && ELEVENLABS_BRANCH_ID.length) {
+      clientOpts.branchId = ELEVENLABS_BRANCH_ID;
     }
 
     voiceAIClient = await ElevenLabs.createAgentsClient(clientOpts);

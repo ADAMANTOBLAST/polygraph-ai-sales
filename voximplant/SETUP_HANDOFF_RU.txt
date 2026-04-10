@@ -20,17 +20,19 @@
 
 3) ElevenLabs — агент
 ---------------------
-- Agents → ваш агент → System prompt: вставьте текст из elevenlabs_voice_agent_prompt_handoff.txt (блок про Бориса и правила).
-- Tools → добавьте Client tool:
+- Agents → ваш агент → Knowledge base: блок «【Компания】» … «【Роли и передача трубки】» из elevenlabs_voice_agent_prompt_handoff.txt (или весь файл как документ).
+- System prompt: файл elevenlabs_voice_system_prompt.txt целиком (или дубликат блока в elevenlabs_voice_agent_prompt_handoff.txt).
+- Tools → добавьте именно Client tool (не Server tool и не Webhook):
   - Имя: transfer_to_specialist (точно так же, как в JS сценарии).
-  - Описание: см. тот же файл.
+  - Описание: блок «Client tool» в elevenlabs_voice_agent_prompt_handoff.txt (обновлённое: сначала вызов, без «передачи» без вызова).
 - Сохраните и опубликуйте смену (в т.ч. branch, если используете).
 
 4) Проверка
 -----------
 - Позвоните на входящий номер.
-- Скажите фразу про макет/материалы/технолога — агент должен сказать про соединение и вызвать tool; в логах Voximplant — ClientToolCall, затем исходящий на +375291252472.
-- Если перевод не идёт: в логах смотрите Failed у callPSTN (Caller ID, баланс, запрет направления +375).
+- Скажите фразу про макет/ТЗ/технолога — в логах сценария должна появиться строка «ClientToolCall payload: …», затем исходящий на +375291252472.
+- Агент говорит «передам», но в логах нет ClientToolCall — модель не вызывает tool: проверьте тип инструмента (только Client tool), имя transfer_to_specialist и обновите System prompt + описание tool из elevenlabs_voice_system_prompt.txt / elevenlabs_voice_agent_prompt_handoff.txt.
+- ClientToolCall есть, но нет исходящего — смотрите SPECIALIST_PSTN, OUTBOUND_CALLER_ID и строку SPECIALIST_PSTN Failed в логах (верификация Caller ID, баланс, маршрутизация на +375).
 
 5) Безопасность
 ---------------

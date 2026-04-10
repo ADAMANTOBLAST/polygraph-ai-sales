@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import json
 import threading
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 
 _STATE: dict | None = None
@@ -19,6 +21,7 @@ def _default() -> dict:
         "uid_account": {},
         "lead_rr_idx": 0,
         "role_rr_idx": {},
+        "voice_calls": [],
     }
 
 
@@ -48,6 +51,8 @@ def load_state() -> dict:
             _STATE["lead_rr_idx"] = 0
         if "role_rr_idx" not in _STATE:
             _STATE["role_rr_idx"] = {}
+        if "voice_calls" not in _STATE:
+            _STATE["voice_calls"] = []
         return _STATE
 
 
@@ -168,3 +173,64 @@ def copy_history_on_reassign(uid: int, old_account_id: int, new_account_id: int)
         return
     st["histories"][nk] = list(src)
     save_state()
+
+
+_VOICE_CALL_KEYS = frozenset(
+    {
+        "session_id",
+        "voximplant_session_id",
+        "caller_id",
+        "destination",
+        "duration_sec",
+        "summary",
+        "transcript",
+        "recording_url",
+        "elevenlabs_conversation_id",
+        "caller_name",
+        "hangup_reason",
+        "event",
+        "source",
+        "transferred_to_specialist",
+    }
+)
+
+
+def append_voice_call(payload: dict) -> str:
+    """Добавить запись о голосовом звонке (вебхук из Voximplant). Возвращает id."""
+    st = load_state()
+    calls: list = st.setdefault("voice_calls", [])
+    rid = str(uuid.uuid4())
+    row: dict = {
+        "id": rid,
+        "received_at": datetime.now(timezone.utc).isoformat(),
+    }
+    for k in _VOICE_CALL_KEYS:
+        if k in payload and payload[k] is not None:
+            v = payload[k]
+            if k == "duration_sec":
+                try:
+                    row[k] = int(v)
+                except (TypeError, ValueError):
+                    row[k] = v
+            else:
+                row[k] = v if isinstance(v, (str, int, float, bool)) else str(v)[:8000]
+    nested = payload.get("call")
+    if isinstance(nested, dict):
+        for k, v in nested.items():
+            if k in _VOICE_CALL_KEYS and v is not None and k not in row:
+                row[k] = v if isinstance(v, (str, int, float, bool)) else str(v)[:8000]
+    calls.insert(0, row)
+    max_keep = 500
+    if len(calls) > max_keep:
+        st["voice_calls"] = calls[:max_keep]
+    save_state()
+    return rid
+
+
+def list_voice_calls(limit: int = 200) -> list[dict]:
+    st = load_state()
+    raw = st.get("voice_calls") or []
+    if not isinstance(raw, list):
+        return []
+    lim = max(1, min(int(limit), 500))
+    return list(raw[:lim])
