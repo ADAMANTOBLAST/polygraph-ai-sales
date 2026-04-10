@@ -1,6 +1,6 @@
 /**
- * ElevenLabs Agents → по client tool transfer_to_specialist перевод на внешний номер (специалист).
- * Номер по умолчанию: +375291252472 (Беларусь). Подставьте ключи и верифицированный исходящий Caller ID.
+ * ElevenLabs Agents (Екатерина, менеджер) → по client tool transfer_to_specialist перевод на внешний номер.
+ * Номер: +375291252472 (Беларусь). Подставьте ключи и верифицированный исходящий Caller ID.
  *
  * Инструкция по настройке: voximplant/SETUP_HANDOFF_RU.txt
  * Промпт для агента: voximplant/elevenlabs_voice_agent_prompt_handoff.txt
