@@ -11,7 +11,14 @@ from accounts_registry import list_accounts_for_admin
 
 from .bitrix import bitrix_ping_crm, sync_bitrix_chat_for_uid
 from .sales_sync import load_sales_sync, write_sales_sync
-from .state_store import append_history, get_history, get_uid_account, load_state, save_state
+from .state_store import (
+    append_history,
+    get_history,
+    get_uid_account,
+    list_voice_calls,
+    load_state,
+    save_state,
+)
 from .tg_pool import get_telegram_client
 
 log = logging.getLogger(__name__)
@@ -201,6 +208,16 @@ async def handle_admin_ai(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "ai_disabled": off})
 
 
+async def handle_admin_voice_calls(request: web.Request) -> web.Response:
+    """GET: журнал голосовых звонков (см. POST /voximplant/webhook)."""
+    try:
+        lim = int(request.rel_url.query.get("limit") or "200")
+    except (TypeError, ValueError):
+        lim = 200
+    rows = list_voice_calls(limit=lim)
+    return web.json_response({"ok": True, "calls": rows})
+
+
 def setup_admin_routes(app: web.Application) -> None:
     app.router.add_get("/team-accounts", handle_team_accounts)
     app.router.add_get("/admin/sales-sync", handle_admin_sales_sync_get)
@@ -211,3 +228,5 @@ def setup_admin_routes(app: web.Application) -> None:
     app.router.add_get("/admin/chats/{uid}", handle_admin_chat_thread)
     app.router.add_post("/admin/chats/{uid}/send", handle_admin_send)
     app.router.add_post("/admin/chats/{uid}/ai", handle_admin_ai)
+    for _p in ("/admin/voice-calls", "/fnr-api/admin/voice-calls"):
+        app.router.add_get(_p, handle_admin_voice_calls)

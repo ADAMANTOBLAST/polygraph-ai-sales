@@ -15,7 +15,7 @@ from typing import Any
 
 from aiohttp import web
 
-from .state_store import append_voice_call, list_voice_calls
+from .state_store import append_voice_call
 
 log = logging.getLogger(__name__)
 
@@ -139,18 +139,6 @@ async def handle_voximplant_webhook(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "stored_id": stored_id})
 
 
-async def handle_admin_voice_calls(_request: web.Request) -> web.Response:
-    """GET: список звонков для админки."""
-    try:
-        lim = int(_request.rel_url.query.get("limit") or "200")
-    except (TypeError, ValueError):
-        lim = 200
-    rows = list_voice_calls(limit=lim)
-    return web.json_response({"ok": True, "calls": rows})
-
-
 def setup_voximplant_routes(app: web.Application) -> None:
     for path in ("/voximplant/webhook", "/fnr-api/voximplant/webhook"):
         app.router.add_route("*", path, handle_voximplant_webhook)
-    for path in ("/admin/voice-calls", "/fnr-api/admin/voice-calls"):
-        app.router.add_get(path, handle_admin_voice_calls)

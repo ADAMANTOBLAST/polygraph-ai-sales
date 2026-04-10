@@ -710,6 +710,44 @@
         }
       }
 
+      /** GET JSON: не падает на r.json(), если пришла HTML-ошибка nginx. */
+      function fnrFetchJson(url) {
+        return fetch(url, {
+          credentials: 'same-origin',
+          headers: { Accept: 'application/json' },
+        }).then(function (r) {
+          return r.text().then(function (text) {
+            if (!r.ok) {
+              var hint = text.replace(/\s+/g, ' ').slice(0, 200);
+              if (hint.indexOf('<') >= 0) {
+                hint = 'страница HTML (часто 404/502 или нет прокси на fnr-api)';
+              }
+              throw new Error('HTTP ' + r.status + ': ' + hint);
+            }
+            var t = text.trim();
+            if (t.length && t.charAt(0) === '<') {
+              throw new Error(
+                'Вместо JSON пришла HTML. Проверьте nginx: location /fnr-api/ → 127.0.0.1:8765 и перезапуск fnr-api после обновления.'
+              );
+            }
+            try {
+              return JSON.parse(text);
+            } catch (e2) {
+              throw new Error('Не JSON: ' + text.slice(0, 120));
+            }
+          });
+        });
+      }
+
+      /** Абсолютный URL к API от корня сайта (игнорирует &lt;base href&gt; у админки). */
+      function fnrApiAbsolute(pathFromRoot) {
+        try {
+          return new URL(pathFromRoot, window.location.origin).href;
+        } catch (e) {
+          return pathFromRoot;
+        }
+      }
+
       function escHtml(value) {
         return String(value || '')
           .replaceAll('&', '&amp;')
@@ -1349,9 +1387,14 @@
           statusEl.textContent = 'Загрузка…';
           statusEl.className = 'admin-form-msg';
         }
-        fetch(fnrApiBase() + '/admin/voice-calls', { credentials: 'same-origin' })
-          .then(function (r) {
-            return r.json();
+        var voiceUrlPrimary = fnrApiAbsolute('/fnr-api/admin/voice-calls');
+        var voiceUrlAlt = fnrApiBase() + '/admin/voice-calls';
+        fnrFetchJson(voiceUrlPrimary)
+          .catch(function (err) {
+            if (voiceUrlAlt !== voiceUrlPrimary) {
+              return fnrFetchJson(voiceUrlAlt);
+            }
+            throw err;
           })
           .then(function (data) {
             if (!data || !data.ok) throw new Error((data && data.error) || 'Ошибка');
