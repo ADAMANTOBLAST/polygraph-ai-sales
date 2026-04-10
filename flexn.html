@@ -830,16 +830,35 @@
 
     @media (max-width: 640px) {
       html { font-size: 100%; }
-      .container { padding: 0 16px; }
-      .site-header-inner { min-height: 64px; padding: 8px 0; }
+      .container {
+        padding-left: max(16px, calc(env(safe-area-inset-left) + 16px));
+        padding-right: max(16px, calc(env(safe-area-inset-right) + 16px));
+      }
+      .site-header-inner { min-height: 64px; padding: 8px 0; gap: 10px; }
       .brand {
         gap: 8px;
         min-width: 0;
         flex: 1 1 auto;
+        padding-left: 8px;
       }
-      .brand-logo-wrap { height: 36px; width: min(132px, 38vw); flex-shrink: 0; }
-      .brand-logo-img { width: 100%; height: auto; max-height: none; }
+      .brand-logo-wrap {
+        height: 36px;
+        width: min(138px, 40vw);
+        flex-shrink: 0;
+        overflow: visible;
+      }
+      .brand-logo-img {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: none;
+        transform: translateX(3px);
+      }
       .brand-name { font-size: .86rem; letter-spacing: .05em; }
+      .nav-toggle {
+        flex: 0 0 44px;
+        margin-right: 2px;
+      }
       .hero { padding: 18px 0 22px; scroll-margin-top: 72px; }
       .hero-bottle-wrap { display: none; }
       .hero-copy h1 { font-size: clamp(1.55rem,7.5vw,2.1rem); }
@@ -852,9 +871,10 @@
         gap: 12px;
         overflow-x: auto;
         overflow-y: hidden;
-        padding: 2px 2px 10px;
-        margin: 0 -2px;
+        padding: 6px 4px 10px;
+        margin: 0;
         scroll-snap-type: x mandatory;
+        scroll-padding-inline: 4px;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
       }
@@ -887,9 +907,10 @@
         gap: 12px;
         overflow-x: auto;
         overflow-y: hidden;
-        padding: 2px 2px 10px;
-        margin: 0 -2px;
+        padding: 6px 4px 10px;
+        margin: 0;
         scroll-snap-type: x mandatory;
+        scroll-padding-inline: 4px;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
       }
