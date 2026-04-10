@@ -18,7 +18,7 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="../assets/css/admin.css?v=16">
+  <link rel="stylesheet" href="../assets/css/admin.css?v=17">
 </head>
 <body class="admin-body">
   <div class="admin-shell">
@@ -303,15 +303,15 @@
       <section class="admin-card admin-card-section module-section" id="voice-calls">
         <h3>Звонки (голос)</h3>
         <p class="admin-voice-el11-lead">
-          Ниже — <strong>демо</strong> в духе ElevenLabs: список, плеер, «транскрипт» и метрики (без реального LLM/TTS — только интерфейс).
-          Аудио берётся из <code class="admin-code-inline">assets/audio/</code> — файлы с именами как у разговоров; при деплое можно заменить на свои записи.
+          Ниже — <strong>демо-журнал звонков</strong> в стиле кабинета: список, плеер, обзор, транскрипт и карточка клиента.
+          Логика ElevenLabs имитируется визуально; аудио — файлы из <code class="admin-code-inline">assets/audio/</code> (первые два имени — ваши conv_*; при желании замените на реальные записи).
         </p>
 
-        <div class="admin-voice-el11" id="voiceEl11Root" aria-label="Демо ElevenLabs">
+        <div class="admin-voice-el11" id="voiceEl11Root" aria-label="Демо голосовых звонков">
           <div class="admin-el11-head">
             <span class="admin-el11-head__badge">Демо</span>
-            <span class="admin-el11-head__title">Conversational AI</span>
-            <a class="admin-el11-head__link" href="https://elevenlabs.io/app" target="_blank" rel="noopener noreferrer">Открыть ElevenLabs ↗</a>
+            <span class="admin-el11-head__title">Голосовой агент · журнал</span>
+            <a class="admin-el11-head__link" href="https://elevenlabs.io/app" target="_blank" rel="noopener noreferrer">ElevenLabs ↗</a>
           </div>
 
           <div class="admin-el11-layout">
@@ -320,6 +320,7 @@
                 <thead>
                   <tr>
                     <th>Дата и время</th>
+                    <th>Тема</th>
                     <th>Агент</th>
                     <th class="admin-el11-num">Длит.</th>
                     <th class="admin-el11-status-col">Статус</th>
@@ -370,7 +371,8 @@
                   </div>
 
                   <div class="admin-el11-panel" id="voiceEl11PanelClient" data-el11-panel="client" hidden>
-                    <p class="admin-el11-muted">В демо полей нет — в ElevenLabs здесь были бы извлечённые сущности и заметки.</p>
+                    <h5 class="admin-el11-h5">Из разговора</h5>
+                    <div class="admin-el11-client-grid" id="voiceEl11ClientBody"></div>
                   </div>
                 </div>
 
@@ -381,6 +383,7 @@
                   <div class="admin-el11-side-row"><span>Стоимость (кред.)</span><strong id="voiceEl11Credits">—</strong></div>
                   <div class="admin-el11-side-row"><span>LLM (кред.)</span><strong id="voiceEl11Llm">—</strong></div>
                   <div class="admin-el11-side-row"><span>Текстовый режим</span><span>Нет</span></div>
+                  <div class="admin-el11-side-row"><span>Тема</span><strong id="voiceEl11SideTopic" class="admin-el11-side-topic">—</strong></div>
                 </aside>
               </div>
             </div>
@@ -627,6 +630,7 @@
   </div>
 
   <script src="../assets/js/auth-session.js"></script>
+  <script src="../assets/js/voice-demos.js?v=1"></script>
   <script>
     // Защита страницы: без сессии — только на login
     FnrAuth.requireAdminPage();
@@ -1465,116 +1469,8 @@
       }
 
       (function initVoiceEl11Demo() {
-        var demos = [
-          {
-            id: 'conv_7701knv3a2jhfewb11nhv5hqxc7p',
-            dateLabel: '10 апр. 2026, 6:40',
-            durationLabel: '0:53',
-            audio: '../assets/audio/conv_7701knv3a2jhfewb11nhv5hqxc7p.mp3',
-            pager: '1 / 2',
-            summary:
-              'Клиент запрашивает этикетки для бутылок. Уточнён формат — термоусадочные. Дальше логично подобрать материал и тираж.',
-            credits: '420',
-            llm: '45',
-            endReason: 'Агент завершил',
-            turns: [
-              {
-                role: 'agent',
-                ts: '0:00',
-                text: 'Good day, I am Ekaterina, Flex-n-Roll PRO company, how can I help you?',
-                lat: [
-                  { k: 'TTS', v: '116 ms' },
-                  { k: 'LLM', v: '2.0 s' },
-                ],
-              },
-              {
-                role: 'user',
-                ts: '0:06',
-                text: 'Hello, I need labels for my bottle.',
-                lat: [{ k: 'ASR', v: '112 ms' }],
-              },
-              {
-                role: 'agent',
-                ts: '0:13',
-                text:
-                  'Hello! Understood, you need labels for bottles. Could you please tell me what type of label you need — self-adhesive, heat-shrink, or something else?',
-                lat: [
-                  { k: 'TTS', v: '98 ms' },
-                  { k: 'LLM', v: '1.8 s' },
-                ],
-              },
-              {
-                role: 'user',
-                ts: '0:26',
-                text: 'Heat-shrink.',
-                lat: [{ k: 'ASR', v: '103 ms' }],
-              },
-              {
-                role: 'agent',
-                ts: '0:30',
-                text: 'Understood, heat-shrink labels. So that I can give you accurate options — what volume and bottle type are we talking about?',
-                lat: [
-                  { k: 'TTS', v: '101 ms' },
-                  { k: 'LLM', v: '2.1 s' },
-                ],
-              },
-            ],
-          },
-          {
-            id: 'conv_9601kntrj6ybfqm934h435rq13xv',
-            dateLabel: '10 апр. 2026, 6:56',
-            durationLabel: '1:36',
-            audio: '../assets/audio/conv_9601kntrj6ybfqm934h435rq13xv.mp3',
-            pager: '2 / 2',
-            summary:
-              'Клиент звонит по поводу печати этикеток для шампуня: обсуждены объём партии, сроки и передача запроса менеджеру для расчёта.',
-            credits: '1 069',
-            llm: '71',
-            endReason: 'Агент завершил',
-            turns: [
-              {
-                role: 'agent',
-                ts: '0:00',
-                text: 'Добрый день, Flex-n-Roll PRO, чем могу помочь?',
-                lat: [
-                  { k: 'TTS', v: '108 ms' },
-                  { k: 'LLM', v: '1.9 s' },
-                ],
-              },
-              {
-                role: 'user',
-                ts: '0:08',
-                text: 'Здравствуйте, нужны этикетки для бутылок, шампунь, тираж около десяти тысяч.',
-                lat: [{ k: 'ASR', v: '118 ms' }],
-              },
-              {
-                role: 'agent',
-                ts: '0:22',
-                text:
-                  'Принято. Уточните, пожалуйста, материал бутылки и нужен ли дизайн с нуля или есть макет?',
-                lat: [
-                  { k: 'TTS', v: '99 ms' },
-                  { k: 'LLM', v: '2.0 s' },
-                ],
-              },
-              {
-                role: 'user',
-                ts: '0:45',
-                text: 'Макет есть в PDF, бутылка PET 250 мл.',
-                lat: [{ k: 'ASR', v: '104 ms' }],
-              },
-              {
-                role: 'agent',
-                ts: '0:58',
-                text: 'Отлично, передаю менеджеру для расчёта стоимости и сроков. Спасибо за звонок!',
-                lat: [
-                  { k: 'TTS', v: '95 ms' },
-                  { k: 'LLM', v: '1.7 s' },
-                ],
-              },
-            ],
-          },
-        ];
+        var demos = window.FNR_VOICE_DEMOS || [];
+        if (!demos.length) return;
 
         function padTime(s) {
           var m = Math.floor(s / 60);
@@ -1646,7 +1542,10 @@
                 '<td>' +
                 escHtml(d.dateLabel) +
                 '</td>' +
-                '<td><span class="admin-el11-agent-cell">My Agent</span> <span class="admin-el11-link-ico" aria-hidden="true">🔗</span> Main</td>' +
+                '<td><span class="admin-el11-topic">' +
+                escHtml(d.topic || '—') +
+                '</span></td>' +
+                '<td><span class="admin-el11-agent-cell">My Agent</span> <span class="admin-el11-link-ico" aria-hidden="true">●</span> Main</td>' +
                 '<td class="admin-el11-num">' +
                 escHtml(d.durationLabel) +
                 '</td>' +
@@ -1656,23 +1555,44 @@
             .join('');
         }
 
-        function fillDetail(d) {
+        function fillDetail(d, idx, total) {
           var cid = document.getElementById('voiceEl11ConvId');
           var pager = document.getElementById('voiceEl11Pager');
           var sum = document.getElementById('voiceEl11Summary');
           var sideDate = document.getElementById('voiceEl11SideDate');
           var sideDur = document.getElementById('voiceEl11SideDur');
+          var sideTopic = document.getElementById('voiceEl11SideTopic');
           var cred = document.getElementById('voiceEl11Credits');
           var llm = document.getElementById('voiceEl11Llm');
           var endR = document.getElementById('voiceEl11EndReason');
+          var uid = document.getElementById('voiceEl11UserId');
+          var clientBody = document.getElementById('voiceEl11ClientBody');
           if (cid) cid.textContent = d.id;
-          if (pager) pager.textContent = d.pager;
+          if (pager) pager.textContent = idx + 1 + ' / ' + total;
           if (sum) sum.textContent = d.summary;
           if (sideDate) sideDate.textContent = d.dateLabel;
           if (sideDur) sideDur.textContent = d.durationLabel;
+          if (sideTopic) sideTopic.textContent = d.topic || '—';
           if (cred) cred.textContent = d.credits;
           if (llm) llm.textContent = d.llm;
           if (endR) endR.textContent = d.endReason;
+          if (uid) uid.textContent = d.userId != null ? d.userId : '—';
+          if (clientBody) {
+            var facts = d.clientFacts || [];
+            clientBody.innerHTML = facts.length
+              ? facts
+                  .map(function (row) {
+                    return (
+                      '<div class="admin-el11-client-row"><span class="admin-el11-client-k">' +
+                      escHtml(row.k) +
+                      '</span><strong class="admin-el11-client-v">' +
+                      escHtml(row.v) +
+                      '</strong></div>'
+                    );
+                  })
+                  .join('')
+              : '<p class="admin-el11-muted">Нет извлечённых полей для этого демо.</p>';
+          }
           renderThread(document.getElementById('voiceEl11Thread'), d.turns);
           renderWave(waveEl, d.id.split('').reduce(function (a, c) { return a + c.charCodeAt(0); }, 0));
           if (audioEl) {
@@ -1715,7 +1635,7 @@
           if (!d) return;
           if (detail) detail.hidden = false;
           if (hint) hint.hidden = true;
-          fillDetail(d);
+          fillDetail(d, i, demos.length);
           document.querySelectorAll('.admin-el11-row').forEach(function (tr) {
             tr.classList.toggle('is-active', parseInt(tr.getAttribute('data-el11-idx'), 10) === i);
           });

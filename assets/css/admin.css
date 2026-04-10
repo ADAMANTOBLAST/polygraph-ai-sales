@@ -3375,7 +3375,7 @@ details[open] > .admin-bitrix-details-full__summary::before {
   color: #fcd34d;
 }
 
-/* ——— Звонки: демо ElevenLabs (светлая карточка) ——— */
+/* ——— Звонки: демо журнал (тема кабинета FnR) ——— */
 .admin-voice-el11-lead {
   margin: 0 0 18px;
   font-size: 0.95rem;
@@ -3391,12 +3391,13 @@ details[open] > .admin-bitrix-details-full__summary::before {
 }
 
 .admin-voice-el11 {
-  border-radius: var(--fnr-radius);
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
-  color: #111827;
+  border-radius: var(--fnr-radius-lg);
+  border: 1px solid var(--fnr-card-border, rgba(167, 139, 250, 0.22));
+  background: var(--fnr-card-bg, rgba(22, 14, 42, 0.72));
+  color: var(--fnr-text);
   overflow: hidden;
   margin-bottom: 8px;
+  box-shadow: var(--fnr-shadow);
 }
 
 .admin-el11-head {
@@ -3404,9 +3405,9 @@ details[open] > .admin-bitrix-details-full__summary::before {
   flex-wrap: wrap;
   align-items: center;
   gap: 10px 16px;
-  padding: 14px 18px;
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(109, 40, 217, 0.22), rgba(167, 139, 250, 0.06));
+  border-bottom: 1px solid var(--fnr-border);
 }
 
 .admin-el11-head__badge {
@@ -3414,27 +3415,29 @@ details[open] > .admin-bitrix-details-full__summary::before {
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: 6px;
-  background: #ede9fe;
-  color: #5b21b6;
+  padding: 5px 11px;
+  border-radius: 8px;
+  background: rgba(167, 139, 250, 0.2);
+  color: #e9d5ff;
+  border: 1px solid rgba(167, 139, 250, 0.35);
 }
 
 .admin-el11-head__title {
   font-weight: 700;
-  font-size: 0.95rem;
-  color: #111827;
+  font-size: 0.98rem;
+  color: var(--fnr-text);
 }
 
 .admin-el11-head__link {
   margin-left: auto;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #4f46e5;
+  color: #c4b5fd;
   text-decoration: none;
 }
 
 .admin-el11-head__link:hover {
+  color: #ede9fe;
   text-decoration: underline;
 }
 
@@ -3443,29 +3446,39 @@ details[open] > .admin-bitrix-details-full__summary::before {
 }
 
 .admin-el11-list-wrap {
-  padding: 0 18px 12px;
-  background: #fff;
+  padding: 0 16px 8px;
+  background: rgba(0, 0, 0, 0.12);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .admin-el11-calls-table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
 }
 
 .admin-el11-calls-table th {
   text-align: left;
   font-weight: 600;
-  color: #6b7280;
-  padding: 14px 12px 10px 0;
-  border-bottom: 1px solid #f3f4f6;
+  color: var(--fnr-muted);
+  padding: 14px 10px 10px 0;
+  border-bottom: 1px solid var(--fnr-border);
 }
 
 .admin-el11-calls-table td {
-  padding: 16px 12px 16px 0;
-  border-bottom: 1px solid #f3f4f6;
+  padding: 14px 10px 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   vertical-align: middle;
-  color: #111827;
+  color: var(--fnr-text);
+}
+
+.admin-el11-topic {
+  font-size: 0.84rem;
+  color: var(--fnr-text-secondary);
+  line-height: 1.4;
+  max-width: 240px;
 }
 
 .admin-el11-row {
@@ -3474,17 +3487,17 @@ details[open] > .admin-bitrix-details-full__summary::before {
 }
 
 .admin-el11-row:hover {
-  background: #f9fafb;
+  background: rgba(167, 139, 250, 0.06);
 }
 
 .admin-el11-row.is-active {
-  background: #eef2ff;
+  background: rgba(109, 40, 217, 0.18);
 }
 
 .admin-el11-num {
   text-align: right;
   font-variant-numeric: tabular-nums;
-  color: #374151;
+  color: var(--fnr-text-secondary);
 }
 
 .admin-el11-status-col {
@@ -3495,33 +3508,36 @@ details[open] > .admin-bitrix-details-full__summary::before {
   display: inline-block;
   padding: 4px 12px;
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 600;
-  background: #dcfce7;
-  color: #166534;
+  background: rgba(5, 150, 105, 0.22);
+  color: #6ee7b7;
+  border: 1px solid rgba(52, 211, 153, 0.35);
 }
 
 .admin-el11-agent-cell {
   font-weight: 600;
+  color: var(--fnr-text);
 }
 
 .admin-el11-link-ico {
-  opacity: 0.55;
-  font-size: 0.85em;
+  opacity: 0.45;
+  font-size: 0.65rem;
+  color: #a78bfa;
 }
 
 .admin-el11-footnote {
   margin: 0;
-  padding: 10px 18px 14px;
+  padding: 12px 18px 16px;
   font-size: 0.82rem;
-  color: #6b7280;
-  background: #fff;
-  border-top: 1px solid #f3f4f6;
+  color: var(--fnr-muted);
+  background: rgba(0, 0, 0, 0.15);
+  border-top: 1px solid var(--fnr-border);
 }
 
 .admin-el11-detail {
-  border-top: 1px solid #e5e7eb;
-  background: #fff;
+  border-top: 1px solid var(--fnr-border);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .admin-el11-detail-top {
@@ -3539,7 +3555,7 @@ details[open] > .admin-bitrix-details-full__summary::before {
 
 .admin-el11-detail-main {
   padding: 18px 18px 22px;
-  border-right: 1px solid #f3f4f6;
+  border-right: 1px solid var(--fnr-border);
 }
 
 @media (max-width: 900px) {
@@ -3560,21 +3576,22 @@ details[open] > .admin-bitrix-details-full__summary::before {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--fnr-text);
 }
 
 .admin-el11-conv-id {
-  font-size: 0.75rem;
-  color: #6b7280;
-  background: #f3f4f6;
-  padding: 2px 8px;
-  border-radius: 4px;
+  font-size: 0.72rem;
+  color: var(--fnr-muted);
+  background: rgba(0, 0, 0, 0.25);
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--fnr-border);
 }
 
 .admin-el11-pager {
   margin-left: auto;
   font-size: 0.8rem;
-  color: #9ca3af;
+  color: var(--fnr-muted);
 }
 
 .admin-el11-player {
@@ -3583,8 +3600,10 @@ details[open] > .admin-bitrix-details-full__summary::before {
 
 .admin-el11-audio {
   width: 100%;
-  height: 40px;
+  height: 42px;
   margin-bottom: 10px;
+  border-radius: 8px;
+  opacity: 0.95;
 }
 
 .admin-el11-wave {
@@ -3592,12 +3611,12 @@ details[open] > .admin-bitrix-details-full__summary::before {
   align-items: flex-end;
   justify-content: space-between;
   gap: 2px;
-  height: 56px;
+  height: 58px;
   margin-bottom: 8px;
-  padding: 4px 0;
-  border-radius: 8px;
-  background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
-  border: 1px solid #f3f4f6;
+  padding: 6px 8px;
+  border-radius: var(--fnr-radius-sm);
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--fnr-border);
 }
 
 .admin-el11-wave__bar {
@@ -3605,8 +3624,8 @@ details[open] > .admin-bitrix-details-full__summary::before {
   min-width: 2px;
   max-width: 8px;
   border-radius: 2px;
-  background: linear-gradient(180deg, #a5b4fc 0%, #6366f1 100%);
-  opacity: 0.85;
+  background: linear-gradient(180deg, #c4b5fd 0%, #6d28d9 100%);
+  opacity: 0.9;
 }
 
 .admin-el11-player-meta {
@@ -3614,22 +3633,24 @@ details[open] > .admin-bitrix-details-full__summary::before {
   justify-content: space-between;
   align-items: center;
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--fnr-muted);
 }
 
 .admin-el11-chip {
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 6px;
-  background: #f3f4f6;
+  background: rgba(167, 139, 250, 0.12);
   font-weight: 600;
   font-size: 0.75rem;
+  color: #ddd6fe;
+  border: 1px solid rgba(167, 139, 250, 0.25);
 }
 
 .admin-el11-tabs {
   display: flex;
   gap: 4px;
   margin-bottom: 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--fnr-border);
 }
 
 .admin-el11-tab {
@@ -3639,15 +3660,15 @@ details[open] > .admin-bitrix-details-full__summary::before {
   background: transparent;
   font-size: 0.88rem;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--fnr-muted);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   border-radius: 6px 6px 0 0;
 }
 
 .admin-el11-tab.is-active {
-  color: #111827;
-  border-bottom-color: #6366f1;
+  color: var(--fnr-text);
+  border-bottom-color: #a78bfa;
 }
 
 .admin-el11-h5 {
@@ -3656,14 +3677,14 @@ details[open] > .admin-bitrix-details-full__summary::before {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #6b7280;
+  color: var(--fnr-muted);
 }
 
 .admin-el11-summary-text {
   margin: 0 0 18px;
   font-size: 0.92rem;
   line-height: 1.55;
-  color: #374151;
+  color: var(--fnr-text-secondary);
 }
 
 .admin-el11-dl {
@@ -3676,19 +3697,19 @@ details[open] > .admin-bitrix-details-full__summary::before {
   align-items: center;
   gap: 12px;
   padding: 10px 0;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 0.88rem;
 }
 
 .admin-el11-dl dt {
   margin: 0;
-  color: #6b7280;
+  color: var(--fnr-muted);
   font-weight: 500;
 }
 
 .admin-el11-dl dd {
   margin: 0;
-  color: #111827;
+  color: var(--fnr-text);
   font-weight: 500;
 }
 
@@ -3698,13 +3719,14 @@ details[open] > .admin-bitrix-details-full__summary::before {
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 600;
-  background: #dcfce7;
-  color: #166534;
+  background: rgba(5, 150, 105, 0.22);
+  color: #6ee7b7;
+  border: 1px solid rgba(52, 211, 153, 0.35);
 }
 
 .admin-el11-sidebar {
   padding: 18px 18px 22px;
-  background: #fafafa;
+  background: rgba(0, 0, 0, 0.18);
   font-size: 0.86rem;
 }
 
@@ -3713,8 +3735,8 @@ details[open] > .admin-bitrix-details-full__summary::before {
   justify-content: space-between;
   gap: 12px;
   padding: 10px 0;
-  border-bottom: 1px solid #f3f4f6;
-  color: #4b5563;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--fnr-text-secondary);
 }
 
 .admin-el11-side-row:last-child {
@@ -3722,25 +3744,63 @@ details[open] > .admin-bitrix-details-full__summary::before {
 }
 
 .admin-el11-side-row strong {
-  color: #111827;
+  color: var(--fnr-text);
   font-weight: 600;
 }
 
+.admin-el11-side-topic {
+  text-align: right;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  max-width: 160px;
+}
+
 .admin-el11-env {
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: 6px;
-  background: #e5e7eb;
-  font-size: 0.75rem;
+  background: rgba(167, 139, 250, 0.15);
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  color: #e9d5ff;
+  border: 1px solid rgba(167, 139, 250, 0.35);
 }
 
 .admin-el11-muted {
   margin: 0;
-  color: #6b7280;
+  color: var(--fnr-muted);
   font-size: 0.88rem;
   line-height: 1.5;
+}
+
+.admin-el11-client-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-el11-client-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: var(--fnr-radius-sm);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--fnr-border);
+}
+
+.admin-el11-client-k {
+  font-size: 0.8rem;
+  color: var(--fnr-muted);
+}
+
+.admin-el11-client-v {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--fnr-text);
+  text-align: right;
 }
 
 .admin-el11-thread {
@@ -3759,7 +3819,7 @@ details[open] > .admin-bitrix-details-full__summary::before {
   gap: 8px;
   margin-bottom: 6px;
   font-size: 0.78rem;
-  color: #6b7280;
+  color: var(--fnr-muted);
 }
 
 .admin-el11-msg-head--user {
@@ -3772,18 +3832,21 @@ details[open] > .admin-bitrix-details-full__summary::before {
   border-radius: 50%;
   background: linear-gradient(135deg, #34d399, #059669);
   flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.25);
 }
 
 .admin-el11-agent-name {
   font-weight: 700;
-  color: #111827;
+  color: var(--fnr-text);
 }
 
 .admin-el11-branch {
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: 4px;
-  background: #f3f4f6;
+  background: rgba(167, 139, 250, 0.12);
   font-size: 0.72rem;
+  color: #c4b5fd;
+  border: 1px solid rgba(167, 139, 250, 0.22);
 }
 
 .admin-el11-ts {
@@ -3798,7 +3861,7 @@ details[open] > .admin-bitrix-details-full__summary::before {
 
 .admin-el11-user-label {
   font-weight: 600;
-  color: #374151;
+  color: var(--fnr-text-secondary);
 }
 
 .admin-el11-bubble {
@@ -3807,19 +3870,19 @@ details[open] > .admin-bitrix-details-full__summary::before {
   border-radius: 12px;
   font-size: 0.9rem;
   line-height: 1.45;
-  color: #111827;
+  color: var(--fnr-text);
 }
 
 .admin-el11-bubble--agent {
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--fnr-border-strong);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: var(--fnr-shadow-sm);
 }
 
 .admin-el11-bubble--user {
   margin-left: auto;
-  background: #f3f4f6;
-  border: 1px solid transparent;
+  background: rgba(109, 40, 217, 0.18);
+  border: 1px solid rgba(167, 139, 250, 0.28);
 }
 
 .admin-el11-msg--user .admin-el11-bubble {
@@ -3846,11 +3909,11 @@ details[open] > .admin-bitrix-details-full__summary::before {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 6px;
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 600;
-  color: #4b5563;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
+  color: var(--fnr-text-secondary);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--fnr-border);
 }
 
 /* ——— Звонки: блок ElevenLabs ——— */
