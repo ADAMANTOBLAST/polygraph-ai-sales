@@ -29,7 +29,13 @@ def _connected_sorted() -> list[int]:
 
 
 def pick_account_for_new_lead() -> int:
-    """Round-robin среди активных и допущенных к лидам; иначе среди lead_eligible."""
+    """
+    Round-robin по списку Telegram-аккаунтов, которые принимают лиды (см. lead_active_account_ids в админке).
+
+    Каждый **новый** клиент (новый Telegram uid) получает следующего менеджера по кругу: после последнего
+    снова берётся первый. Счётчик `lead_rr_idx` в `fnr_state.json` сохраняется на диске — перезапуск сервиса
+    цикл не сбивает. Повторные обращения того же uid идут тому же аккаунту (см. resolve_account_for_lead_dialog).
+    """
     conn = _connected_sorted()
     if not conn:
         return 0
@@ -37,12 +43,27 @@ def pick_account_for_new_lead() -> int:
     if not ids:
         ids = lead_eligible_account_ids(conn)
     if not ids:
+        log.warning(
+            "Нет аккаунтов для round-robin (проверьте lead_active_account_ids и подключённые сессии) — "
+            "лид пойдёт на первый подключённый аккаунт %s",
+            conn[0],
+        )
         return conn[0]
+    # Стабильный порядок: иначе при разных обходах множества возможны скачки очереди
+    ids = sorted({int(x) for x in ids})
     st = load_state()
-    idx = int(st.get("lead_rr_idx") or 0) % len(ids)
+    n = len(ids)
+    idx = int(st.get("lead_rr_idx") or 0) % n
     aid = ids[idx]
     st["lead_rr_idx"] = idx + 1
     save_state()
+    log.info(
+        "Round-robin лидов: аккаунт %s (%s из %s, следующий индекс очереди=%s)",
+        aid,
+        idx + 1,
+        n,
+        st["lead_rr_idx"],
+    )
     return int(aid)
 
 
@@ -52,6 +73,7 @@ def _pick_replacement(old_id: int, conn: list[int]) -> int:
         ids = lead_eligible_account_ids(conn)
     if not ids:
         return old_id
+    ids = sorted({int(x) for x in ids})
     for a in ids:
         if int(a) != int(old_id):
             return int(a)
