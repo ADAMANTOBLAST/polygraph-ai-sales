@@ -872,6 +872,7 @@
         --mobile-screen-pad-left: max(16px, calc(env(safe-area-inset-left) + 16px));
         --mobile-screen-pad-right: max(16px, calc(env(safe-area-inset-right) + 16px));
         --mobile-slider-edge: 10px;
+        --mobile-left-align: var(--mobile-screen-pad-left);
       }
       .container {
         padding-left: var(--mobile-screen-pad-left);
@@ -907,11 +908,11 @@
       .hero-copy h1 { font-size: clamp(1.55rem,7.5vw,2.1rem); }
       .hero-lead { font-size: .97rem; }
       .hero-cta {
-        display: flex;
-        width: min(84vw, 280px);
+        display: inline-flex;
+        width: auto;
         justify-content: center;
-        max-width: calc(100% - var(--mobile-slider-edge));
-        margin-left: var(--mobile-slider-edge);
+        max-width: 100%;
+        margin-left: 0;
       }
       .strip { padding: 18px 0 24px; }
       .strip-row,
@@ -928,15 +929,15 @@
       }
       .strip-row {
         padding-top: 6px;
-        padding-right: var(--mobile-slider-edge);
+        padding-right: 10px;
         padding-bottom: 10px;
-        padding-left: var(--mobile-slider-edge);
-        scroll-padding-inline: var(--mobile-slider-edge);
+        padding-left: var(--mobile-left-align);
+        scroll-padding-inline: var(--mobile-left-align);
         margin: 0;
       }
       .metrics-grid {
-        padding: 6px var(--mobile-slider-edge) 10px;
-        scroll-padding-inline: var(--mobile-slider-edge);
+        padding: 6px 10px 10px 0;
+        scroll-padding-inline: 0;
         margin: 0;
       }
       .strip-row::-webkit-scrollbar { display: none; }
