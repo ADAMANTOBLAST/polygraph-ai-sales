@@ -224,10 +224,10 @@
       }
       .site-nav {
         position: absolute;
-        top: calc(100% + 10px);
+        top: calc(100% + 8px);
         right: 0;
         left: auto;
-        inset: auto 0 auto auto;
+        bottom: auto;
         width: min(272px, calc(100vw - 24px));
         flex-direction: column;
         align-items: stretch;
@@ -296,6 +296,25 @@
       }
       .site-nav a[data-target="#partnership"]:hover,
       .site-nav a[data-target="#partnership"]:focus-visible {
+        background: #6d28d9 !important;
+        border-color: rgba(196,181,253,.36) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        opacity: 1 !important;
+        color: #fff !important;
+        box-shadow: var(--glass-specular-strong), 0 10px 28px rgba(91,33,182,.28) !important;
+      }
+      .site-nav a[data-target="#company"] {
+        background: #5b21b6 !important;
+        border-color: rgba(196,181,253,.3) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        opacity: 1 !important;
+        color: #fff !important;
+        box-shadow: var(--glass-specular), 0 8px 24px rgba(91,33,182,.22) !important;
+      }
+      .site-nav a[data-target="#company"]:hover,
+      .site-nav a[data-target="#company"]:focus-visible {
         background: #6d28d9 !important;
         border-color: rgba(196,181,253,.36) !important;
         backdrop-filter: none !important;
