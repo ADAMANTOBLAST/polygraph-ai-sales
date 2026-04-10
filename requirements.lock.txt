@@ -1,0 +1,33 @@
+# Снимок зависимостей (pip freeze): установка даёт детерминированный набор версий.
+# Обновлять после изменения requirements.txt:  .venv/bin/pip install -r requirements.txt && .venv/bin/pip freeze | grep -vi '^pip='
+#
+aiohappyeyeballs==2.6.1
+aiohttp==3.13.5
+aiosignal==1.4.0
+annotated-types==0.7.0
+anyio==4.13.0
+attrs==26.1.0
+certifi==2026.2.25
+distro==1.9.0
+frozenlist==1.8.0
+h11==0.16.0
+httpcore==1.0.9
+httpx==0.28.1
+idna==3.11
+jiter==0.13.0
+multidict==6.7.1
+openai==1.109.1
+propcache==0.4.1
+pyaes==1.6.1
+pyasn1==0.6.3
+pydantic==2.12.5
+pydantic_core==2.41.5
+python-dotenv==1.2.2
+python-socks==2.8.1
+rsa==4.9.1
+sniffio==1.3.1
+Telethon==1.42.0
+tqdm==4.67.3
+typing-inspection==0.4.2
+typing_extensions==4.15.0
+yarl==1.23.0
