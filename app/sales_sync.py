@@ -216,23 +216,6 @@ def agent_blob_for_account(account_id: int) -> dict[str, Any]:
     return raw if isinstance(raw, dict) else {}
 
 
-def handoff_rules_for_account(account_id: int) -> dict[str, str]:
-    agent = agent_blob_for_account(account_id)
-    raw = agent.get("handoff")
-    if not isinstance(raw, dict):
-        return {}
-    out: dict[str, str] = {}
-    for key in ROLE_KEY_TO_LABEL.keys():
-        val = (raw.get(key) or "").strip()
-        if val:
-            out[key] = val
-    # Совместимость со старым ключом lead -> manager.
-    legacy_lead = (raw.get("lead") or "").strip()
-    if legacy_lead:
-        out["lead"] = legacy_lead
-    return out
-
-
 def first_message_for_account(account_id: int) -> str | None:
     b = account_blob(account_id)
     t = (b.get("first_message") or "").strip()
@@ -258,15 +241,13 @@ def system_extra_for_account(account_id: int) -> str | None:
 
 
 def handoff_rules_for_account(account_id: int) -> dict[str, str]:
-    b = account_blob(account_id)
-    agent = b.get("agent")
-    if not isinstance(agent, dict):
-        return {}
+    """Условия передачи из админки (ключи seller, lead, tech, economist, dispatcher)."""
+    agent = agent_blob_for_account(account_id)
     raw = agent.get("handoff")
     if not isinstance(raw, dict):
         return {}
     out: dict[str, str] = {}
-    for key in ("seller", "lead", "tech", "economist", "dispatcher"):
+    for key in ROLE_KEY_TO_LABEL.keys():
         value = (raw.get(key) or "").strip()
         if value:
             out[key] = value

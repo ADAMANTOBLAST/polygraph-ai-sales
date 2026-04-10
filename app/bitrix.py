@@ -321,17 +321,41 @@ def bitrix_stage_for_event(event_name: str) -> str | None:
 
 
 def bitrix_assigned_user_for_route(route_name: str) -> int | None:
+    """
+    Ответственный по маршруту бота [[FNR_ROUTE:…]] для сделки.
+    Сначала BITRIX_ROUTE_MAP в .env; если ключа нет — Bitrix user id из команды (та же роль, что при автопередаче).
+    """
     route_key = (route_name or "").strip().lower()
     mapping = _env_json("BITRIX_ROUTE_MAP")
     raw = mapping.get(route_key)
-    if raw in (None, "", 0, "0"):
+    if raw not in (None, "", 0, "0"):
+        try:
+            uid = int(raw)
+        except (TypeError, ValueError):
+            log.warning("BITRIX_ROUTE_MAP[%s] has invalid user id: %r", route_key, raw)
+        else:
+            if uid > 0:
+                return uid
+    route_to_role = {
+        "seller": "seller",
+        "manager": "lead",
+        "lead": "lead",
+        "tech": "tech",
+        "economist": "economist",
+        "dispatcher": "dispatcher",
+    }
+    role_key = route_to_role.get(route_key)
+    if not role_key:
         return None
-    try:
-        uid = int(raw)
-    except (TypeError, ValueError):
-        log.warning("BITRIX_ROUTE_MAP[%s] has invalid user id: %r", route_key, raw)
-        return None
-    return uid if uid > 0 else None
+    fb = bitrix_user_id_for_role(role_key)
+    if fb:
+        log.debug(
+            "BITRIX_ROUTE_MAP[%s] пусто — ответственный из команды (роль %s, id=%s)",
+            route_key,
+            role_key,
+            fb,
+        )
+    return fb
 
 
 async def crm_deal_update_stage(
@@ -563,19 +587,32 @@ async def sync_bitrix_handoff_for_uid(
         return
     assigned_err: str | None = None
     bitrix_uid = bitrix_user_id_for_role(to_role_key)
+    deal_err: str | None = None
     if bitrix_uid:
         assigned_err = await crm_lead_update_assigned_by(int(lead_id), int(bitrix_uid))
+        raw_deal = meta.get("deal_id")
+        if raw_deal not in (None, "", 0, "0"):
+            try:
+                did = int(raw_deal)
+            except (TypeError, ValueError):
+                did = 0
+            if did > 0:
+                deal_err = await crm_deal_update_stage(did, stage_id=None, assigned_by_id=int(bitrix_uid))
+                if not deal_err:
+                    log.info("Bitrix deal %s: ASSIGNED_BY_ID -> %s (handoff)", did, bitrix_uid)
     from_label = role_label(from_role_key)
     to_label = role_label(to_role_key)
     parts = [f"Автопередача лида из Telegram: {from_label} -> {to_label}."]
     if target_account_id is not None:
         parts.append(f"Telegram-аккаунт: fnr-acc-{int(target_account_id)}.")
     if bitrix_uid:
-        parts.append(f"Bitrix ASSIGNED_BY_ID: {int(bitrix_uid)}.")
+        parts.append(f"Bitrix лид ASSIGNED_BY_ID: {int(bitrix_uid)}.")
     else:
-        parts.append("Bitrix ASSIGNED_BY_ID не обновлён: для роли не настроен Bitrix user id.")
+        parts.append("Bitrix лид: ответственный не обновлён — у активного сотрудника этой роли нет Bitrix user id.")
     if assigned_err:
-        parts.append(f"Ошибка смены ответственного: {assigned_err}.")
+        parts.append(f"Ошибка смены ответственного (лид): {assigned_err}.")
+    if deal_err:
+        parts.append(f"Ошибка смены ответственного (сделка): {deal_err}.")
     comment = " ".join(parts)
     err = await crm_timeline_comment_add_lead(int(lead_id), comment)
     if err:
