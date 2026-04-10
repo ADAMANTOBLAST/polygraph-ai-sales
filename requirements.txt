@@ -1,5 +1,12 @@
-# Зависимости бота — дополняйте по мере разработки
-telethon>=1.36.0,<2
-openai>=1.40.0,<2
+# PolygraphAiSales — прямые зависимости (верхний уровень).
+#
+# После `pip install -r requirements.txt` pip подтянет ещё ~25 транзитивных пакетов
+# (например: openai → httpx, pydantic, anyio; aiohttp → yarl, multidict; telethon → pyaes, rsa).
+#
+# Воспроизводимый деплой (те же версии, что на CI/сервере):
+#   pip install -r requirements.lock.txt
+#
 aiohttp>=3.9.0,<4
+openai>=1.40.0,<2
 python-dotenv>=1.0.0,<2
+telethon>=1.36.0,<2

@@ -22,12 +22,18 @@ from ai_messaging.channels.telethon_client import build_client
 
 from .admin_api import setup_admin_routes
 from .voximplant_webhook import setup_voximplant_routes
-from .bitrix import create_lead_from_form, build_lead_comments_initial, sync_bitrix_chat_for_uid
+from .bitrix import (
+    build_lead_comments_initial,
+    convert_lead_to_deal,
+    create_deal_from_lead_fallback,
+    create_lead_from_form,
+    sync_bitrix_chat_for_uid,
+)
 from .manager_router import resolve_account_for_lead_dialog
 from .state_store import add_tracked, append_history, load_state, set_bitrix_lead_link
 from .telegram_profiles import first_and_second_greeting, load_persisted
 from .tg_handlers import register_private_handlers
-from .tg_pool import get_telegram_client
+from .tg_pool import TgPoolState, get_telegram_client
 
 logging.basicConfig(
     level=logging.INFO,
@@ -106,7 +112,9 @@ async def _handle_lead(request: web.Request) -> web.Response:
         try:
             # uid узнаём с любого клиента; peer для send_message должен быть от того же клиента,
             # что отправляет (иначе Telethon: invalid Peer).
-            client_any: TelegramClient = request.app["telegram"]
+            pool = request.app["tg_pool"]
+            assert pool.main is not None
+            client_any: TelegramClient = pool.main
             entity = await client_any.get_entity(telegram)
             uid = int(entity.id)
             add_tracked(uid)
@@ -139,42 +147,46 @@ async def _handle_lead(request: web.Request) -> web.Response:
     bitrix_error = None
     try:
         bitrix_lead_id, bitrix_error = await create_lead_from_form(data)
+        lead_header = build_lead_comments_initial(data)
+        if bitrix_lead_id is not None:
+            conv_deal, conv_err = await convert_lead_to_deal(bitrix_lead_id)
+            if conv_deal:
+                bitrix_deal_id = conv_deal
+            elif conv_err:
+                log.warning(
+                    "Bitrix crm.lead.convert для лида %s не дал сделку: %s — пробуем crm.deal.add",
+                    bitrix_lead_id,
+                    conv_err,
+                )
+                fb_deal, fb_err = await create_deal_from_lead_fallback(
+                    bitrix_lead_id,
+                    "Заявка с сайта Flex&Roll PRO",
+                    lead_header,
+                )
+                if fb_deal:
+                    bitrix_deal_id = fb_deal
+                elif fb_err:
+                    log.warning(
+                        "Bitrix fallback сделки для лида %s: %s",
+                        bitrix_lead_id,
+                        fb_err,
+                    )
+
+        if bitrix_lead_id is not None and uid is not None:
+            try:
+                set_bitrix_lead_link(
+                    uid,
+                    bitrix_lead_id,
+                    lead_header,
+                    deal_id=bitrix_deal_id,
+                )
+                await sync_bitrix_chat_for_uid(uid)
+            except Exception as e:
+                log.exception("Bitrix sync link: %s", e)
     except Exception as e:
-        log.exception("Bitrix: %s", e)
-        bitrix_error = str(e)[:200]
-
-    lead_header = build_lead_comments_initial(data)
-    if bitrix_lead_id is not None:
-        conv_deal, conv_err = await convert_lead_to_deal(bitrix_lead_id)
-        if conv_deal:
-            bitrix_deal_id = conv_deal
-        elif conv_err:
-            log.warning(
-                "Bitrix crm.lead.convert для лида %s не дал сделку: %s — пробуем crm.deal.add",
-                bitrix_lead_id,
-                conv_err,
-            )
-            fb_deal, fb_err = await create_deal_from_lead_fallback(
-                bitrix_lead_id,
-                "Заявка с сайта Flex&Roll PRO",
-                lead_header,
-            )
-            if fb_deal:
-                bitrix_deal_id = fb_deal
-            elif fb_err:
-                log.warning("Bitrix fallback сделки для лида %s: %s", bitrix_lead_id, fb_err)
-
-    if bitrix_lead_id is not None and uid is not None:
-        try:
-            set_bitrix_lead_link(
-                uid,
-                bitrix_lead_id,
-                lead_header,
-                deal_id=bitrix_deal_id,
-            )
-            await sync_bitrix_chat_for_uid(uid)
-        except Exception as e:
-            log.exception("Bitrix sync link: %s", e)
+        log.exception("Bitrix: игнорируем, главное — Telegram: %s", e)
+        if not bitrix_error:
+            bitrix_error = str(e)[:200]
 
     body: dict[str, Any] = {
         "ok": True,
@@ -190,33 +202,92 @@ async def _handle_lead(request: web.Request) -> web.Response:
     return web.json_response(body)
 
 
-async def _health(_request: web.Request) -> web.Response:
-    return web.json_response({"ok": True, "accounts": len(get_accounts())})
+async def _health(request: web.Request) -> web.Response:
+    pool: TgPoolState = request.app["tg_pool"]
+    ready = pool.ready
+    n = len(pool.clients)
+    return web.json_response(
+        {
+            "ok": True,
+            "telegram_ready": ready,
+            "telegram_clients": n,
+            "accounts": len(get_accounts()),
+        }
+    )
+
+
+async def _bootstrap_telethon_pool(pool: TgPoolState) -> None:
+    """Фон: иначе aiohttp не слушает порт, пока все сессии не подключены → nginx 502."""
+    try:
+        clients: dict[int, TelegramClient] = {}
+
+        async def _start_one(aid: int | str) -> tuple[int, TelegramClient | None]:
+            try:
+                c = build_client(aid)
+                await c.start()
+                register_private_handlers(c, int(aid))
+                log.info("Telethon аккаунт id=%s подключён", aid)
+                return int(aid), c
+            except Exception as e:
+                log.exception("Telethon аккаунт id=%s не поднят: %s", aid, e)
+                return int(aid), None
+
+        aids = sorted(get_accounts().keys())
+        pairs = await asyncio.gather(*[_start_one(aid) for aid in aids])
+        for aid, c in pairs:
+            if c is not None:
+                clients[aid] = c
+        if not clients:
+            log.critical(
+                "Ни одна Telegram-сессия не авторизована (sessions/*.session) — "
+                "ждём ручной перезапуск после исправления"
+            )
+            return
+        pool.clients = clients
+        pool.main = clients.get(0) or next(iter(clients.values()))
+        pool.ready = True
+        log.info(
+            "Telethon: пул из %s сессий (лиды и ответы — с аккаунта ответственного)",
+            len(clients),
+        )
+    except Exception:
+        log.exception("_bootstrap_telethon_pool: фатальная ошибка")
 
 
 async def _init_app(app: web.Application) -> None:
-    clients: dict[int, TelegramClient] = {}
-    for aid in sorted(get_accounts().keys()):
-        try:
-            c = build_client(aid)
-            await c.start()
-            register_private_handlers(c, int(aid))
-            clients[int(aid)] = c
-            log.info("Telethon аккаунт id=%s подключён", aid)
-        except Exception as e:
-            log.exception("Telethon аккаунт id=%s не поднят: %s", aid, e)
-    if not clients:
-        raise RuntimeError("Ни одна Telegram-сессия не авторизована (sessions/*.session)")
-    app["telegram_clients"] = clients
-    app["telegram"] = clients.get(0) or next(iter(clients.values()))
+    pool: TgPoolState = app["tg_pool"]
+    pool.clients = {}
+    pool.main = None
+    pool.ready = False
     load_persisted()
     load_state()
-    log.info("Telethon: пул из %s сессий (лиды и ответы — с аккаунта ответственного)", len(clients))
+    asyncio.create_task(_bootstrap_telethon_pool(pool))
+
+
+@web.middleware
+async def _telethon_ready_middleware(
+    request: web.Request, handler
+) -> web.StreamResponse:
+    path = request.path
+    if request.method == "OPTIONS":
+        return await handler(request)
+    if path == "/health" or path.endswith("/voximplant/webhook"):
+        return await handler(request)
+    if not request.app["tg_pool"].ready:
+        return web.json_response(
+            {
+                "ok": False,
+                "error": "warming_up",
+                "message": "Сервис подключается к Telegram, повторите через несколько секунд.",
+            },
+            status=503,
+        )
+    return await handler(request)
 
 
 async def _cleanup_app(app: web.Application) -> None:
-    clients: dict[int, TelegramClient] = app.get("telegram_clients") or {}
-    for c in clients.values():
+    pool: TgPoolState = app["tg_pool"]
+    for c in pool.clients.values():
         try:
             await c.disconnect()
         except Exception as e:
@@ -224,7 +295,8 @@ async def _cleanup_app(app: web.Application) -> None:
 
 
 def create_app() -> web.Application:
-    app = web.Application()
+    app = web.Application(middlewares=[_telethon_ready_middleware])
+    app["tg_pool"] = TgPoolState()
     app.router.add_post("/lead", _handle_lead)
     app.router.add_get("/health", _health)
     setup_voximplant_routes(app)

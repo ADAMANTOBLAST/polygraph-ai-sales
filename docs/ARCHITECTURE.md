@@ -1,47 +1,111 @@
 # Архитектура PolygraphAiSales (fnr-api)
 
-## Назначение
+## Назначение системы
 
-- **HTTP API** (`aiohttp`): заявки с сайта (`POST /lead`), админка (`/admin/*`), синхронизация sales, Bitrix, вебхук Voximplant.
-- **Telethon**: пул Telegram-аккаунтов из `accounts_registry.json` + `sessions/*.session`, входящие в личку, ответы через Comet.
-- **Статика**: лендинг `flexn.html`, админка `admin/` (копируется на сервер через `deploy.sh`).
+| Компонент | Роль |
+|-----------|------|
+| **HTTP-сервис (aiohttp)** | `POST /lead`, админка `/admin/*`, `/team-accounts`, вебхук Voximplant, health |
+| **Пул Telethon** | Несколько пользовательских аккаунтов Telegram; исходящие приветствия и входящие диалоги |
+| **Comet API** | Генерация ответов, транскрипция/vision при необходимости |
+| **Bitrix24** | Лиды, сделки, стадии, ответственные, таймлайн, комментарии |
+| **Статика** | Лендинг `flexn.html`, админка `admin/`, общие `assets/` |
+
+## Диаграмма потоков (высокий уровень)
+
+```mermaid
+flowchart LR
+  subgraph clients [Клиенты]
+    WEB[Лендинг flexn.html]
+    TG_USER[Клиент в Telegram]
+    PSTN[Телефон Voximplant]
+  end
+
+  subgraph edge [Публикация]
+    NGINX[nginx /fnr-api/]
+  end
+
+  subgraph fnr [PolygraphAiSales]
+    API[aiohttp :8765]
+    POOL[TgPoolState + Telethon pool]
+    HAND[tg_handlers + Comet]
+    ADMIN[admin_api]
+    VOX[voximplant_webhook]
+    ST[state_store]
+  end
+
+  subgraph external [Внешние API]
+    B24[Bitrix24 REST]
+    COMET[Comet API]
+  end
+
+  WEB -->|POST /lead| NGINX
+  NGINX --> API
+  API --> POOL
+  API --> B24
+  TG_USER <--> POOL
+  POOL --> HAND
+  HAND --> COMET
+  HAND --> B24
+  PSTN --> VOX
+  NGINX --> VOX
+  VOX --> ST
+  ADMIN --> POOL
+  ADMIN --> B24
+  ADMIN --> ST
+  API --> ST
+  HAND --> ST
+```
 
 ## Структура каталогов
 
-| Путь | Роль |
-|------|------|
-| `app/` | Код приложения: `main.py` (роуты, lifecycle), `admin_api.py`, `tg_handlers.py`, `state_store.py`, `bitrix.py`, `comet_client.py`, `manager_router.py`, `sales_sync.py` |
-| `admin/` | SPA админки (HTML + встроенный JS), без сборки |
-| `assets/` | Общие CSS/JS для админки и лендинга |
-| `data/` | `fnr_state.json` — треки, истории диалогов, журнал `voice_calls` (на сервере, не в git) |
-| `sessions/` | Файлы сессий Telethon (не в git) |
-| `voximplant/` | Примеры сценариев VoxEngine (копируются в панель Voximplant) |
-| `accounts_registry.json` | Реестр Telegram-аккаунтов (на сервере, не в git) |
+| Путь | Описание |
+|------|----------|
+| **`app/`** | Прикладной код: `main.py` (точка входа HTTP, middleware готовности Telethon, `/lead`), `admin_api.py`, `tg_handlers.py`, `tg_pool.py`, `state_store.py`, `bitrix.py`, `comet_client.py`, `comet_media.py`, `manager_router.py`, `sales_sync.py`, `voximplant_webhook.py`, `telegram_profiles.py`, вспомогательные модули |
+| **`admin/`** | Админ-интерфейс: список чатов, переписка, отправка, синхронизация sales, Bitrix ping/resync, журнал звонков |
+| **`assets/`** | Общие `css` / `js` для админки и демо |
+| **`data/`** | **`fnr_state.json`** — отслеживаемые uid, истории диалогов, `bitrix_uid_meta`, round-robin, **`voice_calls`**. **`fnr_sales_sync.json`** — люди, роли, активность, очередь лидов (не в git на проде) |
+| **`sessions/`** | Файлы `*.session` Telethon (не в git) |
+| **`voximplant/`** | Сценарии VoxEngine (JS), тексты промптов, инструкции по handoff и вебхуку |
+| **`tests/`** | Модульные тесты (`unittest`) |
+| **`docs/`** | Архитектура, quickstart, описание продукта |
+| **`flexn.html`**, **`privacy.html`**, **`logo.svg`** | Публичные страницы |
+| **`accounts_registry.json`** | Реестр Telegram-аккаунтов (шаблон: `accounts_registry.json.example`) |
+| **`accounts_registry.py`** | Чтение реестра, список аккаунтов для админки |
+| **`restart.sh`**, **`deploy.sh`** | Перезапуск процесса; git pull + pip + копирование статики + restart |
+| **`check_session.py`** | Утилита проверки сессии (при необходимости) |
+| **`ai_messaging/`** | Общая обвязка Telethon-клиента для аккаунта |
 
-Поток данных: **сайт** → nginx `/fnr-api/` → **fnr-api** на `127.0.0.1:8765` → `.env`, `data/`, Bitrix, Telegram.
+Поток с сайта: **браузер** → **nginx** `/fnr-api/` → **процесс на 127.0.0.1** → при необходимости **Bitrix**, **Telegram**.
 
-## Распределение лидов между менеджерами (round-robin)
+## Жизненный цикл процесса
 
-Новые заявки с сайта (`POST /lead` с Telegram) закрепляются за аккаунтами `fnr-acc-*` **по кругу**: первый новый клиент — первому менеджеру из списка, следующий — второму, … после последнего снова первый. Очередь хранится в `data/fnr_state.json` в поле `lead_rr_idx` (перезапуск сервиса порядок не обнуляет).
+1. **`create_app()`** регистрирует middleware, маршруты, `on_startup` / `on_cleanup`.
+2. **`on_startup`** создаёт **`TgPoolState`**, грузит state и persisted profiles, запускает **фоновую** задачу подключения Telethon — HTTP-порт открывается без ожидания всех сессий (избегание 502 у nginx).
+3. Пока `pool.ready === false`, middleware отвечает **`503 warming_up`** на защищённые маршруты; **`/health`** и вебхук Voximplant доступны.
+4. **`on_cleanup`** отключает клиентов Telethon.
 
-Состав очереди задаётся в админке: **`lead_active_account_ids`** в синхронизации sales (`fnr_sales_sync.json`) — только эти подключённые аккаунты участвуют в распределении. Если список пустой, новые лиды не маршрутизируются по RR (см. код: fallback на первый аккаунт с предупреждением в логах).
+## Распределение лидов и роли
 
-Повторное обращение **того же** пользователя Telegram идёт тому же менеджеру, пока он в отпуске не снят с линии — тогда срабатывает переназначение (`resolve_account_for_lead_dialog`).
+- Новый uid при **`POST /lead`** (канал Telegram): **`pick_account_for_new_lead`** — round-robin среди **`eligible_active_account_ids`** / **`lead_eligible_account_ids`** (см. `sales_sync.py`, список из админки).
+- Повторный uid: **`resolve_account_for_lead_dialog`** — тот же аккаунт, с логикой отпуска/переназначения.
+- Маркеры в ответе ИИ: **`[[FNR_EVENT:...]]`**, **`[[FNR_ROUTE:...]]`** → обновление сделки в Bitrix (**`apply_deal_outcome`**, стадии и ответственный).
 
-Реализация: `app/manager_router.py` (`pick_account_for_new_lead`), списки допустимых id — `app/sales_sync.py` (`lead_eligible_account_ids`, `eligible_active_account_ids`).
+Подробнее о полях state — **`app/state_store.py`**.
 
-## Переменные окружения (ключи)
+## Переменные окружения
 
-| Переменная | Обязательность | Назначение |
-|------------|----------------|------------|
-| `COMET_API_KEY` или `COMETAPI_KEY` | Да, для ИИ | API Comet (диалоги) |
-| `BITRIX_INCOMING_WEBHOOK` или `BITRIX_WEBHOOK_URL` | Для CRM | Входящий вебхук Bitrix24 REST |
-| `FNR_HTTP_PORT` | Нет (по умолчанию 8765) | Порт локального aiohttp |
-| `VOXIMPLANT_WEBHOOK_SECRET` | Нет | Защита вебхука телефонии (заголовок / `?token=` ) |
+Сводная таблица в **`README.md`** и расширенные комментарии в **`.env.example`**.
 
-Секреты в репозиторий не коммитить; шаблон — `.env.example`.
+## Расширение системы
 
-## Расширение
+| Задача | Куда смотреть |
+|--------|----------------|
+| Новый HTTP endpoint | `app/main.py` или `app/admin_api.py` → `setup_*_routes` |
+| Правила CRM | `app/bitrix.py`, переменные `.env` |
+| Поведение бота в личке | `app/tg_handlers.py`, `app/comet_client.py` |
+| Новый тип события телефонии | `app/voximplant_webhook.py`, формат в `voximplant/VOICE_CALLS_WEBHOOK.md` |
+| UI админки | `admin/index.html`, `assets/css/admin.css`, `assets/js/*` |
 
-- Новые HTTP-эндпоинты: регистрация в `app/main.py` или `app/admin_api.py`, бизнес-логика в `app/`.
-- Изменения в UI админки: `admin/index.html`, стили `assets/css/admin.css`, при необходимости `assets/js/`.
+---
+
+*Согласовано с кодом в репозитории; при изменении потоков обновите диаграмму и таблицы.*

@@ -2,25 +2,29 @@
 venv/
 __pycache__/
 *.py[cod]
-.env
-.env.*
-!.env.example
 *.log
 .idea/
 .vscode/
 
-# Telegram session files (только на сервере / у разработчика локально)
-sessions/*.session
-sessions/*.session-journal
+# Секреты окружения (на сервере свой .env)
+.env
+.env.*
+!.env.example
 
-# Секреты реестра — на сервере свой accounts_registry.json (не в git)
+# Telegram: файлы сессий только на сервере / у разработчика локально
+*.session
+*.session-journal
+sessions/*
+!sessions/.gitkeep
+
+# Реестр с api_id/api_hash — на сервере копия из шаблона accounts_registry.json.example
 accounts_registry.json
 
-# Состояние диалогов (на сервере)
+# Состояние диалогов и sales-sync (на сервере)
 data/*.json
 !data/.gitkeep
 
-# Фронтенды user / admin (когда появятся)
+# Фронтенды (если появятся отдельные сборки)
 user/node_modules/
 user/dist/
 admin/node_modules/

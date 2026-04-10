@@ -14,8 +14,14 @@ if [ ! -d ".venv" ]; then
   echo "=== python3 -m venv .venv ==="
   python3 -m venv .venv
 fi
-echo "=== pip install ==="
-./.venv/bin/pip install -r requirements.txt -q
+REQ_FILE="requirements.txt"
+if [ -f requirements.lock.txt ]; then
+  REQ_FILE="requirements.lock.txt"
+  echo "=== pip install ($REQ_FILE) ==="
+else
+  echo "=== pip install ($REQ_FILE; для pin-версий добавьте requirements.lock.txt) ==="
+fi
+./.venv/bin/pip install -r "$REQ_FILE" -q
 
 # HTTP API заявок: nginx location /fnr-api/ → 127.0.0.1:8765 (на canwant.ru уже настроено).
 echo "=== статика Flex-n-roll → /var/www/canwant/flex-n-roll (canwant.ru/flex-n-roll/) ==="

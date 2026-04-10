@@ -782,6 +782,90 @@
     .select-custom-panel li:hover, .select-custom-panel li.is-active { background: #4c1d95; color: #fff; box-shadow: var(--glass-specular); }
     .select-custom-panel li:hover i, .select-custom-panel li.is-active i { color: #c4b5fd; }
 
+    /* Баннер «звоните» при способе связи «Телефон» */
+    .phone-promo-banner {
+      margin-bottom: 12px;
+      border-radius: 18px;
+      padding: clamp(15px, 2.6vw, 22px) clamp(16px, 3vw, 24px);
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.11) 0%, rgba(124, 58, 237, 0.14) 55%, rgba(91, 33, 182, 0.1) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: var(--glass-specular), inset 0 0 28px rgba(34, 197, 94, 0.05);
+    }
+    .phone-promo-banner[hidden] {
+      display: none !important;
+    }
+    .phone-promo-inner {
+      display: flex;
+      align-items: center;
+      gap: clamp(14px, 2.8vw, 22px);
+    }
+    .phone-promo-icon-wrap {
+      flex-shrink: 0;
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: var(--glass-specular);
+    }
+    .phone-promo-icon-wrap i {
+      font-size: 1.35rem;
+      color: rgba(190, 242, 100, 0.95);
+    }
+    .phone-promo-copy {
+      flex: 1;
+      min-width: 0;
+    }
+    .phone-promo-kicker {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(248, 250, 252, 0.58);
+      margin: 0 0 6px;
+    }
+    .phone-promo-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(0.95rem, 2.1vw, 1.1rem);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.96);
+      margin: 0 0 8px;
+      line-height: 1.25;
+    }
+    .phone-promo-number {
+      display: inline-block;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(1.12rem, 2.8vw, 1.45rem);
+      letter-spacing: 0.04em;
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 4px 8px 0;
+      line-height: 1.2;
+      text-shadow: 0 0 24px rgba(34, 197, 94, 0.35);
+      transition: color 0.2s ease, opacity 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .phone-promo-number:hover {
+      color: #bbf7d0;
+    }
+    .phone-promo-sub {
+      margin: 8px 0 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: rgba(248, 250, 252, 0.72);
+      letter-spacing: 0.03em;
+    }
+    .phone-promo-sub strong {
+      color: rgba(190, 242, 100, 0.92);
+      font-weight: 700;
+    }
+
     /* Submit */
     .submit-btn {
       width: 100%; margin-top: 8px; padding: 16px 22px; border-radius: 18px;
@@ -994,6 +1078,39 @@
       .metric-value { font-size: clamp(1.8rem, 9vw, 2.3rem); }
       .metric-label { font-size: .78rem; }
       .glass-form-shell { padding: 24px 18px 26px; border-radius: 24px; }
+      .phone-promo-inner {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+      }
+      .phone-promo-icon-wrap {
+        width: 48px;
+        height: 48px;
+        margin: 0 auto;
+      }
+      .phone-promo-icon-wrap i {
+        font-size: 1.2rem;
+      }
+      .phone-promo-title {
+        font-size: clamp(0.82rem, 3.8vw, 0.98rem);
+        margin-bottom: 6px;
+      }
+      .phone-promo-number {
+        display: block;
+        font-size: clamp(1.18rem, 5.2vw, 1.38rem);
+        padding: 12px 16px;
+        margin: 4px auto 0;
+        width: 100%;
+        max-width: 20rem;
+        border-radius: 14px;
+        background: rgba(34, 197, 94, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        box-sizing: border-box;
+      }
+      .phone-promo-sub {
+        font-size: 0.82rem;
+        margin-top: 6px;
+      }
       .about-block h2,
       .form-section-title { font-size: clamp(1.05rem, 4.4vw, 1.42rem); }
       #partnership { scroll-margin-top: 78px; }
@@ -1163,6 +1280,19 @@
                 </ul>
               </div>
               <div class="error-msg" data-for="contactMethod"></div>
+            </div>
+            <div class="phone-promo-banner" id="phonePromoBanner" hidden aria-live="polite">
+              <div class="phone-promo-inner">
+                <div class="phone-promo-icon-wrap" aria-hidden="true">
+                  <i class="fas fa-phone-volume"></i>
+                </div>
+                <div class="phone-promo-copy">
+                  <p class="phone-promo-kicker">Удобнее по телефону</p>
+                  <p class="phone-promo-title">Звоните нам</p>
+                  <a class="phone-promo-number" href="tel:+74999384362">+7&nbsp;499&nbsp;938&nbsp;43&nbsp;62</a>
+                  <p class="phone-promo-sub"><strong>На связи 24/7</strong></p>
+                </div>
+              </div>
             </div>
             <div class="field" id="contactDetailField">
               <label for="contactDetail" id="contactDetailLabel"><i class="fab fa-telegram field-label-icon" id="contactDetailLabelIcon"></i> Telegram</label>
@@ -1366,6 +1496,8 @@
   const methodSelect = document.getElementById('contactMethodSelect');
   const contactDetail = document.getElementById('contactDetail');
   const contactDetailLabel = document.getElementById('contactDetailLabel');
+  const contactDetailField = document.getElementById('contactDetailField');
+  const phonePromoBanner = document.getElementById('phonePromoBanner');
 
   const contactDetailLabelIcon = document.getElementById('contactDetailLabelIcon');
   const contactDetailIcon = document.getElementById('contactDetailIcon');
@@ -1374,6 +1506,14 @@
   function syncContactField() {
     if (!methodSelect || !contactDetail || !contactDetailLabel) return;
     const m = methodSelect.value;
+    const showPhoneBanner = m === 'phone';
+    if (phonePromoBanner) {
+      phonePromoBanner.hidden = !showPhoneBanner;
+    }
+    if (contactDetailField) {
+      contactDetailField.hidden = showPhoneBanner;
+    }
+
     if (m === 'telegram') {
       contactDetailLabel.innerHTML = '<i class="fab fa-telegram field-label-icon" id="contactDetailLabelIcon"></i> Telegram';
       contactDetail.type = 'text';
@@ -1396,9 +1536,11 @@
       if (contactDetailIcon) { contactDetailIcon.className = 'fas fa-envelope input-icon'; }
       if (selectMethodIcon) { selectMethodIcon.className = 'fas fa-envelope select-method-icon'; }
     }
-    contactDetail.value = '';
-    var cde = document.querySelector('[data-for="contactDetail"]');
-    if (cde) cde.textContent = '';
+    if (!showPhoneBanner) {
+      contactDetail.value = '';
+      var cde = document.querySelector('[data-for="contactDetail"]');
+      if (cde) cde.textContent = '';
+    }
   }
   if (methodSelect) {
     methodSelect.addEventListener('change', syncContactField);
@@ -1495,11 +1637,7 @@
         ok = false;
       }
     } else if (method === 'phone') {
-      const d = detail.replace(/\D/g, '');
-      if (!d || d.length < 9) {
-        showErr('contactDetail', 'Введите номер для связи');
-        ok = false;
-      }
+      /* Номер уже проверяется в поле «Номер телефона»; баннер — наш колл-центр */
     } else if (method === 'email') {
       const em = /^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/;
       if (!detail || !em.test(detail)) {
@@ -1548,7 +1686,13 @@
       scrollFormFeedback();
 
       const method = methodSelect ? methodSelect.value : 'telegram';
-      const detailRaw = contactDetail ? contactDetail.value.trim() : '';
+      const mainPhoneVal = document.getElementById('phone').value.trim();
+      var detailRaw =
+        method === 'phone'
+          ? mainPhoneVal
+          : contactDetail
+            ? contactDetail.value.trim()
+            : '';
       let telegram = '';
       let email = '';
       if (method === 'telegram') {
@@ -1559,7 +1703,7 @@
 
       const formData = {
         name: document.getElementById('name').value.trim(),
-        phone: document.getElementById('phone').value.trim(),
+        phone: mainPhoneVal,
         contactMethod: method,
         contactDetail: detailRaw,
         telegram: telegram,
@@ -1599,6 +1743,8 @@
         } else {
           msg += ' Мы свяжемся с вами по указанным данным.';
         }
+      } else if (method === 'phone') {
+        msg += ' Можно также позвонить нам: +7 499 938 43 62 (круглосуточно).';
       }
       formStatus.innerHTML = '<span style="color:#86efac;">' + msg + '</span>';
       form.reset();
