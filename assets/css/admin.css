@@ -293,6 +293,14 @@ body.admin-body:has(.admin-shell) {
 /* Мобильное меню: бургер + off-canvas (правила max-width внизу) */
 .admin-sidebar-backdrop {
   display: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  font: inherit;
+  color: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
 }
 
 /* Липкая шапка: бургер (узкий экран), бренд, пользователь и выход */
@@ -315,7 +323,8 @@ body.admin-body:has(.admin-shell) {
   align-items: center;
   gap: 10px;
   min-height: 52px;
-  padding: 10px 36px;
+  padding: 10px max(36px, env(safe-area-inset-right, 0px)) 10px max(36px, env(safe-area-inset-left, 0px));
+  padding-top: max(10px, env(safe-area-inset-top, 0px));
 }
 
 .admin-app-header__brand {
@@ -1181,7 +1190,8 @@ html.admin-nav-is-open .admin-nav-toggle__bar:nth-child(3) {
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 16px 48px rgba(0, 0, 0, 0.35);
   scroll-margin-top: 72px;
-  overflow: hidden;
+  /* visible: выпадающие .fnr-select не обрезаются снизу карточки */
+  overflow: visible;
 }
 
 .admin-card::before {
@@ -1735,6 +1745,9 @@ html.admin-nav-is-open .admin-nav-toggle__bar:nth-child(3) {
 
 .admin-table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
   border-radius: var(--fnr-radius);
   border: 1px solid var(--fnr-border);
   background: var(--fnr-surface);
@@ -2109,7 +2122,7 @@ body.admin-body:has(.admin-shell) .module-form .fnr-select__panel {
   left: 0;
   right: 0;
   top: calc(100% + 6px);
-  z-index: 200;
+  z-index: 400;
   margin: 0;
   padding: 6px;
   list-style: none;
@@ -2123,6 +2136,8 @@ body.admin-body:has(.admin-shell) .module-form .fnr-select__panel {
   -webkit-backdrop-filter: blur(12px);
   max-height: min(320px, 52vh);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 body.admin-body:has(.admin-shell) .module-form .fnr-select__item {
@@ -2311,7 +2326,7 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
     flex: 1 1 auto;
     min-width: 0;
     width: 100%;
-    padding: 28px 24px 56px;
+    padding: 28px max(24px, env(safe-area-inset-right, 0px)) max(56px, calc(24px + env(safe-area-inset-bottom, 0px))) max(24px, env(safe-area-inset-left, 0px));
   }
 
   .admin-app-header {
@@ -2319,7 +2334,7 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
   }
 
   .admin-app-header__row {
-    padding: 10px 24px;
+    padding: max(10px, env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) 10px max(24px, env(safe-area-inset-left, 0px));
     min-height: 50px;
   }
 
@@ -2341,6 +2356,14 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
     display: none !important;
   }
 
+  /* Затемнение снизу от липкой шапки: иначе main (backdrop-filter) часто рисуется поверх и перехватывает клики */
+  html.admin-nav-is-open .admin-sidebar-backdrop {
+    top: max(52px, calc(env(safe-area-inset-top, 0px) + 48px));
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
   .admin-sidebar {
     position: fixed;
     left: 0;
@@ -2349,6 +2372,10 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
     width: min(300px, 88vw);
     height: 100%;
     max-height: 100dvh;
+    padding-top: max(28px, env(safe-area-inset-top, 0px));
+    padding-bottom: max(32px, env(safe-area-inset-bottom, 0px));
+    padding-left: max(18px, env(safe-area-inset-left, 0px));
+    padding-right: max(18px, env(safe-area-inset-right, 0px));
     z-index: 200;
     transform: translateX(-105%);
     transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
@@ -2362,6 +2389,10 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
 
   html.admin-nav-is-open .admin-sidebar {
     transform: translateX(0);
+  }
+
+  .admin-nav a {
+    min-height: 44px;
   }
 
   html.admin-nav-is-open,
@@ -2402,7 +2433,7 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
     min-height: 0;
     overflow-x: hidden;
     overflow-y: visible;
-    padding: 20px 16px 40px;
+    padding: 20px max(16px, env(safe-area-inset-right, 0px)) max(40px, calc(16px + env(safe-area-inset-bottom, 0px))) max(16px, env(safe-area-inset-left, 0px));
   }
 
   .admin-app-header {
@@ -2410,24 +2441,32 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
   }
 
   .admin-app-header__row {
-    padding: 10px 16px;
+    padding: max(10px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
   }
 
   .chat-shell {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    max-height: none;
+    min-height: min(72dvh, 640px);
+  }
+
+  .chat-shell--split {
+    min-height: min(72dvh, 640px);
     height: auto;
     max-height: none;
   }
 
-  .chat-shell--split {
-    grid-template-columns: 1fr;
-    min-height: auto;
-    height: auto;
+  .chat-shell > .chat-col,
+  .chat-shell > .chat-thread-panel {
+    min-height: 0;
     max-height: none;
   }
 
   .chat-thread-panel {
-    min-height: min(70vh, 560px);
+    flex: 1 1 auto;
+    min-height: min(52dvh, 480px);
   }
 
   .chat-list-panel {
@@ -2437,7 +2476,8 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
   }
 
   .chat-col--leads {
-    max-height: 280px;
+    flex: 0 0 auto;
+    max-height: min(280px, 38dvh);
     border-right: none;
     border-bottom: 1px solid var(--fnr-border);
   }
@@ -2524,11 +2564,11 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
     padding: 22px 16px 24px;
     margin-bottom: 24px;
     border-radius: 14px;
-    scroll-margin-top: 76px;
+    scroll-margin-top: calc(72px + env(safe-area-inset-top, 0px));
   }
 
   .module-section {
-    scroll-margin-top: 76px;
+    scroll-margin-top: calc(72px + env(safe-area-inset-top, 0px));
   }
 
   .admin-card h3 {
@@ -2583,6 +2623,18 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
   body.admin-body:has(.admin-shell) .module-form .fnr-select__trigger {
     padding: 12px 14px;
     font-size: 16px;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  body.admin-body:has(.admin-shell) .module-form .fnr-select__panel {
+    max-height: min(280px, 46dvh);
+  }
+
+  body.admin-body:has(.admin-shell) .module-form .fnr-select__item {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
   }
 
   .module-list-wrap {
@@ -2694,11 +2746,11 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
   }
 
   .chat-col--leads {
-    max-height: 250px;
+    max-height: min(250px, 36dvh);
   }
 
   .chat-thread-panel {
-    min-height: min(58vh, 520px);
+    min-height: min(48dvh, 520px);
   }
 
   .chat-messages {
@@ -2758,7 +2810,7 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
 
 @media (max-width: 480px) {
   .admin-main {
-    padding: 16px 12px 32px;
+    padding: 16px max(12px, env(safe-area-inset-right, 0px)) max(32px, calc(12px + env(safe-area-inset-bottom, 0px))) max(12px, env(safe-area-inset-left, 0px));
   }
 
   .admin-app-header {
@@ -2766,13 +2818,41 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
   }
 
   .admin-app-header__row {
-    padding: 8px 12px;
+    flex-wrap: wrap;
+    row-gap: 8px;
+    column-gap: 8px;
+    padding: max(8px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px));
     min-height: 48px;
   }
 
+  .admin-app-header__brand {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .admin-app-header__user {
+    flex: 1 1 100%;
+    max-width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .admin-app-header__user .admin-user-chip {
+    max-width: none;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  html.admin-nav-is-open .admin-sidebar-backdrop {
+    top: max(100px, calc(env(safe-area-inset-top, 0px) + 88px));
+  }
+
   .admin-sidebar {
-    width: min(320px, 92vw);
-    padding: 22px 14px 24px;
+    width: min(320px, calc(92vw - env(safe-area-inset-left, 0px)));
+    padding-top: max(22px, env(safe-area-inset-top, 0px));
+    padding-bottom: max(24px, env(safe-area-inset-bottom, 0px));
+    padding-left: max(14px, env(safe-area-inset-left, 0px));
+    padding-right: max(14px, env(safe-area-inset-right, 0px));
   }
 
   .admin-nav a {
@@ -2815,11 +2895,11 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
   }
 
   .chat-col--leads {
-    max-height: 232px;
+    max-height: min(232px, 34dvh);
   }
 
   .chat-thread-panel {
-    min-height: 52vh;
+    min-height: min(46dvh, 480px);
   }
 
   .chat-thread-subtitle,

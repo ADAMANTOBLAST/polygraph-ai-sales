@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <!-- DEPLOY_REV подставляется deploy.sh из git rev-parse --short (проверка что выложилась свежая копия) -->
   <meta name="fnr-deploy-rev" content="DEPLOY_REV">
   <title>Кабинет | Flex&Roll PRO</title>
@@ -18,11 +18,11 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="../assets/css/admin.css?v=17">
+  <link rel="stylesheet" href="../assets/css/admin.css?v=18">
 </head>
 <body class="admin-body">
   <div class="admin-shell">
-    <div class="admin-sidebar-backdrop" id="adminSidebarBackdrop" hidden></div>
+    <button type="button" class="admin-sidebar-backdrop" id="adminSidebarBackdrop" hidden aria-label="Закрыть меню"></button>
     <aside class="admin-sidebar" id="adminSidebar">
       <div class="admin-sidebar__brand">
         <div class="admin-sidebar__mark" aria-hidden="true">FnR</div>
@@ -3195,20 +3195,61 @@
       var mq = window.matchMedia('(max-width: 900px)');
       var toggle = document.getElementById('adminNavToggle');
       var backdrop = document.getElementById('adminSidebarBackdrop');
+      var sidebar = document.getElementById('adminSidebar');
+      var scrollLockY = 0;
+      function clearScrollLock() {
+        if (document.body.style.position === 'fixed') {
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.left = '';
+          document.body.style.right = '';
+          document.body.style.width = '';
+          window.scrollTo(0, scrollLockY);
+        }
+      }
+      function applyScrollLock() {
+        if (!mq.matches) return;
+        scrollLockY = window.scrollY || document.documentElement.scrollTop || 0;
+        document.body.style.position = 'fixed';
+        document.body.style.top = '-' + scrollLockY + 'px';
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+      }
       function closeNav() {
+        var wasOpen = document.documentElement.classList.contains('admin-nav-is-open');
         document.documentElement.classList.remove('admin-nav-is-open');
         if (toggle) toggle.setAttribute('aria-expanded', 'false');
-        if (backdrop) backdrop.hidden = true;
+        if (backdrop) {
+          backdrop.hidden = true;
+          backdrop.setAttribute('aria-hidden', 'true');
+        }
+        if (sidebar && mq.matches) sidebar.setAttribute('aria-hidden', 'true');
+        else if (sidebar) sidebar.removeAttribute('aria-hidden');
+        clearScrollLock();
+        if (wasOpen && toggle && mq.matches) toggle.focus();
       }
       function openNav() {
         document.documentElement.classList.add('admin-nav-is-open');
         if (toggle) toggle.setAttribute('aria-expanded', 'true');
-        if (backdrop) backdrop.hidden = false;
+        if (backdrop) {
+          backdrop.hidden = false;
+          backdrop.setAttribute('aria-hidden', 'false');
+        }
+        if (sidebar && mq.matches) sidebar.setAttribute('aria-hidden', 'false');
+        applyScrollLock();
+        var first = sidebar && sidebar.querySelector('.admin-nav a[href]');
+        if (first && mq.matches) {
+          window.setTimeout(function () {
+            first.focus();
+          }, 0);
+        }
       }
       function onToggle() {
         if (document.documentElement.classList.contains('admin-nav-is-open')) closeNav();
         else openNav();
       }
+      if (backdrop) backdrop.setAttribute('aria-hidden', 'true');
       if (toggle) toggle.addEventListener('click', onToggle);
       if (backdrop) backdrop.addEventListener('click', closeNav);
       navLinks.forEach(function (a) {
@@ -3217,11 +3258,27 @@
         });
       });
       window.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closeNav();
+        if (e.key !== 'Escape') return;
+        if (!document.documentElement.classList.contains('admin-nav-is-open')) return;
+        closeNav();
       });
-      window.addEventListener('resize', function () {
-        if (!mq.matches) closeNav();
-      });
+      function onNavLayoutModeChange() {
+        if (!mq.matches) {
+          clearScrollLock();
+          closeNav();
+          if (sidebar) sidebar.removeAttribute('aria-hidden');
+          return;
+        }
+        if (sidebar && !document.documentElement.classList.contains('admin-nav-is-open')) {
+          sidebar.setAttribute('aria-hidden', 'true');
+        }
+      }
+      if (typeof mq.addEventListener === 'function') {
+        mq.addEventListener('change', onNavLayoutModeChange);
+      } else if (typeof mq.addListener === 'function') {
+        mq.addListener(onNavLayoutModeChange);
+      }
+      if (mq.matches && sidebar) sidebar.setAttribute('aria-hidden', 'true');
     })();
   </script>
   <script src="../assets/js/admin-select.js"></script>

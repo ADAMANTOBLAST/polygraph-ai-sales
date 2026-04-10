@@ -145,7 +145,10 @@
   );
 
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeAll();
+    if (e.key !== 'Escape' || !openWrap) return;
+    e.preventDefault();
+    e.stopPropagation();
+    closeAll();
   });
 
   window.fnrSyncCustomSelect = syncOne;
