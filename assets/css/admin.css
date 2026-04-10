@@ -324,7 +324,7 @@ body.admin-body:has(.admin-shell) {
   gap: 10px;
   min-height: 52px;
   padding: 10px max(36px, env(safe-area-inset-right, 0px)) 10px max(36px, env(safe-area-inset-left, 0px));
-  padding-top: max(10px, env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .admin-app-header__brand {
@@ -605,10 +605,10 @@ html.admin-nav-is-open .admin-nav-toggle__bar:nth-child(3) {
 }
 
 .chat-shell--split {
-  grid-template-columns: minmax(268px, 360px) minmax(0, 1fr);
-  min-height: 520px;
-  height: min(82vh, 900px);
-  max-height: min(82vh, 900px);
+  grid-template-columns: minmax(232px, 312px) minmax(0, 1fr);
+  min-height: 480px;
+  height: min(76vh, 820px);
+  max-height: min(76vh, 820px);
 }
 
 .chat-shell > .chat-col,
@@ -829,7 +829,7 @@ html.admin-nav-is-open .admin-nav-toggle__bar:nth-child(3) {
   gap: 4px;
   width: 100%;
   text-align: left;
-  padding: 10px 11px;
+  padding: 9px 10px;
   margin-bottom: 6px;
   border: 1px solid transparent;
   border-radius: 10px;
@@ -904,6 +904,9 @@ html.admin-nav-is-open .admin-nav-toggle__bar:nth-child(3) {
   border-bottom: 1px solid var(--fnr-border);
   background: linear-gradient(180deg, #faf8ff, #fff);
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .chat-thread-header__text {
@@ -965,11 +968,11 @@ html.admin-nav-is-open .admin-nav-toggle__bar:nth-child(3) {
 }
 
 .chat-bubble {
-  max-width: min(92%, 520px);
-  padding: 12px 16px;
+  max-width: min(86%, 460px);
+  padding: 10px 14px;
   border-radius: 14px;
-  font-size: 1.02rem;
-  line-height: 1.5;
+  font-size: 0.98rem;
+  line-height: 1.45;
 }
 
 .chat-bubble__who {
@@ -1010,10 +1013,13 @@ html.admin-nav-is-open .admin-nav-toggle__bar:nth-child(3) {
 
 .chat-composer {
   flex-shrink: 0;
-  padding: 12px 14px 16px;
+  padding: 10px 12px 12px;
   border-top: 1px solid var(--fnr-border);
   background: #f8f6fd;
   box-shadow: 0 -4px 16px rgba(20, 18, 31, 0.06);
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
 }
 
 .chat-composer__label {
@@ -1029,13 +1035,14 @@ html.admin-nav-is-open .admin-nav-toggle__bar:nth-child(3) {
 .chat-composer__row {
   display: flex;
   gap: 12px;
-  align-items: flex-end;
+  align-items: stretch;
+  flex-wrap: nowrap;
 }
 
 .chat-composer__attach {
   flex-shrink: 0;
-  width: 50px;
-  height: 50px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   display: inline-flex;
   align-items: center;
@@ -1078,15 +1085,22 @@ html.admin-nav-is-open .admin-nav-toggle__bar:nth-child(3) {
 .chat-input {
   flex: 1;
   min-width: 0;
-  padding: 13px 16px;
+  padding: 10px 14px;
   border: 1px solid var(--fnr-border-strong);
   border-radius: 10px;
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   font-family: inherit;
-  resize: vertical;
-  min-height: 48px;
-  max-height: 160px;
+  resize: none;
+  min-height: 44px;
+  max-height: 120px;
   background: #fff;
+}
+
+#chatSendBtn {
+  flex: 0 0 auto;
+  min-width: 120px;
+  min-height: 44px;
+  padding: 10px 18px;
 }
 
 .chat-input:focus {
@@ -2326,15 +2340,15 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
     flex: 1 1 auto;
     min-width: 0;
     width: 100%;
-    padding: 28px max(24px, env(safe-area-inset-right, 0px)) max(56px, calc(24px + env(safe-area-inset-bottom, 0px))) max(24px, env(safe-area-inset-left, 0px));
+    padding: 0 max(24px, env(safe-area-inset-right, 0px)) max(56px, calc(24px + env(safe-area-inset-bottom, 0px))) max(24px, env(safe-area-inset-left, 0px));
   }
 
   .admin-app-header {
-    margin: -28px -24px 16px -24px;
+    margin: 0 -24px 16px -24px;
   }
 
   .admin-app-header__row {
-    padding: max(10px, env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) 10px max(24px, env(safe-area-inset-left, 0px));
+    padding: env(safe-area-inset-top, 0px) max(24px, env(safe-area-inset-right, 0px)) 10px max(24px, env(safe-area-inset-left, 0px));
     min-height: 50px;
   }
 
@@ -2433,15 +2447,15 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
     min-height: 0;
     overflow-x: hidden;
     overflow-y: visible;
-    padding: 20px max(16px, env(safe-area-inset-right, 0px)) max(40px, calc(16px + env(safe-area-inset-bottom, 0px))) max(16px, env(safe-area-inset-left, 0px));
+    padding: 0 max(16px, env(safe-area-inset-right, 0px)) max(40px, calc(16px + env(safe-area-inset-bottom, 0px))) max(16px, env(safe-area-inset-left, 0px));
   }
 
   .admin-app-header {
-    margin: -20px -16px 14px -16px;
+    margin: 0 -16px 14px -16px;
   }
 
   .admin-app-header__row {
-    padding: max(10px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
+    padding: env(safe-area-inset-top, 0px) max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
   }
 
   .chat-shell {
@@ -2449,11 +2463,11 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
     flex-direction: column;
     height: auto;
     max-height: none;
-    min-height: min(72dvh, 640px);
+    min-height: min(68dvh, 600px);
   }
 
   .chat-shell--split {
-    min-height: min(72dvh, 640px);
+    min-height: min(68dvh, 600px);
     height: auto;
     max-height: none;
   }
@@ -2477,7 +2491,7 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
 
   .chat-col--leads {
     flex: 0 0 auto;
-    max-height: min(280px, 38dvh);
+    max-height: none;
     border-right: none;
     border-bottom: 1px solid var(--fnr-border);
   }
@@ -2551,13 +2565,17 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
 
   .module-actions,
   .vip-form-actions {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     align-items: stretch;
+    gap: 8px;
   }
 
   .module-actions .btn,
   .vip-form-actions .btn {
-    width: 100%;
+    flex: 1 1 160px;
+    width: auto;
+    min-width: 0;
   }
 
   .admin-card {
@@ -2709,11 +2727,17 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
   }
 
   .chat-list-item {
-    padding: 10px;
+    flex: 0 0 min(240px, 72vw);
+    min-height: 88px;
+    margin-bottom: 0;
+    padding: 10px 11px;
+    scroll-snap-align: start;
+    border-color: var(--fnr-border);
+    background: rgba(255, 255, 255, 0.04);
   }
 
   .chat-list-item__title {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
   }
 
   .chat-thread-header {
@@ -2742,15 +2766,32 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
   }
 
   .chat-list-panel {
-    max-height: 220px;
+    max-height: none;
   }
 
   .chat-col--leads {
-    max-height: min(250px, 36dvh);
+    max-height: none;
   }
 
   .chat-thread-panel {
     min-height: min(48dvh, 520px);
+  }
+
+  .chat-list-body {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 10px 12px 12px;
+    min-height: 0;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .chat-list-body .chat-list-empty {
+    min-width: 100%;
+    margin: 8px 0;
   }
 
   .chat-messages {
@@ -2766,12 +2807,12 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
   }
 
   .chat-composer {
-    padding: 10px 12px 12px;
+    padding: 8px 10px 10px;
   }
 
   .chat-composer__row {
-    flex-wrap: wrap;
-    gap: 10px;
+    flex-wrap: nowrap;
+    gap: 8px;
     align-items: stretch;
   }
 
@@ -2781,13 +2822,16 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
   }
 
   .chat-input {
-    flex: 1 1 calc(100% - 54px);
+    flex: 1 1 auto;
     min-height: 44px;
   }
 
   #chatSendBtn {
-    flex: 1 1 100%;
-    width: 100%;
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 104px;
+    padding-left: 14px;
+    padding-right: 14px;
   }
 
   .admin-table,
@@ -2810,18 +2854,18 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
 
 @media (max-width: 480px) {
   .admin-main {
-    padding: 16px max(12px, env(safe-area-inset-right, 0px)) max(32px, calc(12px + env(safe-area-inset-bottom, 0px))) max(12px, env(safe-area-inset-left, 0px));
+    padding: 0 max(12px, env(safe-area-inset-right, 0px)) max(32px, calc(12px + env(safe-area-inset-bottom, 0px))) max(12px, env(safe-area-inset-left, 0px));
   }
 
   .admin-app-header {
-    margin: -16px -12px 12px -12px;
+    margin: 0 -12px 12px -12px;
   }
 
   .admin-app-header__row {
     flex-wrap: wrap;
     row-gap: 8px;
     column-gap: 8px;
-    padding: max(8px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px));
+    padding: env(safe-area-inset-top, 0px) max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px));
     min-height: 48px;
   }
 
@@ -2891,11 +2935,11 @@ body.admin-body:has(.admin-shell) .chat-account-chip.agent-account-chip.chat-sta
   }
 
   .chat-list-panel {
-    max-height: 208px;
+    max-height: none;
   }
 
   .chat-col--leads {
-    max-height: min(232px, 34dvh);
+    max-height: none;
   }
 
   .chat-thread-panel {
